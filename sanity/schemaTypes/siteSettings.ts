@@ -6,6 +6,7 @@ export const siteSettings = defineType({
   type: "document",
   fields: [
     defineField({name: "companyName", title: "Nom de l’entreprise", type: "string", initialValue: "Super-Service", validation: (rule) => rule.required()}),
+    defineField({name: "logo", title: "Logo de l’entreprise", type: "seoImage"}),
     defineField({name: "email", title: "Adresse e-mail", type: "email", initialValue: "info@super-service.ch", validation: (rule) => rule.required()}),
     defineField({name: "phoneDisplay", title: "Téléphone affiché", type: "string", initialValue: "+41 78 322 33 68", validation: (rule) => rule.required()}),
     defineField({name: "phoneLink", title: "Téléphone pour les liens", description: "Format international sans espace, par exemple +41783223368", type: "string", initialValue: "+41783223368", validation: (rule) => rule.required()}),

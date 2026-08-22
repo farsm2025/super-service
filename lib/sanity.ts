@@ -1,0 +1,4 @@
+import {createClient} from "@sanity/client";
+export const sanityClient=createClient({projectId:process.env.NEXT_PUBLIC_SANITY_PROJECT_ID||"hk158c3c",dataset:process.env.NEXT_PUBLIC_SANITY_DATASET||"production",apiVersion:"2026-03-01",useCdn:true});
+export type Realization={_id:string;title:string;service:string;city?:string;description?:string;imageUrl?:string;imageAlt?:string};
+export async function getRealizations(service?:string,featuredOnly=false):Promise<Realization[]>{const filter=[`_type=="realization"`,`defined(title)`,service?`service==$service`:"",featuredOnly?`featured==true`:""].filter(Boolean).join(" && ");try{return await sanityClient.fetch(`*[${filter}]|order(coalesce(order,10) asc,completedAt desc,_createdAt desc){_id,title,service,city,description,"imageUrl":mainImage.asset->url,"imageAlt":coalesce(mainImage.alt,title)}`,{service},{next:{revalidate:60}})}catch{return[]}}

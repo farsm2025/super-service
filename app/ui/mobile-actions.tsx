@@ -1,0 +1,1 @@
+export function MobileActions(){return <nav className="mobile-actions" aria-label="Actions rapides"><a href="tel:+41783223368"><span>☎</span>Appeler</a><a href="https://wa.me/41783223368"><span>WA</span>WhatsApp</a><a href="/devis"><span>✎</span>Devis</a></nav>}

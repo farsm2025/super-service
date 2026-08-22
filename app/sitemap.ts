@@ -1,0 +1,2 @@
+import type {MetadataRoute} from "next";
+export default function sitemap():MetadataRoute.Sitemap{const base="https://www.super-service.ch";return ["","/services/demenagement","/services/nettoyage","/services/transport-debarras","/services/petits-travaux-jardinage","/avis","/devis","/mentions-legales","/confidentialite"].map((url,i)=>({url:base+url,lastModified:new Date(),changeFrequency:(i<7?"monthly":"yearly") as "monthly"|"yearly",priority:i===0?1:i<5?.85:.5}))}

@@ -1,0 +1,2 @@
+import {sendQuoteRequest} from "../../../lib/reviews";
+export async function POST(req:Request){try{const b=await req.json() as Record<string,string>;if(b.website)return Response.json({ok:true});if(!b.name||!b.phone||!b.email||!b.service||!b.city||!b.message||b.consent!=="yes")return Response.json({message:"Informations manquantes"},{status:400});await sendQuoteRequest(b);return Response.json({ok:true});}catch{return Response.json({message:"Service indisponible"},{status:500})}}

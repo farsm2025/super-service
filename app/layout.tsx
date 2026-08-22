@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import {PrivacyBanner} from "./ui/privacy-banner";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.super-service.ch"),
@@ -11,4 +12,4 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" }, robots: { index: true, follow: true },
 };
 const schema = { "@context":"https://schema.org", "@type":"MovingCompany", name:"Super-Service", url:"https://www.super-service.ch", image:"https://www.super-service.ch/logo-super-service.jpg", telephone:"+41783223368", email:"info@super-service.ch", address:{"@type":"PostalAddress",streetAddress:"Rue du Clos-de-Bulle 5",postalCode:"1004",addressLocality:"Lausanne",addressCountry:"CH"}, areaServed:{"@type":"AdministrativeArea",name:"Canton de Vaud"}, priceRange:"CHF" };
-export default function RootLayout({children}:{children:React.ReactNode}) { return <html lang="fr"><body><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema)}} />{children}</body></html>; }
+export default function RootLayout({children}:{children:React.ReactNode}) { return <html lang="fr"><body><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema)}} />{children}<PrivacyBanner/></body></html>; }

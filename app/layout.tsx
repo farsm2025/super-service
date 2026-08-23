@@ -5,8 +5,8 @@ import {PrivacyBanner} from "./ui/privacy-banner";
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.super-service.ch"),
   title: { default: "Déménagement à Lausanne et dans le canton de Vaud | Super-Service", template: "%s | Super-Service" },
-  description: "Entreprise de déménagement et multiservices à Lausanne : transport, montage de meubles, nettoyage de fin de bail et débarras. Devis gratuit sous 24 h.",
-  keywords: ["déménagement Lausanne", "nettoyage fin de bail Lausanne", "entreprise multiservices Vaud", "débarras Lausanne", "montage meubles Lausanne"],
+  description: "Entreprise de déménagement et multiservices à Lausanne : nettoyage de fin de bail, location de camion sans chauffeur, transport et débarras. Devis gratuit sous 24 h.",
+  keywords: ["déménagement Lausanne", "nettoyage fin de bail Lausanne", "location camion Lausanne", "location camion sans chauffeur Vaud", "entreprise multiservices Vaud", "débarras Lausanne"],
   openGraph: { type: "website", locale: "fr_CH", siteName: "Super-Service", title: "Déménagement à Lausanne et dans le canton de Vaud", description: "Déménagement, nettoyage et multiservices. Devis gratuit sous 24 h.", images: [{ url: "/logo-super-service.jpg", width: 1320, height: 666, alt: "Super-Service Lausanne" }] },
   twitter: { card: "summary_large_image", title: "Super-Service Lausanne", description: "Déménagement, nettoyage et multiservices dans le canton de Vaud.", images: ["/logo-super-service.jpg"] },
   alternates: { canonical: "/" }, robots: { index: true, follow: true },

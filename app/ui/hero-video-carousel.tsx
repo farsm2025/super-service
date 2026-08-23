@@ -63,12 +63,12 @@ export function HeroVideoCarousel() {
       </div>
       <div className="hero-overlay" />
       <div className="hero-content">
-        <p className="hero-kicker">Déménagement • Nettoyage • Multiservices</p>
+        <p className="hero-kicker">Déménagement • Nettoyage • Location de camion • Multiservices</p>
         <h1>Déménagement à Lausanne et dans le canton de Vaud</h1>
         <p>
           Une équipe polyvalente pour votre déménagement, le transport, le
-          montage de meubles, le nettoyage de fin de bail, le débarras et les
-          petits travaux.
+          montage de meubles, le nettoyage de fin de bail, la location de camion
+          sans chauffeur, le débarras et les petits travaux.
         </p>
         <div className="hero-actions">
           <Link className="button button-primary" href="/devis">

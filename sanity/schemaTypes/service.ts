@@ -21,6 +21,8 @@ export const service = defineType({
       defineField({name: "halfDayPrice", title: "Tarif demi-journée", type: "string"}),
       defineField({name: "fullDayPrice", title: "Tarif journée complète", type: "string"}),
     ]}]}),
+    defineField({name: "driverHalfDaySupplement", title: "Supplément chauffeur — demi-journée", description: "Montant ajouté au tarif du véhicule, par exemple CHF 100.–", type: "string", fieldset: "rental"}),
+    defineField({name: "driverFullDaySupplement", title: "Supplément chauffeur — journée complète", description: "Montant ajouté au tarif du véhicule, par exemple CHF 150.–", type: "string", fieldset: "rental"}),
     defineField({name: "licenseRequired", title: "Permis nécessaire", type: "string", fieldset: "rental"}),
     defineField({name: "includedMileage", title: "Kilométrage inclus", type: "string", fieldset: "rental"}),
     defineField({name: "deposit", title: "Caution", type: "string", fieldset: "rental"}),

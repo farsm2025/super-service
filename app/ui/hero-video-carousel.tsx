@@ -68,7 +68,7 @@ export function HeroVideoCarousel() {
         <p>
           Une équipe polyvalente pour votre déménagement, le transport, le
           montage de meubles, le nettoyage de fin de bail, la location de camion
-          sans chauffeur, le débarras et les petits travaux.
+          avec ou sans chauffeur, le débarras et les petits travaux.
         </p>
         <div className="hero-actions">
           <Link className="button button-primary" href="/devis">

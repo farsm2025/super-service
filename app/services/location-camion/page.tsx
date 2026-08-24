@@ -5,9 +5,9 @@ import {PageShell} from "../../ui/page-shell";
 import {getServiceBySlug, type RentalVehicle} from "../../../lib/sanity";
 
 export function generateMetadata():Metadata{
-  const title="Location de camions sans chauffeur à Lausanne";
-  const description="Location de deux camions sans chauffeur à Lausanne : Iveco Daily 17 m³ et Citroën Jumper 20 m³ avec hayon. Kilométrage illimité et permis B.";
-  return {title,description,alternates:{canonical:"/services/location-camion"},openGraph:{title,description,images:[{url:"/images/location-camion/citroen-jumper-exterieur.webp",width:1600,height:1200,alt:"Camions de location sans chauffeur à Lausanne"}]}};
+  const title="Location de camions avec ou sans chauffeur à Lausanne";
+  const description="Location de deux camions avec ou sans chauffeur à Lausanne : Iveco Daily 17 m³ et Citroën Jumper 20 m³ avec hayon. Kilométrage illimité et permis B.";
+  return {title,description,alternates:{canonical:"/services/location-camion"},openGraph:{title,description,images:[{url:"/images/location-camion/citroen-jumper-exterieur.webp",width:1600,height:1200,alt:"Camions de location avec ou sans chauffeur à Lausanne"}]}};
 }
 
 type VehiclePresentation=RentalVehicle&{
@@ -52,25 +52,33 @@ function mergeVehicles(content?:RentalVehicle[]):VehiclePresentation[]{
 export default async function Page(){
   const service=await getServiceBySlug("location-camion");
   const vehicles=mergeVehicles(service?.rentalVehicles);
+  const driverHalfDay=service?.driverHalfDaySupplement||"CHF 100.–";
+  const driverFullDay=service?.driverFullDaySupplement||"CHF 150.–";
   const sharedDetails=[
-    ["Permis nécessaire",service?.licenseRequired||"Permis catégorie B"],
+    ["Permis nécessaire",service?.licenseRequired||"Permis catégorie B pour conduire vous-même"],
     ["Caution",service?.deposit||"CHF 100.– par véhicule"],
     ["Kilométrage",service?.includedMileage||"Illimité"],
     ["Prise en charge et restitution",service?.pickupLocation||"Rue du Clos-de-Bulle 5, 1004 Lausanne"],
   ];
-  return <PageShell eyebrow="Location en toute autonomie" title="Location de deux camions sans chauffeur à Lausanne" intro="Choisissez le véhicule adapté à votre déménagement ou à votre transport : un grand fourgon Iveco Daily de 17 m³ ou un Citroën Jumper de 20 m³ équipé d’un hayon.">
+  return <PageShell eyebrow="Avec ou sans chauffeur" title="Location de deux camions à Lausanne" intro="Choisissez le véhicule adapté à votre déménagement ou à votre transport : conduisez-le vous-même ou ajoutez un chauffeur pour une demi-journée ou une journée complète.">
     <section className="rental-fleet" aria-labelledby="fleet-title">
       <div className="section-heading compact"><p className="eyebrow">Deux véhicules disponibles</p><h2 id="fleet-title">Choisissez le volume adapté à votre besoin</h2><p>Comparez les deux véhicules, leurs équipements et leurs tarifs de location.</p></div>
       <div className="rental-vehicle-grid">
         {vehicles.map((vehicle)=><article className="rental-vehicle-card" key={vehicle.vehicleId}>
-          <header className="rental-vehicle-head"><div><p className="eyebrow">Location sans chauffeur</p><h3>{vehicle.name}</h3><p>{vehicle.feature}</p></div><strong className="volume-badge">{vehicle.volume}</strong></header>
+          <header className="rental-vehicle-head"><div><p className="eyebrow">Tarif du véhicule</p><h3>{vehicle.name}</h3><p>{vehicle.feature}</p></div><strong className="volume-badge">{vehicle.volume}</strong></header>
           <div className="rental-vehicle-gallery">
             {vehicle.images.map((image,index)=><figure key={image.src}><div className="rental-vehicle-photo"><Image src={image.src} alt={image.alt} fill priority={vehicle.vehicleId==="iveco"&&index===0} sizes="(max-width:680px) 100vw,(max-width:1100px) 50vw,300px"/></div><figcaption>{image.caption}</figcaption></figure>)}
           </div>
-          <div className="rental-prices" aria-label={`Tarifs ${vehicle.name}`}><div><span>Demi-journée</span><strong>{vehicle.halfDayPrice}</strong></div><div className="featured-price"><span>Journée complète</span><strong>{vehicle.fullDayPrice}</strong></div></div>
-          <Link className="button button-primary" href="/devis">Demander ce véhicule</Link>
+          <div className="rental-prices" aria-label={`Tarifs sans chauffeur pour ${vehicle.name}`}><div><span>Demi-journée</span><strong>{vehicle.halfDayPrice}</strong></div><div className="featured-price"><span>Journée complète</span><strong>{vehicle.fullDayPrice}</strong></div></div>
+          <p className="rental-base-note">Tarifs du camion sans chauffeur</p>
+          <Link className="button button-primary" href="/devis">Réserver avec ou sans chauffeur</Link>
         </article>)}
       </div>
+      <aside className="driver-option" aria-labelledby="driver-option-title">
+        <div className="driver-option-copy"><span className="driver-option-icon" aria-hidden="true">CH</span><div><p className="eyebrow light">Option chauffeur</p><h2 id="driver-option-title">Vous préférez être accompagné ?</h2><p>Ajoutez un chauffeur à la location de l’Iveco Daily ou du Citroën Jumper.</p></div></div>
+        <div className="driver-option-prices"><div><span>Demi-journée</span><strong>+ {driverHalfDay}</strong></div><div><span>Journée complète</span><strong>+ {driverFullDay}</strong></div></div>
+        <p className="driver-option-note">Le supplément chauffeur s’ajoute au tarif de location du véhicule choisi.</p>
+      </aside>
     </section>
     <section className="rental-practical" aria-labelledby="rental-details-title"><div className="rental-practical-copy"><p className="eyebrow">Informations communes</p><h2 id="rental-details-title">Une location simple et transparente</h2><p>Les mêmes conditions pratiques s’appliquent aux deux véhicules. Contactez-nous pour vérifier leur disponibilité à la date souhaitée.</p><div className="truck-actions"><Link className="button button-primary" href="/devis">Vérifier la disponibilité</Link><a className="button button-whatsapp" href="https://wa.me/41783223368">Demander sur WhatsApp</a></div></div><dl>{sharedDetails.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>
     {service?.rentalConditions&&<section className="rental-conditions"><h2>Conditions de location</h2><p>{service.rentalConditions}</p></section>}

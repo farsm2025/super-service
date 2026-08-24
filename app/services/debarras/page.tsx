@@ -13,10 +13,10 @@ export const metadata: Metadata = {
       "Tri, chargement, transport et évacuation des encombrants à Lausanne et dans le canton de Vaud.",
     images: [
       {
-        url: "/images/transport-debarras/debarras-lausanne-canton-vaud.webp",
-        width: 941,
-        height: 1672,
-        alt: "Service de débarras Super-Service dans le canton de Vaud",
+        url: "/images/debarras/debarras-cave-lausanne.webp",
+        width: 1200,
+        height: 900,
+        alt: "Cave encombrée à débarrasser à Lausanne",
       },
     ],
   },
@@ -24,16 +24,14 @@ export const metadata: Metadata = {
 
 const photos: ServicePhoto[] = [
   {
-    src: "/images/transport-debarras/debarras-lausanne-canton-vaud.webp",
-    alt: "Agent Super-Service pour un débarras à Lausanne et dans le canton de Vaud",
-    caption: "Une équipe disponible pour votre débarras",
-    position: "center 35%",
+    src: "/images/debarras/debarras-cave-lausanne.webp",
+    alt: "Cave encombrée de meubles et de cartons avant un débarras à Lausanne",
+    caption: "Débarras de caves, greniers et espaces de stockage",
   },
   {
-    src: "/images/transport-debarras/transport-livraison-lausanne.webp",
-    alt: "Professionnel Super-Service transportant des objets vers un véhicule",
-    caption: "Chargement et transport des objets à évacuer",
-    position: "center 42%",
+    src: "/images/debarras/debarras-maison-lausanne.webp",
+    alt: "Meubles et cartons à évacuer lors du débarras d’une maison à Lausanne",
+    caption: "Tri et évacuation des meubles et objets encombrants",
   },
 ];
 

@@ -13,10 +13,10 @@ export const metadata: Metadata = {
       "Une équipe polyvalente pour le bricolage, les fixations et l’entretien extérieur à Lausanne et dans le canton de Vaud.",
     images: [
       {
-        url: "/images/nettoyage/agent-nettoyage-super-service-vaud.webp",
-        width: 1024,
-        height: 1536,
-        alt: "Agent Super-Service équipé pour une intervention dans le canton de Vaud",
+        url: "/images/petits-travaux-jardinage/entretien-jardin-lausanne.webp",
+        width: 1200,
+        height: 900,
+        alt: "Jardin entretenu avec pelouse et haies taillées à Lausanne",
       },
     ],
   },
@@ -24,15 +24,14 @@ export const metadata: Metadata = {
 
 const photos: ServicePhoto[] = [
   {
-    src: "/images/nettoyage/agent-nettoyage-super-service-vaud.webp",
-    alt: "Agent Super-Service équipé devant son véhicule dans le canton de Vaud",
-    caption: "Une équipe équipée pour vos interventions",
-    position: "center 42%",
+    src: "/images/petits-travaux-jardinage/entretien-jardin-lausanne.webp",
+    alt: "Entretien d’un jardin avec pelouse et haies taillées à Lausanne",
+    caption: "Entretien ponctuel de vos jardins et espaces extérieurs",
   },
   {
-    src: "/images/demenagement/equipe-demenagement-lausanne.webp",
-    alt: "Professionnel Super-Service en intervention à Lausanne",
-    caption: "Un service polyvalent et organisé",
+    src: "/images/petits-travaux-jardinage/petits-travaux-electriques-lausanne.webp",
+    alt: "Préparation du raccordement d’un luminaire à Lausanne",
+    caption: "Petites interventions et remplacement de luminaires",
   },
 ];
 

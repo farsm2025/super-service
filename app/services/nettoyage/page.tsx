@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { PageShell } from "../../ui/page-shell";
+import { ServiceGallery, type ServicePhoto } from "../../ui/service-gallery";
 
 export const metadata: Metadata = {
   title: "Nettoyage de fin de bail à Lausanne",
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     "Nettoyage professionnel de fin de bail, bureaux et fin de chantier à Lausanne et dans le canton de Vaud. Devis gratuit sous 24 h.",
   alternates: { canonical: "/services/nettoyage" },
   openGraph: {
-    title: "Nettoyage professionnel à Lausanne",
+    title: "Nettoyage professionnel à Lausanne | Super-Service",
     description:
       "Nettoyage de fin de bail, bureaux, vitres et fin de chantier à Lausanne et dans le canton de Vaud.",
     images: [
@@ -22,16 +22,18 @@ export const metadata: Metadata = {
   },
 };
 
-const cleaningPhotos = [
+const photos: ServicePhoto[] = [
   {
     src: "/images/nettoyage/nettoyage-vitres-lausanne.webp",
     alt: "Professionnels réalisant un nettoyage de vitres à Lausanne",
     caption: "Nettoyage professionnel des vitres",
+    position: "center 44%",
   },
   {
     src: "/images/nettoyage/agent-nettoyage-super-service-vaud.webp",
     alt: "Agent de nettoyage Super-Service équipé dans le canton de Vaud",
     caption: "Une équipe équipée pour chaque intervention",
+    position: "center 46%",
   },
 ];
 
@@ -50,6 +52,14 @@ export default function Page() {
             délai disponible.
           </p>
         </div>
+
+        <ServiceGallery
+          id="nettoyage-en-images"
+          eyebrow="Le soin dans chaque détail"
+          title="Un nettoyage professionnel, du matériel au résultat"
+          photos={photos}
+        />
+
         <div className="detail-grid">
           <article>
             <h3>Nettoyage de fin de bail</h3>
@@ -79,38 +89,6 @@ export default function Page() {
               état du logement.
             </p>
           </article>
-        </div>
-      </section>
-
-      <section
-        className="service-photo-showcase cleaning-photo-showcase"
-        aria-labelledby="cleaning-showcase-title"
-      >
-        <div className="section-heading compact">
-          <p className="eyebrow">Le soin dans chaque détail</p>
-          <h2 id="cleaning-showcase-title">
-            Un nettoyage professionnel, du matériel au résultat
-          </h2>
-          <p>
-            Notre équipe intervient avec les équipements adaptés pour rendre vos
-            espaces propres et agréables.
-          </p>
-        </div>
-        <div className="service-photo-gallery">
-          {cleaningPhotos.map((photo, index) => (
-            <figure key={photo.src}>
-              <div className="service-photo">
-                <Image
-                  src={photo.src}
-                  alt={photo.alt}
-                  fill
-                  priority={index === 0}
-                  sizes="(max-width: 680px) calc(100vw - 40px), (max-width: 1100px) 44vw, 520px"
-                />
-              </div>
-              <figcaption>{photo.caption}</figcaption>
-            </figure>
-          ))}
         </div>
       </section>
     </PageShell>

@@ -1,11 +1,26 @@
 import type {Metadata} from "next";
 import Image from "next/image";
+import Link from "next/link";
 import {PageShell} from "../../ui/page-shell";
 
 export const metadata: Metadata = {
   title: "Entreprise de déménagement à Lausanne",
   description:
     "Déménagement de particuliers et entreprises à Lausanne et dans le canton de Vaud : emballage, transport, démontage et remontage de meubles.",
+  alternates: { canonical: "/services/demenagement" },
+  openGraph: {
+    title: "Entreprise de déménagement à Lausanne | Super-Service",
+    description:
+      "Déménagement privé et professionnel à Lausanne et dans le canton de Vaud avec protection et transport soignés.",
+    images: [
+      {
+        url: "/images/demenagement/equipe-demenagement-lausanne.webp",
+        width: 1600,
+        height: 1200,
+        alt: "Équipe de déménagement Super-Service à Lausanne",
+      },
+    ],
+  },
 };
 
 export default function Page() {
@@ -85,6 +100,9 @@ export default function Page() {
               Armoires, lits, étagères, tables et meubles complexes démontés
               puis remontés avec soin.
             </p>
+            <Link className="detail-link" href="/services/montage-de-meubles">
+              Découvrir le montage de meubles →
+            </Link>
           </article>
           <article>
             <h3>Emballage et protection</h3>

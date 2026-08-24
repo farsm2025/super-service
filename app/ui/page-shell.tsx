@@ -1,2 +1,45 @@
-import Link from "next/link"; import {Header} from "./header"; import {MobileActions} from "./mobile-actions";
-export function PageShell({eyebrow,title,intro,children}:{eyebrow:string,title:string,intro:string,children:React.ReactNode}){return <main><Header/><section className="inner-hero"><p className="eyebrow light">{eyebrow}</p><h1>{title}</h1><p>{intro}</p><div className="hero-actions center"><Link className="button button-primary" href="/devis">Demander un devis gratuit</Link><a className="button button-glass" href="tel:+41783223368">+41 78 322 33 68</a></div></section>{children}<section className="mini-cta"><h2>Un besoin précis ? Parlons-en.</h2><p>Devis gratuit et réponse sous 24 h.</p><Link className="button button-primary" href="/devis">Obtenir mon devis</Link></section><MobileActions/></main>}
+import Link from "next/link";
+import { Footer } from "./footer";
+import { Header } from "./header";
+import { MobileActions } from "./mobile-actions";
+
+export function PageShell({
+  eyebrow,
+  title,
+  intro,
+  children,
+}: {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <main>
+      <Header />
+      <section className="inner-hero">
+        <p className="eyebrow light">{eyebrow}</p>
+        <h1>{title}</h1>
+        <p>{intro}</p>
+        <div className="hero-actions center">
+          <Link className="button button-primary" href="/devis">
+            Demander un devis gratuit
+          </Link>
+          <a className="button button-glass" href="tel:+41783223368">
+            +41 78 322 33 68
+          </a>
+        </div>
+      </section>
+      {children}
+      <section className="mini-cta">
+        <h2>Un besoin précis ? Parlons-en.</h2>
+        <p>Devis gratuit et réponse sous 24 h.</p>
+        <Link className="button button-primary" href="/devis">
+          Obtenir mon devis
+        </Link>
+      </section>
+      <Footer />
+      <MobileActions />
+    </main>
+  );
+}

@@ -13,10 +13,10 @@ export const metadata: Metadata = {
       "Montage, démontage et remontage de meubles à Lausanne et dans le canton de Vaud, seul ou avec un déménagement.",
     images: [
       {
-        url: "/images/demenagement/equipe-demenagement-lausanne.webp",
+        url: "/images/montage-meubles/montage-meuble-lausanne.webp",
         width: 1600,
         height: 1200,
-        alt: "Professionnel Super-Service prenant en charge des meubles à Lausanne",
+        alt: "Montage d’un meuble avec une perceuse à Lausanne",
       },
     ],
   },
@@ -24,14 +24,14 @@ export const metadata: Metadata = {
 
 const photos: ServicePhoto[] = [
   {
-    src: "/images/demenagement/equipe-demenagement-lausanne.webp",
-    alt: "Professionnel Super-Service prenant en charge des meubles à Lausanne",
-    caption: "Une prise en charge soigneuse de vos meubles",
+    src: "/images/montage-meubles/montage-meuble-lausanne.webp",
+    alt: "Montage d’un meuble en bois avec une perceuse à Lausanne",
+    caption: "Un assemblage précis réalisé avec le matériel adapté",
   },
   {
-    src: "/images/demenagement/camion-demenagement-20m3.webp",
-    alt: "Meubles protégés et chargés dans un camion de déménagement",
-    caption: "Un service disponible seul ou avec votre déménagement",
+    src: "/images/montage-meubles/assemblage-meubles-lausanne.webp",
+    alt: "Assemblage d’un meuble blanc avec un tournevis à Lausanne",
+    caption: "Le montage soigné de vos meubles et de leurs fixations",
   },
 ];
 

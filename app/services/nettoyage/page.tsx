@@ -11,6 +11,7 @@ export const metadata: Metadata = {
     title: "Nettoyage professionnel à Lausanne | Super-Service",
     description:
       "Nettoyage de fin de bail, bureaux, vitres et fin de chantier à Lausanne et dans le canton de Vaud.",
+    url: "/services/nettoyage",
     images: [
       {
         url: "/images/nettoyage/nettoyage-vitres-lausanne.webp",

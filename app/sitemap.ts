@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "../lib/site";
 
 const servicePages = [
   "/services/demenagement",
@@ -11,7 +12,6 @@ const servicePages = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://www.super-service.ch";
   const pages = [
     "",
     "/services",
@@ -23,7 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   return pages.map((url, index) => ({
-    url: base + url,
+    url: SITE_URL + url,
     lastModified: new Date(),
     changeFrequency: (index <= servicePages.length ? "monthly" : "yearly") as
       | "monthly"

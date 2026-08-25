@@ -11,6 +11,7 @@ export const metadata: Metadata = {
     title: "Petits travaux et jardinage à Lausanne | Super-Service",
     description:
       "Une équipe polyvalente pour le bricolage, les fixations et l’entretien extérieur à Lausanne et dans le canton de Vaud.",
+    url: "/services/petits-travaux-jardinage",
     images: [
       {
         url: "/images/petits-travaux-jardinage/entretien-jardin-lausanne.webp",

@@ -40,6 +40,7 @@ export default function Page() {
   return (
     <PageShell
       eyebrow="Montage & démontage"
+      breadcrumbLabel="Montage de meubles"
       title="Montage et démontage de meubles à Lausanne"
       intro="Lits, armoires, tables ou étagères : nous assemblons et démontons vos meubles avec méthode et précaution."
     >

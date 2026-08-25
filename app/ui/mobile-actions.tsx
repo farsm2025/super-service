@@ -1,1 +1,4 @@
-export function MobileActions(){return <nav className="mobile-actions" aria-label="Actions rapides"><a href="tel:+41783223368"><span>☎</span>Appeler</a><a href="https://wa.me/41783223368"><span>WA</span>WhatsApp</a><a href="/devis"><span>✎</span>Devis</a></nav>}
+import Link from "next/link";
+import {Icon} from "./icons";
+
+export function MobileActions(){return <nav className="mobile-actions" aria-label="Actions rapides"><a href="tel:+41783223368"><span><Icon name="phone"/></span>Appeler</a><a href="https://wa.me/41783223368"><span><Icon name="whatsapp"/></span>WhatsApp</a><Link href="/devis"><span><Icon name="quote"/></span>Devis</Link></nav>}

@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {PageShell} from "../../ui/page-shell";
+import {Icon} from "../../ui/icons";
 import {getServiceBySlug, type RentalVehicle} from "../../../lib/sanity";
 
 export function generateMetadata():Metadata{
@@ -60,7 +61,7 @@ export default async function Page(){
     ["Kilométrage",service?.includedMileage||"Illimité"],
     ["Prise en charge et restitution",service?.pickupLocation||"Rue du Clos-de-Bulle 5, 1004 Lausanne"],
   ];
-  return <PageShell eyebrow="Avec ou sans chauffeur" title="Location de deux camions à Lausanne" intro="Choisissez le véhicule adapté à votre déménagement ou à votre transport : conduisez-le vous-même ou ajoutez un chauffeur pour une demi-journée ou une journée complète.">
+  return <PageShell eyebrow="Avec ou sans chauffeur" breadcrumbLabel="Location de camion" title="Location de deux camions à Lausanne" intro="Choisissez le véhicule adapté à votre déménagement ou à votre transport : conduisez-le vous-même ou ajoutez un chauffeur pour une demi-journée ou une journée complète.">
     <section className="rental-fleet" aria-labelledby="fleet-title">
       <div className="section-heading compact"><p className="eyebrow">Deux véhicules disponibles</p><h2 id="fleet-title">Choisissez le volume adapté à votre besoin</h2><p>Comparez les deux véhicules, leurs équipements et leurs tarifs de location.</p></div>
       <div className="rental-vehicle-grid">
@@ -75,7 +76,7 @@ export default async function Page(){
         </article>)}
       </div>
       <aside className="driver-option" aria-labelledby="driver-option-title">
-        <div className="driver-option-copy"><span className="driver-option-icon" aria-hidden="true">CH</span><div><p className="eyebrow light">Option chauffeur</p><h2 id="driver-option-title">Vous préférez être accompagné ?</h2><p>Ajoutez un chauffeur à la location de l’Iveco Daily ou du Citroën Jumper.</p></div></div>
+        <div className="driver-option-copy"><span className="driver-option-icon"><Icon name="driver"/></span><div><p className="eyebrow light">Option chauffeur</p><h2 id="driver-option-title">Vous préférez être accompagné ?</h2><p>Ajoutez un chauffeur à la location de l’Iveco Daily ou du Citroën Jumper.</p></div></div>
         <div className="driver-option-prices"><div><span>Demi-journée</span><strong>+ {driverHalfDay}</strong></div><div><span>Journée complète</span><strong>+ {driverFullDay}</strong></div></div>
         <p className="driver-option-note">Le supplément chauffeur s’ajoute au tarif de location du véhicule choisi.</p>
       </aside>

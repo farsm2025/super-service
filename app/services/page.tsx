@@ -29,6 +29,7 @@ export default function ServicesPage() {
   return (
     <PageShell
       eyebrow="Nos prestations"
+      breadcrumbLabel="Services"
       title="Tous nos services à Lausanne et dans le canton de Vaud"
       intro="Un seul partenaire pour organiser vos besoins de déménagement, nettoyage, transport et multiservices, avec une réponse claire et un devis gratuit."
     >

@@ -40,6 +40,7 @@ export default function Page() {
   return (
     <PageShell
       eyebrow="Multiservices"
+      breadcrumbLabel="Petits travaux et jardinage"
       title="Petits travaux et jardinage à Lausanne"
       intro="Les petites interventions qui vous font gagner du temps, réalisées par une équipe polyvalente."
     >

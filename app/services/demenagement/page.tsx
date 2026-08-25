@@ -28,6 +28,7 @@ export default function Page() {
   return (
     <PageShell
       eyebrow="Service principal"
+      breadcrumbLabel="Déménagement"
       title="Entreprise de déménagement à Lausanne"
       intro="Du studio aux locaux professionnels, notre équipe organise votre déménagement avec méthode, soin et ponctualité."
     >

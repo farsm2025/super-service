@@ -43,6 +43,7 @@ export default function Page() {
   return (
     <PageShell
       eyebrow="Transport & livraison"
+      breadcrumbLabel="Transport et livraison"
       title="Transport et livraison à Lausanne"
       intro="Une solution flexible pour déplacer un meuble, livrer un achat ou transporter des objets volumineux."
     >

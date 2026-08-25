@@ -42,6 +42,7 @@ export default function Page() {
   return (
     <PageShell
       eyebrow="Service principal"
+      breadcrumbLabel="Nettoyage"
       title="Nettoyage professionnel à Lausanne"
       intro="Fin de bail, bureaux ou après travaux : nous remettons les lieux en état avec une attention particulière aux détails."
     >

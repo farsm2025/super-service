@@ -40,6 +40,7 @@ export default function Page() {
   return (
     <PageShell
       eyebrow="Tri & évacuation"
+      breadcrumbLabel="Débarras"
       title="Service de débarras à Lausanne et dans le canton de Vaud"
       intro="Appartement, maison, cave, bureau ou chantier : nous organisons le débarras selon le volume et les accès."
     >

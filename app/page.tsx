@@ -35,6 +35,7 @@ export default function Home() {
     <section className="section intro" id="services">
       <div className="section-heading"><p className="eyebrow">Un seul partenaire, plusieurs solutions</p><h2>Déménagement, nettoyage et location de camion</h2><p>Particuliers, entreprises et régies : Super-Service coordonne les prestations dont vous avez besoin, sans multiplier les interlocuteurs.</p></div>
       <div className="service-grid">{services.map((s, i) => <article className={`service-card ${i < 3 ? "featured" : ""}`} key={s.title}><span className="service-icon" aria-hidden="true">{s.icon}</span><h3>{s.title}</h3><p>{s.text}</p><Link href={s.href}>Découvrir le service <span>→</span></Link></article>)}</div>
+      <div className="services-overview-action"><Link className="button button-outline" href="/services">Voir tous nos services</Link></div>
       <aside className="truck-highlight"><div className="truck-highlight-image"><Image src="/images/location-camion/citroen-jumper-exterieur.webp" alt="Deux camions à louer avec ou sans chauffeur à Lausanne" fill sizes="(max-width:900px) 100vw,50vw"/></div><div><p className="eyebrow light">Avec ou sans chauffeur</p><h3>17 m³ ou 20 m³ avec hayon</h3><p>Choisissez entre l’Iveco Daily et le Citroën Jumper, puis conduisez vous-même ou ajoutez un chauffeur.</p><Link className="button button-white" href="/services/location-camion">Comparer les véhicules</Link></div></aside>
     </section>
     <section className="split-section" id="a-propos">

@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://www.super-service.ch";
   const pages = [
     "",
+    "/services",
     ...servicePages,
     "/avis",
     "/devis",

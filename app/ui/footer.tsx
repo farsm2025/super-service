@@ -18,6 +18,7 @@ export function Footer() {
       </div>
       <div>
         <h3>Services</h3>
+        <Link href="/services">Tous les services</Link>
         <Link href="/services/demenagement">Déménagement</Link>
         <Link href="/services/nettoyage">Nettoyage</Link>
         <Link href="/services/location-camion">Location de camion</Link>

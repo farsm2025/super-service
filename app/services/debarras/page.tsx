@@ -11,6 +11,7 @@ export const metadata: Metadata = {
     title: "Service de débarras à Lausanne | Super-Service",
     description:
       "Tri, chargement, transport et évacuation des encombrants à Lausanne et dans le canton de Vaud.",
+    url: "/services/debarras",
     images: [
       {
         url: "/images/debarras/debarras-cave-lausanne.webp",

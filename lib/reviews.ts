@@ -1,4 +1,6 @@
-const project=process.env.NEXT_PUBLIC_SANITY_PROJECT_ID; const dataset=process.env.NEXT_PUBLIC_SANITY_DATASET||"production"; const token=process.env.SANITY_API_TOKEN; const resend=process.env.RESEND_API_KEY; const origin=process.env.SITE_URL||"https://www.super-service.ch";
+import {SITE_URL} from "./site";
+
+const project=process.env.NEXT_PUBLIC_SANITY_PROJECT_ID; const dataset=process.env.NEXT_PUBLIC_SANITY_DATASET||"production"; const token=process.env.SANITY_API_TOKEN; const resend=process.env.RESEND_API_KEY; const origin=process.env.SITE_URL||SITE_URL;
 const emailFrom=process.env.EMAIL_FROM||"Super-Service <devis@mail.super-service.ch>";
 const emailTo=process.env.EMAIL_TO||"info@super-service.ch";
 async function sanityMutate(mutations:unknown[]){if(!project||!token)return;const r=await fetch(`https://${project}.api.sanity.io/v2026-03-01/data/mutate/${dataset}`,{method:"POST",headers:{"content-type":"application/json","authorization":`Bearer ${token}`},body:JSON.stringify({mutations})});if(!r.ok)throw new Error("Sanity mutation failed")}

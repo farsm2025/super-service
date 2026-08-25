@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     title: "Entreprise de déménagement à Lausanne | Super-Service",
     description:
       "Déménagement privé et professionnel à Lausanne et dans le canton de Vaud avec protection et transport soignés.",
+    url: "/services/demenagement",
     images: [
       {
         url: "/images/demenagement/equipe-demenagement-lausanne.webp",

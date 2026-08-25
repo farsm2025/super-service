@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     title: "Transport et livraison à Lausanne | Super-Service",
     description:
       "Transport, livraison et manutention à Lausanne et dans le canton de Vaud avec une équipe et un véhicule adaptés.",
+    url: "/services/transport-et-livraison",
     images: [
       {
         url: "/images/transport-debarras/transport-livraison-lausanne.webp",

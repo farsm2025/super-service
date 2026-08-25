@@ -11,6 +11,7 @@ export const metadata: Metadata = {
     title: "Montage de meubles à Lausanne | Super-Service",
     description:
       "Montage, démontage et remontage de meubles à Lausanne et dans le canton de Vaud, seul ou avec un déménagement.",
+    url: "/services/montage-de-meubles",
     images: [
       {
         url: "/images/montage-meubles/montage-meuble-lausanne.webp",

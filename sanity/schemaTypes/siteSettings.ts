@@ -14,7 +14,7 @@ export const siteSettings = defineType({
     defineField({name: "street", title: "Rue et numéro", type: "string", initialValue: "Rue du Clos-de-Bulle 5", validation: (rule) => rule.required()}),
     defineField({name: "postalCode", title: "Code postal", type: "string", initialValue: "1004", validation: (rule) => rule.required()}),
     defineField({name: "city", title: "Ville", type: "string", initialValue: "Lausanne", validation: (rule) => rule.required()}),
-    defineField({name: "websiteUrl", title: "Adresse du site internet", type: "url", initialValue: "https://www.super-service.ch", validation: (rule) => rule.required()}),
+    defineField({name: "websiteUrl", title: "Adresse du site internet", type: "url", initialValue: "https://super-service.ch", validation: (rule) => rule.required()}),
     defineField({name: "quoteDelay", title: "Délai annoncé pour les devis", type: "string", initialValue: "24 h"}),
   ],
   preview: {prepare: () => ({title: "Coordonnées et réglages généraux"})},

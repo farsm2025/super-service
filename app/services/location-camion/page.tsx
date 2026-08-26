@@ -4,6 +4,7 @@ import Link from "next/link";
 import {PageShell} from "../../ui/page-shell";
 import {Icon} from "../../ui/icons";
 import {getServiceBySlug, type RentalVehicle} from "../../../lib/sanity";
+import {Realizations} from "../../ui/realizations";
 
 export function generateMetadata():Metadata{
   const title="Location de camions avec ou sans chauffeur à Lausanne";
@@ -83,5 +84,6 @@ export default async function Page(){
     </section>
     <section className="rental-practical" aria-labelledby="rental-details-title"><div className="rental-practical-copy"><p className="eyebrow">Informations communes</p><h2 id="rental-details-title">Une location simple et transparente</h2><p>Les mêmes conditions pratiques s’appliquent aux deux véhicules. Contactez-nous pour vérifier leur disponibilité à la date souhaitée.</p><div className="truck-actions"><Link className="button button-primary" href="/devis">Vérifier la disponibilité</Link><a className="button button-whatsapp" href="https://wa.me/41783223368">Demander sur WhatsApp</a></div></div><dl>{sharedDetails.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>
     {service?.rentalConditions&&<section className="rental-conditions"><h2>Conditions de location</h2><p>{service.rentalConditions}</p></section>}
+    <Realizations service="location-camion" />
   </PageShell>;
 }

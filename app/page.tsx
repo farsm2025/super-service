@@ -42,7 +42,7 @@ export default function Home() {
       <div className="split-visual"><Image src="/logo-super-service.jpg" alt="Équipe Super-Service pour le déménagement, le nettoyage et les petits travaux" width={1320} height={666} sizes="(max-width: 900px) 100vw, 50vw" /></div>
       <div className="split-copy"><p className="eyebrow light">Notre différence</p><h2>Une équipe polyvalente, un service simple et soigné</h2><p>Basée à Lausanne, notre équipe intervient pour vos déménagements, nettoyages et besoins multiservices dans tout le canton de Vaud.</p><ul className="check-list"><li>Un interlocuteur unique pour organiser votre intervention</li><li>Des prestations adaptées aux particuliers et aux entreprises</li><li>Une réponse rapide et un devis gratuit sous 24 h</li><li>Un travail contrôlé avec vous avant notre départ</li></ul><Link className="button button-white" href="/devis">Parler de mon projet</Link></div>
     </section>
-    <Realizations />
+    <Realizations featuredOnly />
     <Testimonials />
     <section className="section process"><div className="section-heading compact"><p className="eyebrow">Comment ça marche ?</p><h2>Votre intervention en quatre étapes</h2></div><div className="steps">{steps.map(([n,t,x]) => <article key={n}><span>{n}</span><h3>{t}</h3><p>{x}</p></article>)}</div></section>
     <section className="service-area"><div><p className="eyebrow light">Zone d’intervention</p><h2>Lausanne et tout le canton de Vaud</h2><p>Lausanne, Prilly, Renens, Pully, Morges, Nyon, Yverdon-les-Bains, Vevey, Montreux et les communes environnantes.</p></div><Link className="button button-white" href="/devis">Demander un devis dans ma région</Link></section>

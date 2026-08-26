@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {PageShell} from "../../ui/page-shell";
+import {Realizations} from "../../ui/realizations";
 
 export const metadata: Metadata = {
   title: "Entreprise de déménagement à Lausanne",
@@ -115,6 +116,7 @@ export default function Page() {
           </article>
         </div>
       </section>
+      <Realizations service="demenagement" />
     </PageShell>
   );
 }

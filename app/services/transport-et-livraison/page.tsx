@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageShell } from "../../ui/page-shell";
+import { Realizations } from "../../ui/realizations";
 import { ServiceGallery, type ServicePhoto } from "../../ui/service-gallery";
 
 export const metadata: Metadata = {
@@ -97,6 +98,7 @@ export default function Page() {
           </article>
         </div>
       </section>
+      <Realizations service="transport-et-livraison" />
     </PageShell>
   );
 }

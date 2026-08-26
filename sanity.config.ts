@@ -18,12 +18,16 @@ export default defineConfig({
         S.list()
           .title("Gestion du site")
           .items([
+            S.documentTypeListItem("realization").title("Photos des services"),
+            S.documentTypeListItem("testimonial").title("Avis clients"),
+            S.documentTypeListItem("service").title("Contenu et tarifs des services"),
+            S.divider(),
             S.listItem()
               .title("Paramètres du site")
               .child(S.document().schemaType("siteSettings").documentId("siteSettings")),
             S.divider(),
             ...S.documentTypeListItems().filter(
-              (item) => item.getId() !== "siteSettings",
+              (item) => !["siteSettings", "realization", "testimonial", "service"].includes(item.getId() || ""),
             ),
           ]),
     }),

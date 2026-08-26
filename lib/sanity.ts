@@ -3,6 +3,16 @@ export const sanityClient=createClient({projectId:process.env.NEXT_PUBLIC_SANITY
 export type Realization={_id:string;title:string;service:string;city?:string;description?:string;imageUrl?:string;imageAlt?:string};
 export type RentalVehicle={vehicleId?:"iveco"|"citroen";name?:string;volume?:string;feature?:string;halfDayPrice?:string;fullDayPrice?:string};
 export type ServiceContent={title?:string;description?:string;seoTitle?:string;seoDescription?:string;rentalVehicles?:RentalVehicle[];driverHalfDaySupplement?:string;driverFullDaySupplement?:string;licenseRequired?:string;includedMileage?:string;deposit?:string;pickupLocation?:string;rentalConditions?:string};
-export async function getRealizations(service?:string,featuredOnly=false):Promise<Realization[]>{const filter=[`_type=="realization"`,`defined(title)`,service?`service==$service`:"",featuredOnly?`featured==true`:""].filter(Boolean).join(" && ");try{return await sanityClient.fetch(`*[${filter}]|order(coalesce(order,10) asc,completedAt desc,_createdAt desc){_id,title,service,city,description,"imageUrl":mainImage.asset->url,"imageAlt":coalesce(mainImage.alt,title)}`,{service},{next:{revalidate:60}})}catch{return[]}}
+const serviceAliases:Record<string,string[]>={
+  demenagement:["demenagement"],
+  nettoyage:["nettoyage"],
+  "location-camion":["location-camion"],
+  "transport-et-livraison":["transport-et-livraison","transport"],
+  "montage-de-meubles":["montage-de-meubles","montage-meubles"],
+  debarras:["debarras"],
+  "petits-travaux-jardinage":["petits-travaux-jardinage","petits-travaux","jardinage","multiservices"],
+};
+
+export async function getRealizations(service?:string,featuredOnly=false):Promise<Realization[]>{const services=service?(serviceAliases[service]||[service]):[];const filter=[`_type=="realization"`,`defined(title)`,`defined(mainImage.asset)`,service?`service in $services`:"",featuredOnly?`featured==true`:""].filter(Boolean).join(" && ");try{return await sanityClient.fetch(`*[${filter}]|order(coalesce(order,10) asc,completedAt desc,_createdAt desc){_id,title,service,city,description,"imageUrl":mainImage.asset->url,"imageAlt":coalesce(mainImage.alt,title)}`,{services},{next:{revalidate:60}})}catch{return[]}}
 
 export async function getServiceBySlug(slug:string):Promise<ServiceContent|null>{try{return await sanityClient.fetch(`*[_type=="service"&&slug.current==$slug][0]{title,description,seoTitle,seoDescription,rentalVehicles[]{vehicleId,name,volume,feature,halfDayPrice,fullDayPrice},driverHalfDaySupplement,driverFullDaySupplement,licenseRequired,includedMileage,deposit,pickupLocation,rentalConditions}`,{slug},{next:{revalidate:60}})}catch{return null}}

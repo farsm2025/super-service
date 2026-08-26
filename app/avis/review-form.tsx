@@ -9,13 +9,14 @@ export function ReviewForm(){
   async function submit(event:React.FormEvent<HTMLFormElement>){
     event.preventDefault();
     if(submitting)return;
+    const formElement=event.currentTarget;
     setSubmitting(true);
     setStatus("Envoi en cours…");
-    const form=new FormData(event.currentTarget);
+    const form=new FormData(formElement);
     try{
       const response=await fetch("/api/avis",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(Object.fromEntries(form))});
       if(!response.ok)throw new Error("Review submission failed");
-      event.currentTarget.reset();
+      formElement.reset();
       window.location.assign("/?avis=envoye#avis");
     }catch{
       setStatus("L’envoi n’a pas abouti. Vous pouvez réessayer ou nous contacter.");

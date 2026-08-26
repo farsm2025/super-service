@@ -20,13 +20,14 @@ const legacyRoutes = [
 const nextConfig: NextConfig = {
   images: {remotePatterns: [{protocol: "https", hostname: "cdn.sanity.io"}]},
   async headers() {
-    if (process.env.SITE_LAUNCHED === "true") return [];
-
     return [
       {
         source: "/:path*",
         headers: [
-          {key: "X-Robots-Tag", value: "noindex, nofollow, noarchive"},
+          {key:"X-Content-Type-Options",value:"nosniff"},
+          {key:"Referrer-Policy",value:"strict-origin-when-cross-origin"},
+          {key:"Permissions-Policy",value:"camera=(), microphone=(), geolocation=()"},
+          ...(process.env.SITE_LAUNCHED === "true"?[]:[{key:"X-Robots-Tag",value:"noindex, nofollow, noarchive"}]),
         ],
       },
     ];

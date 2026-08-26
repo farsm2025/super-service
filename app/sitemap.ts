@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...servicePages,
     "/avis",
     "/devis",
+    "/rendez-vous",
     "/mentions-legales",
     "/confidentialite",
   ];

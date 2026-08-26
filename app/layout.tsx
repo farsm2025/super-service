@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   openGraph: { type: "website", locale: "fr_CH", siteName: "Super-Service", title: "Déménagement à Lausanne et dans le canton de Vaud", description: "Déménagement, nettoyage et multiservices. Devis gratuit sous 24 h.", url: "/", images: [{ url: "/logo-super-service.jpg", width: 1320, height: 666, alt: "Super-Service Lausanne" }] },
   twitter: { card: "summary_large_image", title: "Super-Service Lausanne", description: "Déménagement, nettoyage et multiservices dans le canton de Vaud.", images: ["/logo-super-service.jpg"] },
   alternates: { canonical: "/" },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {capable:true,title:"Super-Service"},
   robots: {
     index: SITE_LAUNCHED,
     follow: SITE_LAUNCHED,

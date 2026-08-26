@@ -1,0 +1,8 @@
+import {NextResponse} from "next/server";
+import {getAdminSession} from "@/lib/admin-auth";
+import {sendAppointmentStatusEmail} from "@/lib/appointment-email";
+import {updateAppointment} from "@/lib/appointments";
+import {requiredText,zurichDateTimeToIso} from "@/lib/validation";
+import {syncGoogleCalendar} from "@/lib/google-calendar";
+export const dynamic="force-dynamic";
+export async function PATCH(request:Request,{params}:{params:Promise<{id:string}>}){if(!await getAdminSession())return NextResponse.json({error:"Non autorisé"},{status:401});try{const{id}=await params;const body=await request.json() as Record<string,unknown>;const action=requiredText(body.action,20);const startsLocal=requiredText(body.startsAt,16);const endsLocal=requiredText(body.endsAt,16);const appointment=await updateAppointment(id,{action,startsAt:startsLocal?zurichDateTimeToIso(startsLocal):undefined,endsAt:endsLocal?zurichDateTimeToIso(endsLocal):undefined,adminNotes:requiredText(body.adminNotes,2000)});const kind={accept:"confirmed",propose:"modified",cancel:"cancelled",reject:"rejected"}[action] as "confirmed"|"modified"|"cancelled"|"rejected"|undefined;let emailSent=true;if(kind){try{await sendAppointmentStatusEmail(appointment,kind)}catch(error){emailSent=false;console.error("Customer email failed",error)}}let calendarSynced=false;try{calendarSynced=(await syncGoogleCalendar(appointment)).synced}catch(error){console.error("Google Calendar sync failed",error)}return NextResponse.json({appointment,emailSent,calendarSynced})}catch(error){console.error(error);return NextResponse.json({error:"Modification impossible"},{status:400})}}

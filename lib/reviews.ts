@@ -1,6 +1,6 @@
 import {SITE_URL} from "./site";
 
-const project=process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
+const project=process.env.NEXT_PUBLIC_SANITY_PROJECT_ID||"hk158c3c";
 const dataset=process.env.NEXT_PUBLIC_SANITY_DATASET||"production";
 const sanityToken=process.env.SANITY_API_TOKEN;
 const resend=process.env.RESEND_API_KEY;

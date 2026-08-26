@@ -71,8 +71,11 @@ export function HeroVideoCarousel() {
           avec ou sans chauffeur, le débarras et les petits travaux.
         </p>
         <div className="hero-actions">
-          <Link className="button button-primary" href="/devis">
-            Demander un devis gratuit
+          <Link className="button button-primary" href="/rendez-vous">
+            Prenez rendez-vous
+          </Link>
+          <Link className="button button-glass" href="/devis">
+            Demander un devis
           </Link>
           <a className="button button-glass" href="tel:+41783223368">
             Nous appeler

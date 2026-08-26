@@ -11,6 +11,7 @@ type IconName =
   | "phone"
   | "whatsapp"
   | "quote"
+  | "calendar"
   | "driver";
 
 const paths: Record<IconName, React.ReactNode> = {
@@ -24,6 +25,7 @@ const paths: Record<IconName, React.ReactNode> = {
   phone: <path d="M7 3H4a1 1 0 0 0-1 1c0 9.4 7.6 17 17 17a1 1 0 0 0 1-1v-3l-4-1-2 2c-4-1.5-7.5-5-9-9l2-2Z"/>,
   whatsapp: <><path d="M20 11.5a8.5 8.5 0 0 1-12.7 7.4L3 20l1.1-4.2A8.5 8.5 0 1 1 20 11.5Z"/><path d="M8.2 7.5c.8 3.4 2.9 5.5 6.3 6.3"/></>,
   quote: <><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></>,
+  calendar: <><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4m8-4v4M3 10h18"/><path d="m9 15 2 2 4-4"/></>,
   driver: <><circle cx="12" cy="7" r="3"/><path d="M5 21a7 7 0 0 1 14 0"/><path d="M8 16h8M12 16v5"/></>,
 };
 

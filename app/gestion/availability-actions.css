@@ -1,0 +1,47 @@
+.availability-actions {
+  display: grid;
+  gap: 9px;
+  margin: 20px 0;
+  padding: 16px;
+  background: #f1f7f4;
+  border: 1px solid #cde6d9;
+  border-radius: 13px;
+}
+
+.availability-actions h3 {
+  margin: 0 0 3px;
+  font-size: 1rem;
+  color: #125f40;
+}
+
+.availability-choice {
+  display: grid;
+  gap: 3px;
+  padding: 13px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: #188657;
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.availability-choice.alternate {
+  background: #126b92;
+}
+
+.availability-choice strong {
+  font-size: .95rem;
+}
+
+.availability-choice span {
+  font-size: .78rem;
+  opacity: .9;
+}
+
+.availability-choice:disabled,
+.decision-buttons button:disabled {
+  opacity: .58;
+  cursor: wait;
+}

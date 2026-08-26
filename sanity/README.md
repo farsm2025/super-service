@@ -6,6 +6,6 @@ La rubrique **Photos des services** permet d’ajouter une photo, son texte alte
 
 La rubrique **Contenu et tarifs des services** contient les informations éditables des services, notamment les véhicules et tarifs de location. La rubrique **Avis clients** reçoit les avis envoyés depuis le site.
 
-Les coordonnées générales doivent être modifiées dans le document unique **Paramètres du site**. Les avis suivent les statuts `pending` → `verified` → `published`.
+Les coordonnées générales doivent être modifiées dans le document unique **Paramètres du site**. Un nouvel avis est créé avec le statut `pending`, puis Super-Service peut le passer directement à `published`, `hidden` ou `rejected` depuis l’e-mail de modération. Le statut `verified` est conservé uniquement pour les anciens liens de validation déjà envoyés.
 
 Les variables nécessaires sont décrites dans `.env.example`. Le jeton `SANITY_API_TOKEN` reste exclusivement dans les variables sécurisées de Vercel et ne doit jamais être ajouté au dépôt.

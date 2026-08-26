@@ -78,8 +78,9 @@ export async function verifyModerationLink(reviewId:string,action:string,expires
 
 export async function createPendingReview(body:Record<string,string>){
   const id=`review-${crypto.randomUUID()}`;
-  await sanityMutate([{create:{_id:id,_type:"testimonial",name:body.name.trim(),email:body.email.trim().toLowerCase(),service:body.service,rating:Number(body.rating||5),comment:body.comment.trim(),status:"pending",verificationToken:body.token,submittedAt:new Date().toISOString()}}]);
-  return id;
+  const review:ReviewRecord={_id:id,name:body.name.trim(),email:body.email.trim().toLowerCase(),service:body.service,rating:Number(body.rating||5),comment:body.comment.trim(),status:"pending"};
+  await sanityMutate([{create:{...review,_type:"testimonial",submittedAt:new Date().toISOString()}}]);
+  return review;
 }
 
 export async function sendReviewVerification(body:Record<string,string>){
@@ -87,7 +88,7 @@ export async function sendReviewVerification(body:Record<string,string>){
   await mail(body.email.trim().toLowerCase(),"Validez votre avis Super-Service",`<h1>Merci pour votre avis</h1><p>Bonjour ${escapeHtml(body.name.trim())}, confirmez votre adresse e-mail pour transmettre votre avis à notre équipe.</p><p><a href="${link}" style="display:inline-block;padding:13px 20px;background:#e51d27;color:#fff;text-decoration:none;border-radius:8px;font-weight:700">Valider mon avis</a></p><p>L’avis sera relu avant publication.</p>`);
 }
 
-async function sendModerationEmail(review:ReviewRecord){
+export async function sendReviewModerationRequest(review:ReviewRecord){
   const [publishLink,rejectLink,hideLink]=await Promise.all([
     createModerationLink(review._id,"published"),
     createModerationLink(review._id,"rejected"),
@@ -111,7 +112,7 @@ export async function validateReview(token:string){
   const review=await sanityQuery<ReviewRecord|null>(`*[_type=="testimonial" && verificationToken==$token][0]{_id,name,email,service,rating,comment,status}`,{token});
   if(!review?._id)return false;
   await sanityMutate([{patch:{id:review._id,set:{status:"verified",verifiedAt:new Date().toISOString()},unset:["verificationToken"]}}]);
-  try{await sendModerationEmail({...review,status:"verified"})}catch(error){console.error("Unable to send review moderation email",error)}
+  try{await sendReviewModerationRequest({...review,status:"verified"})}catch(error){console.error("Unable to send review moderation email",error)}
   return true;
 }
 

@@ -31,7 +31,8 @@ export async function sendNewRequestEmail(appointment:Appointment){
     <strong>E-mail :</strong> ${escapeHtml(appointment.customerEmail)}<br>
     <strong>Adresse :</strong> ${escapeHtml(appointment.customerAddress)}</p>
     <p><strong>Type :</strong> ${escapeHtml(appointment.requestType)}<br>
-    <strong>Date souhaitée :</strong> ${escapeHtml(appointment.preferredDate)} ${escapeHtml(appointment.preferredTimeStart||"")}<br>
+    <strong>Première date :</strong> ${escapeHtml(appointment.preferredDate)} ${escapeHtml(appointment.preferredTimeStart||"")}${appointment.preferredTimeEnd?`–${escapeHtml(appointment.preferredTimeEnd)}`:""}<br>
+    ${appointment.alternateDate?`<strong>Deuxième date :</strong> ${escapeHtml(appointment.alternateDate)} ${escapeHtml(appointment.alternateTimeStart||"")}${appointment.alternateTimeEnd?`–${escapeHtml(appointment.alternateTimeEnd)}`:""}<br>`:""}
     <strong>Motif :</strong><br>${lines(appointment.reason)}</p>
     <p><a href="${link}" style="display:inline-block;padding:13px 20px;background:#e51d27;color:#fff;text-decoration:none;border-radius:8px;font-weight:700">Ouvrir et traiter la demande</a></p>
   `,appointment.customerEmail,`appointment-new-${appointment.id}`);

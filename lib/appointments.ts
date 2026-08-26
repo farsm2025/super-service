@@ -9,12 +9,15 @@ type DbAppointment={
   admin_notes:string|null; google_event_id:string|null; created_at:string; updated_at:string;
 };
 
+function dateOnly(value:string){return String(value).match(/\d{4}-\d{2}-\d{2}/)?.[0]||String(value)}
+function timeOnly(value:string|null){return value?.match(/\d{2}:\d{2}/)?.[0]||null}
+
 function mapAppointment(row:DbAppointment):Appointment{return{
   id:row.id,customerName:row.customer_name,customerEmail:row.customer_email,customerPhone:row.customer_phone,
   customerAddress:row.customer_address,requestType:row.request_type,reason:row.reason,customerNotes:row.customer_notes,
-  preferredDate:String(row.preferred_date),preferredTimeStart:row.preferred_time_start,preferredTimeEnd:row.preferred_time_end,
-  alternateDate:row.alternate_date?String(row.alternate_date):null,alternateTimeStart:row.alternate_time_start,
-  alternateTimeEnd:row.alternate_time_end,startsAt:row.starts_at?new Date(row.starts_at).toISOString():null,
+  preferredDate:dateOnly(row.preferred_date),preferredTimeStart:timeOnly(row.preferred_time_start),preferredTimeEnd:timeOnly(row.preferred_time_end),
+  alternateDate:row.alternate_date?dateOnly(row.alternate_date):null,alternateTimeStart:timeOnly(row.alternate_time_start),
+  alternateTimeEnd:timeOnly(row.alternate_time_end),startsAt:row.starts_at?new Date(row.starts_at).toISOString():null,
   endsAt:row.ends_at?new Date(row.ends_at).toISOString():null,timezone:row.timezone,status:row.status,source:row.source,
   adminNotes:row.admin_notes,googleEventId:row.google_event_id,createdAt:new Date(row.created_at).toISOString(),updatedAt:new Date(row.updated_at).toISOString(),
 }}

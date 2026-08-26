@@ -7,6 +7,8 @@ import { MobileActions } from "./ui/mobile-actions";
 import { Realizations } from "./ui/realizations";
 import { Footer } from "./ui/footer";
 import { Icon } from "./ui/icons";
+import { getPublishedTestimonials } from "../lib/sanity";
+import { testimonials } from "./data/testimonials";
 
 const services = [
   { icon: "moving" as const, title: "Déménagement", text: "Déménagements privés et professionnels à Lausanne et dans tout le canton de Vaud, avec protection soignée de vos biens.", href: "/services/demenagement" },
@@ -25,9 +27,15 @@ const steps = [
   ["04", "Vous contrôlez", "Nous vérifions le résultat avec vous avant de terminer l’intervention."],
 ];
 
-export default function Home() {
+type SearchParams=Promise<Record<string,string|string[]|undefined>>;
+
+export default async function Home({searchParams}:{searchParams:SearchParams}) {
+  const params=await searchParams;
+  const publishedTestimonials=await getPublishedTestimonials();
+  const reviewItems=[...publishedTestimonials,...testimonials.map((item,index)=>({...item,_id:`legacy-${index}`,rating:5}))];
+  const reviewSent=params.avis==="envoye";
   return <main>
-    <Header />
+    <Header reviewCount={reviewItems.length}/>
     <HeroVideoCarousel />
     <section className="trust-strip" aria-label="Nos engagements">
       <div><strong>24 h</strong><span>pour votre devis gratuit</span></div><div><strong>Vaud</strong><span>Lausanne et tout le canton</span></div><div><strong>7j/7</strong><span>selon disponibilité</span></div><div><strong>5★</strong><span>des clients satisfaits</span></div>
@@ -43,7 +51,7 @@ export default function Home() {
       <div className="split-copy"><p className="eyebrow light">Notre différence</p><h2>Une équipe polyvalente, un service simple et soigné</h2><p>Basée à Lausanne, notre équipe intervient pour vos déménagements, nettoyages et besoins multiservices dans tout le canton de Vaud.</p><ul className="check-list"><li>Un interlocuteur unique pour organiser votre intervention</li><li>Des prestations adaptées aux particuliers et aux entreprises</li><li>Une réponse rapide et un devis gratuit sous 24 h</li><li>Un travail contrôlé avec vous avant notre départ</li></ul><Link className="button button-white" href="/devis">Parler de mon projet</Link></div>
     </section>
     <Realizations featuredOnly />
-    <Testimonials />
+    <Testimonials items={reviewItems} reviewSent={reviewSent}/>
     <section className="section process"><div className="section-heading compact"><p className="eyebrow">Comment ça marche ?</p><h2>Votre intervention en quatre étapes</h2></div><div className="steps">{steps.map(([n,t,x]) => <article key={n}><span>{n}</span><h3>{t}</h3><p>{x}</p></article>)}</div></section>
     <section className="service-area"><div><p className="eyebrow light">Zone d’intervention</p><h2>Lausanne et tout le canton de Vaud</h2><p>Lausanne, Prilly, Renens, Pully, Morges, Nyon, Yverdon-les-Bains, Vevey, Montreux et les communes environnantes.</p></div><Link className="button button-white" href="/devis">Demander un devis dans ma région</Link></section>
     <section className="cta-section" id="contact"><p className="eyebrow">Besoin d’un coup de main ?</p><h2>Recevez votre devis gratuit sous 24 h</h2><p>Dites-nous ce qu’il faut déménager, nettoyer, transporter ou réparer. Nous revenons vers vous rapidement.</p><div className="hero-actions center"><Link className="button button-primary" href="/devis">Demander un devis gratuit</Link><a className="button button-outline" href="tel:+41783223368">Appeler maintenant</a><a className="button button-whatsapp" href="https://wa.me/41783223368">WhatsApp</a></div></section>

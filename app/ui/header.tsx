@@ -5,7 +5,7 @@ import {useState} from "react";
 import {testimonials} from "../data/testimonials";
 import {Icon} from "./icons";
 
-export function Header(){
+export function Header({reviewCount=testimonials.length}:{reviewCount?:number}){
   const[open,setOpen]=useState(false);
   const closeMenu=()=>setOpen(false);
   return <header className="header">
@@ -14,7 +14,7 @@ export function Header(){
     <nav className={open?"nav open":"nav"} aria-label="Navigation principale">
       <Link href="/#services" onClick={closeMenu}>Services</Link>
       <Link href="/services/location-camion" onClick={closeMenu}>Location de camion</Link>
-      <Link className="reviews-nav-link" href="/#avis" onClick={closeMenu}>Avis <span className="reviews-count" aria-label={`${testimonials.length} avis`}>{testimonials.length}</span></Link>
+      <Link className="reviews-nav-link" href="/#avis" onClick={closeMenu}>Avis <span className="reviews-count" aria-label={`${reviewCount} avis`}>{reviewCount}</span></Link>
       <Link href="/#a-propos" onClick={closeMenu}>À propos</Link>
       <Link href="/#contact" onClick={closeMenu}>Contact</Link>
     </nav>

@@ -16,6 +16,7 @@ export function Header({reviewCount=testimonials.length}:{reviewCount?:number}){
       <Link href="/services/location-camion" onClick={closeMenu}>Location de camion</Link>
       <Link className="reviews-nav-link" href="/#avis" onClick={closeMenu}>Avis <span className="reviews-count" aria-label={`${reviewCount} avis`}>{reviewCount}</span></Link>
       <Link href="/#a-propos" onClick={closeMenu}>À propos</Link>
+      <Link href="/rendez-vous" onClick={closeMenu}>Rendez-vous</Link>
       <Link href="/#contact" onClick={closeMenu}>Contact</Link>
     </nav>
     <div className="header-actions"><a className="icon-link" href="tel:+41783223368" aria-label="Téléphoner"><Icon name="phone"/></a><a className="icon-link whatsapp" href="https://wa.me/41783223368" aria-label="WhatsApp"><Icon name="whatsapp"/></a><Link className="button button-primary small" href="/devis">Devis gratuit</Link></div>

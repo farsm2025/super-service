@@ -1,0 +1,3 @@
+"use client";
+import {useState} from "react";
+export function LoginForm(){const[state,setState]=useState<"idle"|"sending"|"sent"|"error">("idle");async function requestLink(){setState("sending");const response=await fetch("/api/gestion/auth/request-link",{method:"POST"});setState(response.ok?"sent":"error")};if(state==="sent")return <div className="login-message success"><strong>E-mail envoyé</strong><span>Ouvrez le lien reçu sur info@super-service.ch. Il reste valable 15 minutes.</span></div>;return <><button className="admin-primary login-button" onClick={requestLink} disabled={state==="sending"}>{state==="sending"?"Envoi…":"Recevoir mon lien de connexion"}</button>{state==="error"&&<p className="admin-error">L’e-mail n’a pas pu être envoyé. Réessayez.</p>}</>}

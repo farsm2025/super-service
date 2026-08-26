@@ -25,6 +25,7 @@ export async function validateReview(t:string){if(!project||!token)return false;
 export async function sendQuoteRequest(b:Record<string,string>){
   const name=escapeHtml(b.name.trim());
   const phone=escapeHtml(b.phone.trim());
+  const address=escapeHtml(b.address.trim());
   const email=b.email.trim().toLowerCase();
   const service=escapeHtml(b.service.trim());
   const city=escapeHtml(b.city.trim());
@@ -36,6 +37,7 @@ export async function sendQuoteRequest(b:Record<string,string>){
     <p><strong>Client :</strong> ${name}<br>
     <strong>Téléphone :</strong> ${phone}<br>
     <strong>E-mail :</strong> ${escapeHtml(email)}<br>
+    <strong>Adresse :</strong> ${address}<br>
     <strong>Commune :</strong> ${city}<br>
     <strong>Date souhaitée :</strong> ${date}</p>
     <p><strong>Message :</strong><br>${message}</p>`;

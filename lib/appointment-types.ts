@@ -29,7 +29,7 @@ export type Appointment={
 
 export const statusLabels:Record<AppointmentStatus,string>={
   new_request:"Nouvelle demande",
-  awaiting_customer:"En attente de réponse",
+  awaiting_customer:"En attente du client",
   confirmed:"Confirmé",
   modified:"Modifié",
   completed:"Terminé",

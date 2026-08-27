@@ -5,14 +5,32 @@ import type {Appointment} from "@/lib/appointment-types";
 import {statusLabels} from "@/lib/appointment-types";
 
 type View = "day" | "week" | "month" | "list";
-const dateKey = (value: string | Date) => new Intl.DateTimeFormat("en-CA", {timeZone: "Europe/Zurich", year: "numeric", month: "2-digit", day: "2-digit"}).format(new Date(value));
-const formatDate = (value: string | null, options: Intl.DateTimeFormatOptions = {dateStyle: "medium", timeStyle: "short"}) => value ? new Intl.DateTimeFormat("fr-CH", {timeZone: "Europe/Zurich", ...options}).format(new Date(value)) : "Date à définir";
-const localInput = (value: string | null) => value ? new Intl.DateTimeFormat("sv-SE", {timeZone: "Europe/Zurich", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit"}).format(new Date(value)).replace(" ", "T") : "";
-const phoneHref = (phone: string) => phone.replace(/[^+\d]/g, "");
-const availabilityStart = (date: string, time: string | null) => `${date}T${time || "09:00"}`;
-const availabilityEnd = (date: string, time: string | null) => time ? `${date}T${time}` : "";
+const parsedDate = (value: string | Date | null | undefined) => {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+const dateKey = (value: string | Date | null | undefined) => {
+  const parsed = parsedDate(value);
+  return parsed ? new Intl.DateTimeFormat("en-CA", {timeZone: "Europe/Zurich", year: "numeric", month: "2-digit", day: "2-digit"}).format(parsed) : "";
+};
+const formatDate = (value: string | null, options: Intl.DateTimeFormatOptions = {dateStyle: "medium", timeStyle: "short"}) => {
+  const parsed = parsedDate(value);
+  return parsed ? new Intl.DateTimeFormat("fr-CH", {timeZone: "Europe/Zurich", ...options}).format(parsed) : "Date à définir";
+};
+const localInput = (value: string | null) => {
+  const parsed = parsedDate(value);
+  return parsed ? new Intl.DateTimeFormat("sv-SE", {timeZone: "Europe/Zurich", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit"}).format(parsed).replace(" ", "T") : "";
+};
+const phoneHref = (phone: string | null | undefined) => (phone || "").replace(/[^+\d]/g, "");
+const validDateOnly = (value: string | null | undefined) => /^\d{4}-\d{2}-\d{2}$/.test(value || "");
+const availabilityStart = (date: string, time: string | null) => validDateOnly(date) ? `${date}T${time || "09:00"}` : "";
+const availabilityEnd = (date: string, time: string | null) => validDateOnly(date) && time ? `${date}T${time}` : "";
 const availabilityLabel = (date: string, timeStart: string | null, timeEnd: string | null) => {
-  const day = new Intl.DateTimeFormat("fr-CH", {timeZone: "UTC", weekday: "short", day: "numeric", month: "long", year: "numeric"}).format(new Date(`${date}T12:00:00Z`));
+  if (!validDateOnly(date)) return "Date historique à vérifier";
+  const parsed = parsedDate(`${date}T12:00:00Z`);
+  if (!parsed) return "Date historique à vérifier";
+  const day = new Intl.DateTimeFormat("fr-CH", {timeZone: "UTC", weekday: "short", day: "numeric", month: "long", year: "numeric"}).format(parsed);
   if (timeStart && timeEnd) return `${day}, de ${timeStart} à ${timeEnd}`;
   return timeStart ? `${day}, à ${timeStart}` : day;
 };
@@ -87,7 +105,7 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
     </main>
     <footer className="admin-bottom"><button className={view === "day" ? "active" : ""} onClick={() => setView("day")}><span>⌂</span>Accueil</button><button className={view === "week" || view === "month" ? "active" : ""} onClick={() => setView("month")}><span>▦</span>Calendrier</button><button className={view === "list" ? "active" : ""} onClick={() => {setStatus("new_request"); setView("list");}}><span className="counter-icon">◎{newCount > 0 && <b>{newCount}</b>}</span>Demandes</button><button onClick={() => setManual(true)}><span>＋</span>Ajouter</button></footer>
     {selectedDay && <DayAppointmentsPanel day={selectedDay} appointments={filtered} onClose={() => setSelectedDay(null)} onOpen={item => {setSelectedDay(null); open(item);}}/>}
-    {selected && <AppointmentPanel appointment={selected} onClose={() => setSelected(null)} onSaved={item => {setAppointments(current => current.map(existing => existing.id === item.id ? item : existing)); setSelected(item);}} onDeleted={() => {setAppointments(current => current.filter(item => item.id !== selected.id)); setSelected(null); setSelectedDay(null);}} notice={notice} setNotice={setNotice}/>}
+    {selected && <AppointmentPanel key={selected.id} appointment={selected} onClose={() => setSelected(null)} onSaved={item => {setAppointments(current => current.map(existing => existing.id === item.id ? item : existing)); setSelected(item);}} onDeleted={() => {setAppointments(current => current.filter(item => item.id !== selected.id)); setSelected(null); setSelectedDay(null);}} notice={notice} setNotice={setNotice}/>}
     {manual && <ManualForm onClose={() => setManual(false)} onCreated={item => {setAppointments(current => [item, ...current]); setManual(false);}}/>}
   </div>;
 }

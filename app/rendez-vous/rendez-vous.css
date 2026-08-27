@@ -1,9 +1,214 @@
+.appointment-public {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: clamp(42px, 7vw, 88px) 20px 90px;
+}
+
+.appointment-form {
+  display: block;
+  background: #fff;
+  border: 1px solid #dce3ec;
+  border-top: 5px solid var(--blue);
+  border-radius: 20px;
+  padding: clamp(24px, 5vw, 44px);
+  box-shadow: 0 22px 60px rgba(7, 35, 68, .12);
+}
+
+.appointment-form .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.appointment-form label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  color: #26384d;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.appointment-form .wide {
+  grid-column: 1 / -1;
+}
+
+.appointment-form input,
+.appointment-form select,
+.appointment-form textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid #bdc8d5;
+  border-radius: 9px;
+  padding: 13px 14px;
+  background: #fff;
+  color: #15202d;
+  font: inherit;
+  font-weight: 500;
+  line-height: 1.35;
+  transition: border-color .18s, box-shadow .18s, background .18s;
+}
+
+.appointment-form input,
+.appointment-form select {
+  min-height: 50px;
+}
+
+.appointment-form textarea {
+  resize: vertical;
+}
+
+.appointment-form input:hover,
+.appointment-form select:hover,
+.appointment-form textarea:hover {
+  border-color: #8fa2b7;
+}
+
+.appointment-form input:focus,
+.appointment-form select:focus,
+.appointment-form textarea:focus {
+  outline: none;
+  border-color: var(--blue2);
+  box-shadow: 0 0 0 4px rgba(7, 88, 201, .14);
+  background: #fbfdff;
+}
+
+.appointment-form fieldset {
+  margin: 30px 0 24px;
+  padding: 26px 0 0;
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.appointment-form legend {
+  padding: 0 14px 0 0;
+  color: var(--blue);
+  font-size: 16px;
+  font-weight: 900;
+}
+
 .appointment-slot {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.appointment-form > label:not(.consent):not(.honeypot) {
+  margin-top: 22px;
+}
+
+.appointment-form .consent {
+  display: grid !important;
+  grid-template-columns: auto 1fr !important;
+  align-items: start;
+  gap: 11px;
+  margin-top: 25px;
+  padding: 15px 16px;
+  border-radius: 9px;
+  background: #f3f7fc;
+  color: #34465a;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.appointment-form .consent input {
+  width: 19px;
+  min-height: 19px;
+  height: 19px;
+  margin-top: 2px;
+  accent-color: var(--blue);
+}
+
+.appointment-submit {
+  min-width: 220px;
+  margin-top: 26px;
+  border: 0;
+  cursor: pointer;
+}
+
+.appointment-submit:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.form-note {
+  margin: 13px 0 0;
+  color: #66758a;
+  font-size: 13px;
+}
+
+.form-error {
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border: 1px solid #f0b5ba;
+  border-radius: 8px;
+  background: #fff0f1;
+  color: #a62931;
+  font-weight: 800;
+}
+
+.appointment-form .honeypot {
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+.appointment-success {
+  padding: clamp(38px, 6vw, 58px) 28px;
+  border: 1px solid #cfe5d8;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 22px 60px rgba(7, 35, 68, .12);
+  text-align: center;
+}
+
+.appointment-success > span {
+  display: inline-grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: #e4f6eb;
+  color: #197640;
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.appointment-success h2 {
+  margin-bottom: 10px;
+  font-size: clamp(1.7rem, 5vw, 2.5rem);
+}
+
+.appointment-success p {
+  max-width: 620px;
+  margin: 0 auto 25px;
+  color: #566579;
+}
+
 @media (max-width: 760px) {
+  .appointment-public {
+    padding: 30px 14px 70px;
+  }
+
+  .appointment-form {
+    border-radius: 14px;
+    padding: 22px 17px 25px;
+  }
+
+  .appointment-form .form-grid,
   .appointment-slot {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .appointment-form .wide {
+    grid-column: auto;
+  }
+
+  .appointment-form fieldset {
+    margin-top: 25px;
+  }
+
+  .appointment-submit {
+    width: 100%;
   }
 }

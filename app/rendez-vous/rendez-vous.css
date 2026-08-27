@@ -184,6 +184,43 @@
   color: #566579;
 }
 
+.customer-confirmation-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(38px, 7vw, 80px) 18px 90px;
+}
+
+.customer-confirmation-card {
+  padding: clamp(25px, 5vw, 42px);
+  border: 1px solid #dce3ec;
+  border-top: 5px solid var(--blue);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 22px 60px rgba(7, 35, 68, .12);
+}
+
+.customer-confirmation-card dl {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  margin: 25px 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.customer-confirmation-card dt,
+.customer-confirmation-card dd {
+  margin: 0;
+  padding: 13px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.customer-confirmation-card dt {font-weight: 800;}
+.customer-confirmation-card dd {overflow-wrap: anywhere;}
+.customer-confirm-button {margin-top: 18px;}
+.customer-confirmation-card.invalid {display: flex;flex-wrap: wrap;gap: 12px;}
+.customer-confirmation-card.invalid p {width: 100%;}
+.customer-confirmation-success {text-align: center;padding: 25px 10px;}
+.customer-confirmation-success > span {display: inline-grid;place-items: center;width: 62px;height: 62px;border-radius: 50%;background: #e4f6eb;color: #197640;font-size: 2rem;font-weight: 900;}
+
 @media (max-width: 760px) {
   .appointment-public {
     padding: 30px 14px 70px;
@@ -211,4 +248,9 @@
   .appointment-submit {
     width: 100%;
   }
+
+  .customer-confirmation-card dl {grid-template-columns: 1fr;}
+  .customer-confirmation-card dt {padding-bottom: 2px;border-bottom: 0;}
+  .customer-confirmation-card dd {padding-top: 2px;}
+  .customer-confirm-button {width: 100%;}
 }

@@ -44,18 +44,24 @@ export async function getAppointment(id:string){
   return rows[0]?mapAppointment(rows[0] as DbAppointment):null;
 }
 
-export async function updateAppointment(id:string,input:{action:string;startsAt?:string;endsAt?:string;adminNotes?:string}){
+export async function updateAppointment(id:string,input:{action:string;startsAt?:string;endsAt?:string;adminNotes?:string;customerName?:string;customerEmail?:string;customerPhone?:string;customerAddress?:string;requestType?:string;reason?:string}){
   const sql=database();
   const current=await getAppointment(id);
   if(!current)throw new Error("Appointment not found");
-  const statusMap:Record<string,AppointmentStatus>={accept:"confirmed",propose:["confirmed","modified"].includes(current.status)?"modified":"awaiting_customer",complete:"completed",cancel:"cancelled",reject:"rejected",notes:current.status};
+  const statusMap:Record<string,AppointmentStatus>={accept:"confirmed",propose:["confirmed","modified"].includes(current.status)?"modified":"awaiting_customer",complete:"completed",cancel:"cancelled",reject:"rejected",notes:current.status,save:current.status};
   const nextStatus=statusMap[input.action];
   if(!nextStatus||!appointmentStatuses.includes(nextStatus))throw new Error("Invalid action");
   const startsAt=input.startsAt||current.startsAt;
-  const endsAt=input.endsAt||current.endsAt;
+  const endsAt=input.endsAt||(input.startsAt&&!current.startsAt?new Date(new Date(input.startsAt).getTime()+60*60*1000).toISOString():current.endsAt);
   if((input.action==="accept"||input.action==="propose")&&!startsAt)throw new Error("Date required");
-  const rows=await sql.query(`UPDATE appointments SET status=$2,starts_at=$3,ends_at=$4,admin_notes=$5,updated_at=now() WHERE id=$1 RETURNING ${fields}`,[id,nextStatus,startsAt||null,endsAt||null,input.adminNotes??current.adminNotes]);
+  const rows=await sql.query(`UPDATE appointments SET status=$2,starts_at=$3,ends_at=$4,admin_notes=$5,customer_name=$6,customer_email=$7,customer_phone=$8,customer_address=$9,request_type=$10,reason=$11,updated_at=now() WHERE id=$1 RETURNING ${fields}`,[id,nextStatus,startsAt||null,endsAt||null,input.adminNotes??current.adminNotes,input.customerName?.trim()||current.customerName,input.customerEmail?.trim().toLowerCase()||current.customerEmail,input.customerPhone?.trim()||current.customerPhone,input.customerAddress?.trim()||current.customerAddress,input.requestType?.trim()||current.requestType,input.reason?.trim()||current.reason]);
   const updated=mapAppointment(rows[0] as DbAppointment);
   await sql`INSERT INTO appointment_history (appointment_id,action,actor,previous_status,new_status,details) VALUES (${id},${input.action},'admin',${current.status},${updated.status},${JSON.stringify({startsAt:updated.startsAt,endsAt:updated.endsAt})}::jsonb)`;
   return updated;
+}
+
+export async function deleteAppointment(id:string){
+  const sql=database();
+  const rows=await sql.query("DELETE FROM appointments WHERE id=$1 RETURNING id",[id]);
+  if(!rows[0])throw new Error("Appointment not found");
 }

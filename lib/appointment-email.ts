@@ -55,8 +55,8 @@ export async function sendAppointmentStatusEmail(appointment:Appointment,kind:"c
   `,adminEmail,`appointment-${kind}-${appointment.id}-${appointment.updatedAt}`);
 }
 
-export async function sendMagicLinkEmail(token:string){
-  const link=absoluteUrl(`/api/gestion/auth/verify?token=${encodeURIComponent(token)}`);
+export async function sendMagicLinkEmail(token:string,origin?:string){
+  const link=absoluteUrl(`/api/gestion/auth/verify?token=${encodeURIComponent(token)}`,origin);
   await sendEmail(adminEmail,"Connexion à l’application Super-Service",`
     <h1>Ouvrez votre planning Super-Service</h1>
     <p>Vous avez demandé un lien de connexion à l’application de gestion des rendez-vous.</p>

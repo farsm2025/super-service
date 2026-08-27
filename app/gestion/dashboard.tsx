@@ -5,6 +5,7 @@ import type {Appointment} from "@/lib/appointment-types";
 import {statusLabels} from "@/lib/appointment-types";
 
 type View = "day" | "week" | "month" | "list";
+type ReminderState = "loading" | "off" | "on" | "working" | "blocked" | "unsupported";
 const parsedDate = (value: string | Date | null | undefined) => {
   if (!value) return null;
   const parsed = new Date(value);
@@ -34,6 +35,10 @@ const availabilityLabel = (date: string, timeStart: string | null, timeEnd: stri
   if (timeStart && timeEnd) return `${day}, de ${timeStart} à ${timeEnd}`;
   return timeStart ? `${day}, à ${timeStart}` : day;
 };
+const pushKey = (value: string) => {
+  const padded = `${value}${"=".repeat((4 - value.length % 4) % 4)}`.replace(/-/g, "+").replace(/_/g, "/");
+  return Uint8Array.from(window.atob(padded), character => character.charCodeAt(0));
+};
 
 export function Dashboard({initialAppointments, initialSelectedId}: {initialAppointments: Appointment[]; initialSelectedId?: string}) {
   const [appointments, setAppointments] = useState(initialAppointments);
@@ -45,6 +50,8 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [manual, setManual] = useState(false);
   const [notice, setNotice] = useState("");
+  const [reminderState, setReminderState] = useState<ReminderState>("loading");
+  const [reminderMessage, setReminderMessage] = useState("");
 
   async function refresh() {
     const response = await fetch("/api/gestion/rendez-vous", {cache: "no-store"});
@@ -52,7 +59,16 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
   }
 
   useEffect(() => {
-    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
+    const reminderStatus=async():Promise<ReminderState>=>{
+      if (!("serviceWorker" in navigator) || !("PushManager" in window) || typeof Notification === "undefined")return "unsupported";
+      try{
+        await navigator.serviceWorker.register("/sw.js");
+        const registration=await navigator.serviceWorker.ready;
+        const subscription=await registration.pushManager.getSubscription();
+        return subscription?"on":Notification.permission==="denied"?"blocked":"off";
+      }catch{return "unsupported"}
+    };
+    reminderStatus().then(setReminderState);
     const timer = window.setInterval(refresh, 30000);
     return () => window.clearInterval(timer);
   }, []);
@@ -62,13 +78,47 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
     const seen = JSON.parse(sessionStorage.getItem("appointment-notifications") || "[]") as string[];
     const notify = appointments.filter(item => !seen.includes(item.id) && item.status === "new_request");
     notify.forEach(item => new Notification("Nouvelle demande Super-Service", {body: `${item.customerName} · ${item.requestType}`}));
-    const now = Date.now();
-    appointments.filter(item => item.startsAt && !seen.includes(`soon-${item.id}`) && new Date(item.startsAt).getTime() > now && new Date(item.startsAt).getTime() < now + 60 * 60 * 1000).forEach(item => {
-      new Notification("Rendez-vous prochain", {body: `${item.customerName} · ${formatDate(item.startsAt)}`});
-      seen.push(`soon-${item.id}`);
-    });
     sessionStorage.setItem("appointment-notifications", JSON.stringify([...new Set([...seen, ...notify.map(item => item.id)])].slice(-100)));
   }, [appointments]);
+
+  async function toggleReminders(){
+    if(reminderState==="working"||reminderState==="loading")return;
+    setReminderMessage("");
+    if(reminderState==="unsupported"){
+      setReminderMessage("Sur iPhone, ajoutez d’abord l’application à l’écran d’accueil. Sur Android, utilisez Chrome.");
+      return;
+    }
+    setReminderState("working");
+    try{
+      const registration=await navigator.serviceWorker.ready;
+      const existing=await registration.pushManager.getSubscription();
+      if(existing){
+        await fetch("/api/gestion/push",{method:"DELETE",headers:{"content-type":"application/json"},body:JSON.stringify({endpoint:existing.endpoint})});
+        await existing.unsubscribe();
+        setReminderState("off");
+        setReminderMessage("Rappels désactivés sur ce téléphone.");
+        return;
+      }
+      const permission=await Notification.requestPermission();
+      if(permission!=="granted"){
+        setReminderState("blocked");
+        setReminderMessage("Notifications refusées. Autorisez-les dans les réglages du téléphone pour activer les rappels.");
+        return;
+      }
+      const configuration=await fetch("/api/gestion/push",{cache:"no-store"});
+      if(!configuration.ok)throw new Error("Push configuration unavailable");
+      const {publicKey}=await configuration.json();
+      const subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:pushKey(publicKey)});
+      const response=await fetch("/api/gestion/push",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({subscription:subscription.toJSON()})});
+      if(!response.ok){await subscription.unsubscribe();throw new Error("Push registration failed")}
+      setReminderState("on");
+      setReminderMessage("Rappels activés : une notification sera envoyée une heure avant chaque rendez-vous.");
+    }catch(error){
+      console.error("Reminder toggle failed",error);
+      setReminderState("off");
+      setReminderMessage("Impossible de modifier les rappels pour le moment.");
+    }
+  }
 
   const filtered = useMemo(() => appointments.filter(item => {
     const text = `${item.customerName} ${item.customerEmail} ${item.customerPhone} ${item.reason} ${item.customerAddress}`.toLowerCase();
@@ -96,8 +146,9 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
   }
 
   return <div className="admin-app">
-    <header className="admin-top"><div><span className="admin-brand">SUPER-SERVICE</span><p>Gestion des rendez-vous</p></div><div className="top-actions"><button className="notification-button" onClick={() => Notification.requestPermission()} title="Activer les notifications">🔔</button><form action="/api/gestion/auth/logout" method="post"><button className="admin-ghost">Déconnexion</button></form></div></header>
+    <header className="admin-top"><div><span className="admin-brand">SUPER-SERVICE</span><p>Gestion des rendez-vous</p></div><div className="top-actions"><button className={`notification-button reminder-${reminderState}`} onClick={toggleReminders} aria-pressed={reminderState==="on"} disabled={reminderState==="working"||reminderState==="loading"} title={reminderState==="on"?"Désactiver les rappels":"Activer les rappels"}><span aria-hidden="true">{reminderState==="on"?"🔔":"🔕"}</span><small>{reminderState==="on"?"Rappels actifs":"Rappels inactifs"}</small></button><form action="/api/gestion/auth/logout" method="post"><button className="admin-ghost">Déconnexion</button></form></div></header>
     <main className="admin-main">
+      {reminderMessage&&<p className={`reminder-message ${reminderState==="on"?"success":""}`} role="status">{reminderMessage}</p>}
       <section className="today-hero"><div><p className="admin-kicker">Aujourd’hui</p><h1>{todayItems.length} rendez-vous</h1><p>{newCount ? `${newCount} nouvelle${newCount > 1 ? "s" : ""} demande${newCount > 1 ? "s" : ""} à traiter` : "Toutes les demandes sont traitées"}</p></div><button className="admin-primary" onClick={() => setManual(true)}>＋ Ajouter</button></section>
       <section className="admin-tools"><input aria-label="Rechercher" placeholder="Rechercher un client, téléphone, adresse…" value={query} onChange={event => setQuery(event.target.value)}/><select aria-label="Filtrer par statut" value={status} onChange={event => setStatus(event.target.value)}><option value="">Tous les statuts</option>{Object.entries(statusLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select><select aria-label="Filtrer par type" value={type} onChange={event => setType(event.target.value)}><option value="">Tous les types</option>{types.map(value => <option value={value} key={value}>{value}</option>)}</select></section>
       <nav className="view-tabs" aria-label="Vue calendrier">{(["day", "week", "month"] as View[]).map(value => <button key={value} className={view === value ? "active" : ""} onClick={() => setView(value)}>{{day: "Jour", week: "Semaine", month: "Mois", list: "Liste"}[value]}</button>)}</nav>

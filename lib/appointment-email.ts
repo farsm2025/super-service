@@ -58,9 +58,11 @@ export async function sendAppointmentStatusEmail(appointment:Appointment,kind:"c
 export async function sendMagicLinkEmail(token:string){
   const link=absoluteUrl(`/api/gestion/auth/verify?token=${encodeURIComponent(token)}`);
   await sendEmail(adminEmail,"Connexion à l’application Super-Service",`
-    <h1>Connexion à votre planning</h1>
-    <p>Utilisez ce lien sécurisé pour ouvrir l’application de gestion des rendez-vous.</p>
-    <p><a href="${link}" style="display:inline-block;padding:13px 20px;background:#063b86;color:#fff;text-decoration:none;border-radius:8px;font-weight:700">Ouvrir mon planning</a></p>
-    <p>Ce lien expire dans 15 minutes. Ignorez cet e-mail si vous n’avez pas demandé de connexion.</p>
+    <h1>Ouvrez votre planning Super-Service</h1>
+    <p>Vous avez demandé un lien de connexion à l’application de gestion des rendez-vous.</p>
+    <p><a href="${link}" style="display:inline-block;padding:14px 22px;background:#e32632;color:#fff;text-decoration:none;border-radius:8px;font-weight:700">Ouvrir mon planning</a></p>
+    <p><strong>Ce lien fonctionne pendant 15 minutes et une seule fois.</strong></p>
+    <p>Après avoir appuyé sur le bouton, vous serez connecté automatiquement : aucun mot de passe n’est nécessaire.</p>
+    <p>Si vous n’avez pas demandé cette connexion, vous pouvez ignorer cet e-mail.</p>
   `,undefined,`admin-login-${token.slice(0,16)}`);
 }

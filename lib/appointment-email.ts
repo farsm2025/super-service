@@ -47,7 +47,9 @@ export async function sendManualAppointmentConfirmationEmail(appointment:Appoint
   await sendEmail(appointment.customerEmail,"Confirmation de votre rendez-vous",`
     <h1>Votre rendez-vous est confirmé</h1>
     <p><strong>Date et heure :</strong> ${formatDate(appointment.startsAt)}<br>
-    <strong>Lieu :</strong> ${escapeHtml(appointment.customerAddress)}</p>
+    <strong>Lieu :</strong> ${escapeHtml(appointment.customerAddress)}<br>
+    <strong>Type :</strong> ${escapeHtml(appointment.requestType)}<br>
+    <strong>Motif :</strong> ${lines(appointment.reason)}</p>
   `,adminEmail,`appointment-manual-confirmation-${appointment.id}`);
 }
 

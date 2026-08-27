@@ -1,0 +1,93 @@
+.login-message {
+  gap: 8px;
+}
+
+.login-message small {
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.login-destination {
+  display: grid;
+  gap: 3px;
+  margin: 18px 0;
+  padding: 13px 15px;
+  color: #244b68;
+  background: #edf4fa;
+  border: 1px solid #cfe0ec;
+  border-radius: 11px;
+}
+
+.login-destination span {
+  font-size: .78rem;
+}
+
+.login-destination strong {
+  font-size: 1.02rem;
+  overflow-wrap: anywhere;
+}
+
+.login-steps {
+  display: grid;
+  gap: 11px;
+  margin: 18px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.login-steps li {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.login-steps li > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: #fff;
+  background: #10263b;
+  border-radius: 50%;
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.login-steps p {
+  margin: 2px 0 !important;
+  line-height: 1.45 !important;
+}
+
+.login-expired {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  color: #8f2730;
+  background: #fff1f1;
+  border: 1px solid #edc4c7;
+  border-radius: 10px;
+}
+
+.login-resend {
+  justify-self: start;
+  padding: 5px 0;
+  color: #1768ac;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  .login-card {
+    padding: 28px 22px;
+  }
+
+  .login-card h1 {
+    font-size: 2rem;
+  }
+}

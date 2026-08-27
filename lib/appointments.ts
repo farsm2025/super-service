@@ -11,16 +11,32 @@ type DbAppointment={
 
 function dateOnly(value:string){return String(value).match(/\d{4}-\d{2}-\d{2}/)?.[0]||String(value)}
 function timeOnly(value:string|null){return value?.match(/\d{2}:\d{2}/)?.[0]||null}
+function isoOrNull(value:string|null){
+  if(!value)return null;
+  const parsed=new Date(value);
+  return Number.isNaN(parsed.getTime())?null:parsed.toISOString();
+}
+function validEnd(start:string|null,end:string|null){
+  if(!start)return end;
+  if(!end||new Date(end).getTime()<=new Date(start).getTime())return new Date(new Date(start).getTime()+60*60*1000).toISOString();
+  return end;
+}
+function validEndTime(start:string|null,end:string|null){return start&&end&&end<=start?null:end}
 
-function mapAppointment(row:DbAppointment):Appointment{return{
+function mapAppointment(row:DbAppointment):Appointment{
+  const preferredTimeStart=timeOnly(row.preferred_time_start);
+  const alternateTimeStart=timeOnly(row.alternate_time_start);
+  const startsAt=isoOrNull(row.starts_at);
+  return{
   id:row.id,customerName:row.customer_name,customerEmail:row.customer_email,customerPhone:row.customer_phone,
   customerAddress:row.customer_address,requestType:row.request_type,reason:row.reason,customerNotes:row.customer_notes,
-  preferredDate:dateOnly(row.preferred_date),preferredTimeStart:timeOnly(row.preferred_time_start),preferredTimeEnd:timeOnly(row.preferred_time_end),
-  alternateDate:row.alternate_date?dateOnly(row.alternate_date):null,alternateTimeStart:timeOnly(row.alternate_time_start),
-  alternateTimeEnd:timeOnly(row.alternate_time_end),startsAt:row.starts_at?new Date(row.starts_at).toISOString():null,
-  endsAt:row.ends_at?new Date(row.ends_at).toISOString():null,timezone:row.timezone,status:row.status,source:row.source,
+  preferredDate:dateOnly(row.preferred_date),preferredTimeStart,preferredTimeEnd:validEndTime(preferredTimeStart,timeOnly(row.preferred_time_end)),
+  alternateDate:row.alternate_date?dateOnly(row.alternate_date):null,alternateTimeStart,
+  alternateTimeEnd:validEndTime(alternateTimeStart,timeOnly(row.alternate_time_end)),startsAt,
+  endsAt:validEnd(startsAt,isoOrNull(row.ends_at)),timezone:row.timezone,status:row.status,source:row.source,
   adminNotes:row.admin_notes,googleEventId:row.google_event_id,createdAt:new Date(row.created_at).toISOString(),updatedAt:new Date(row.updated_at).toISOString(),
-}}
+  }
+}
 
 const fields=`id,customer_name,customer_email,customer_phone,customer_address,request_type,reason,customer_notes,preferred_date,preferred_time_start,preferred_time_end,alternate_date,alternate_time_start,alternate_time_end,starts_at,ends_at,timezone,status,source,admin_notes,google_event_id,created_at,updated_at`;
 

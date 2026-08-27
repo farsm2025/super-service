@@ -1,10 +1,10 @@
 "use client";
 
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import type {Appointment} from "@/lib/appointment-types";
 import {statusLabels} from "@/lib/appointment-types";
 
-type View = "day" | "week" | "month" | "list";
+type View = "day" | "week" | "month" | "year" | "list";
 type ReminderState = "loading" | "off" | "on" | "working" | "blocked" | "unsupported";
 const parsedDate = (value: string | Date | null | undefined) => {
   if (!value) return null;
@@ -42,6 +42,8 @@ const pushKey = (value: string) => {
 export function Dashboard({initialAppointments, initialSelectedId}: {initialAppointments: Appointment[]; initialSelectedId?: string}) {
   const [appointments, setAppointments] = useState(initialAppointments);
   const [view, setView] = useState<View>("day");
+  const [calendarDate, setCalendarDate] = useState(() => new Date());
+  const [periodPickerOpen, setPeriodPickerOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
   const [type, setType] = useState("");
@@ -129,6 +131,22 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
   const types = [...new Set(appointments.map(item => item.requestType))].sort();
 
   function open(item: Appointment) {setSelected(item); setNotice("");}
+  function shiftCalendar(amount: number) {
+    setCalendarDate(current => {
+      const next = new Date(current);
+      next.setDate(1);
+      if (view === "year") next.setFullYear(next.getFullYear() + amount);
+      else next.setMonth(next.getMonth() + amount);
+      return next;
+    });
+  }
+  function chooseMonth(value: string) {
+    const [year, month] = value.split("-").map(Number);
+    if (!year || !month) return;
+    setCalendarDate(new Date(year, month - 1, 1));
+    setView("month");
+    setPeriodPickerOpen(false);
+  }
   async function move(item: Appointment, day: string) {
     if (!item.startsAt) return;
     const start = `${day}T${localInput(item.startsAt).slice(11)}`;
@@ -145,18 +163,40 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
       {reminderMessage&&<p className={`reminder-message ${reminderState==="on"?"success":""}`} role="status">{reminderMessage}</p>}
       <section className="today-hero"><div><p className="admin-kicker">Aujourd’hui</p><h1>{todayItems.length} rendez-vous</h1><p>{newCount ? `${newCount} nouvelle${newCount > 1 ? "s" : ""} demande${newCount > 1 ? "s" : ""} à traiter` : "Toutes les demandes sont traitées"}</p></div><button className="admin-primary" onClick={() => setManual(true)}>＋ Ajouter</button></section>
       <section className="admin-tools"><input aria-label="Rechercher" placeholder="Rechercher un client, téléphone, adresse…" value={query} onChange={event => setQuery(event.target.value)}/><select aria-label="Filtrer par statut" value={status} onChange={event => setStatus(event.target.value)}><option value="">Tous les statuts</option>{Object.entries(statusLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select><select aria-label="Filtrer par type" value={type} onChange={event => setType(event.target.value)}><option value="">Tous les types</option>{types.map(value => <option value={value} key={value}>{value}</option>)}</select></section>
-      <nav className="view-tabs" aria-label="Vue calendrier">{(["day", "week", "month"] as View[]).map(value => <button key={value} className={view === value ? "active" : ""} onClick={() => setView(value)}>{{day: "Jour", week: "Semaine", month: "Mois", list: "Liste"}[value]}</button>)}</nav>
-      <CalendarContent view={view} appointments={filtered} onOpen={open} onMove={move} onSelectDay={setSelectedDay}/>
+      <nav className="view-tabs" aria-label="Vue calendrier">{(["day", "week", "month", "year"] as View[]).map(value => <button key={value} className={view === value ? "active" : ""} onClick={() => setView(value)}>{{day: "Jour", week: "Semaine", month: "Mois", year: "Année", list: "Liste"}[value]}</button>)}</nav>
+      {(view === "month" || view === "year") && <section className="calendar-navigation" aria-label="Navigation du calendrier">
+        <button className="calendar-today" onClick={() => {setCalendarDate(new Date()); setView("month");}}>Aujourd’hui</button>
+        <div className="calendar-period-navigation">
+          <button className="calendar-arrow" aria-label={view === "year" ? "Année précédente" : "Mois précédent"} onClick={() => shiftCalendar(-1)}>‹</button>
+          <div className="calendar-period-picker">
+            <button className="calendar-period-title" aria-expanded={periodPickerOpen} onClick={() => setPeriodPickerOpen(opened => !opened)}>{view === "year" ? calendarDate.getFullYear() : formatDate(calendarDate.toISOString(), {month: "long", year: "numeric"})}<span aria-hidden="true">⌄</span></button>
+            {periodPickerOpen && <div className="calendar-picker-popover"><label>Choisir un mois<input type="month" value={`${calendarDate.getFullYear()}-${String(calendarDate.getMonth() + 1).padStart(2, "0")}`} onChange={event => chooseMonth(event.target.value)}/></label></div>}
+          </div>
+          <button className="calendar-arrow" aria-label={view === "year" ? "Année suivante" : "Mois suivant"} onClick={() => shiftCalendar(1)}>›</button>
+        </div>
+        <button className={view === "year" ? "calendar-year active" : "calendar-year"} onClick={() => setView(view === "year" ? "month" : "year")}>{view === "year" ? "Voir le mois" : "Voir l’année"}</button>
+      </section>}
+      <CalendarContent view={view} calendarDate={calendarDate} appointments={filtered} onOpen={open} onMove={move} onSelectDay={setSelectedDay} onSelectMonth={month => {setCalendarDate(month); setView("month");}} onSwipe={shiftCalendar}/>
     </main>
-    <footer className="admin-bottom"><button className={view === "day" ? "active" : ""} onClick={() => setView("day")}><span>⌂</span>Accueil</button><button className={view === "week" || view === "month" ? "active" : ""} onClick={() => setView("month")}><span>▦</span>Calendrier</button><button className={view === "list" ? "active" : ""} onClick={() => {setStatus("new_request"); setView("list");}}><span className="counter-icon">◎{newCount > 0 && <b>{newCount}</b>}</span>Demandes</button><button onClick={() => setManual(true)}><span>＋</span>Ajouter</button></footer>
+    <footer className="admin-bottom"><button className={view === "day" ? "active" : ""} onClick={() => setView("day")}><span>⌂</span>Accueil</button><button className={view === "week" || view === "month" || view === "year" ? "active" : ""} onClick={() => setView("month")}><span>▦</span>Calendrier</button><button className={view === "list" ? "active" : ""} onClick={() => {setStatus("new_request"); setView("list");}}><span className="counter-icon">◎{newCount > 0 && <b>{newCount}</b>}</span>Demandes</button><button onClick={() => setManual(true)}><span>＋</span>Ajouter</button></footer>
     {selectedDay && <DayAppointmentsPanel day={selectedDay} appointments={filtered} onClose={() => setSelectedDay(null)} onOpen={item => {setSelectedDay(null); open(item);}}/>}
     {selected && <AppointmentPanel key={selected.id} appointment={selected} onClose={() => setSelected(null)} onSaved={item => {setAppointments(current => current.map(existing => existing.id === item.id ? item : existing)); setSelected(null); setSelectedDay(null);}} onDeleted={() => {setAppointments(current => current.filter(item => item.id !== selected.id)); setSelected(null); setSelectedDay(null);}} notice={notice} setNotice={setNotice}/>}
     {manual && <ManualForm onClose={() => setManual(false)} onCreated={item => {setAppointments(current => [item, ...current]); setManual(false);}}/>}
   </div>;
 }
 
-function CalendarContent({view, appointments, onOpen, onMove, onSelectDay}: {view: View; appointments: Appointment[]; onOpen: (item: Appointment) => void; onMove: (item: Appointment, day: string) => void; onSelectDay: (day: string) => void}) {
+function CalendarContent({view, calendarDate, appointments, onOpen, onMove, onSelectDay, onSelectMonth, onSwipe}: {view: View; calendarDate: Date; appointments: Appointment[]; onOpen: (item: Appointment) => void; onMove: (item: Appointment, day: string) => void; onSelectDay: (day: string) => void; onSelectMonth: (month: Date) => void; onSwipe: (amount: number) => void}) {
   const today = new Date();
+  const touchStart = useRef<{x: number; y: number} | null>(null);
+  const swipeHandlers = {
+    onTouchStart: (event: React.TouchEvent) => {const touch = event.touches[0]; touchStart.current = {x: touch.clientX, y: touch.clientY};},
+    onTouchEnd: (event: React.TouchEvent) => {
+      const start = touchStart.current; const touch = event.changedTouches[0]; touchStart.current = null;
+      if (!start || !touch) return;
+      const distanceX = touch.clientX - start.x; const distanceY = touch.clientY - start.y;
+      if (Math.abs(distanceX) > 55 && Math.abs(distanceX) > Math.abs(distanceY) * 1.4) onSwipe(distanceX < 0 ? 1 : -1);
+    }
+  };
   if (view === "day") return <AppointmentList title="Rendez-vous du jour" items={appointments.filter(item => item.startsAt && dateKey(item.startsAt) === dateKey(today))} onOpen={onOpen}/>;
   if (view === "list") return <AppointmentList title="Prochains rendez-vous et demandes" items={appointments} onOpen={onOpen}/>;
   if (view === "week") {
@@ -164,11 +204,16 @@ function CalendarContent({view, appointments, onOpen, onMove, onSelectDay}: {vie
     const days = Array.from({length: 7}, (_, index) => {const day = new Date(monday); day.setDate(monday.getDate() + index); return day;});
     return <section className="week-grid">{days.map(day => <div className={dateKey(day) === dateKey(today) ? "week-day current" : "week-day"} key={dateKey(day)} onDragOver={event => event.preventDefault()} onDrop={event => {const item = appointments.find(value => value.id === event.dataTransfer.getData("text/appointment")); if (item) onMove(item, dateKey(day));}}><h3>{formatDate(day.toISOString(), {weekday: "short", day: "numeric"})}</h3>{appointments.filter(item => item.startsAt && dateKey(item.startsAt) === dateKey(day)).map(item => <button draggable onDragStart={event => event.dataTransfer.setData("text/appointment", item.id)} className={`mini-event status-${item.status}`} key={item.id} onClick={() => onOpen(item)}><strong>{formatDate(item.startsAt, {hour: "2-digit", minute: "2-digit"})}</strong>{item.customerName}</button>)}</div>)}</section>;
   }
-  const first = new Date(today.getFullYear(), today.getMonth(), 1); const offset = (first.getDay() + 6) % 7; const start = new Date(first); start.setDate(1 - offset);
+  if (view === "year") return <section className="year-calendar" {...swipeHandlers}><p className="calendar-swipe-help">Glissez horizontalement pour changer d’année.</p><div className="year-grid">{Array.from({length: 12}, (_, monthIndex) => {
+    const month = new Date(calendarDate.getFullYear(), monthIndex, 1); const monthEnd = new Date(calendarDate.getFullYear(), monthIndex + 1, 0).getDate();
+    const firstWeekday = (month.getDay() + 6) % 7; const monthPrefix = `${calendarDate.getFullYear()}-${String(monthIndex + 1).padStart(2, "0")}`; const monthAppointments = appointments.filter(item => item.startsAt && dateKey(item.startsAt).startsWith(monthPrefix));
+    return <button className="year-month" key={monthIndex} onClick={() => onSelectMonth(month)}><span className="year-month-title">{formatDate(month.toISOString(), {month: "long"})}</span><small>{monthAppointments.length} rendez-vous</small><span className="year-mini-week">L M M J V S D</span><span className="year-mini-days">{Array.from({length: firstWeekday}, (_, index) => <i key={`empty-${index}`}/>)}{Array.from({length: monthEnd}, (_, index) => {const day = index + 1; const hasAppointment = monthAppointments.some(item => item.startsAt && Number(dateKey(item.startsAt).slice(8, 10)) === day); return <i className={hasAppointment ? "has-appointment" : ""} key={day}>{day}</i>;})}</span></button>;
+  })}</div></section>;
+  const first = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), 1); const offset = (first.getDay() + 6) % 7; const start = new Date(first); start.setDate(1 - offset);
   const days = Array.from({length: 42}, (_, index) => {const day = new Date(start); day.setDate(start.getDate() + index); return day;});
-  return <section className="month-calendar"><div className="month-title">{formatDate(today.toISOString(), {month: "long", year: "numeric"})}</div><p className="month-help">Touchez une date pour voir ses rendez-vous.</p><div className="month-grid">{["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map(label => <b className="weekday" key={label}>{label}</b>)}{days.map(day => {
+  return <section className="month-calendar" {...swipeHandlers}><p className="month-help">Touchez une date pour voir ses rendez-vous. Sur téléphone, glissez pour changer de mois.</p><div className="month-grid">{["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map(label => <b className="weekday" key={label}>{label}</b>)}{days.map(day => {
     const dayId = dateKey(day); const events = appointments.filter(item => item.startsAt && dateKey(item.startsAt) === dayId);
-    return <div className={`month-day ${day.getMonth() !== today.getMonth() ? "muted" : ""} ${dayId === dateKey(today) ? "current" : ""}`} key={dayId} role="button" tabIndex={0} aria-label={`${formatDate(day.toISOString(), {weekday: "long", day: "numeric", month: "long"})}, ${events.length} rendez-vous`} onClick={() => onSelectDay(dayId)} onKeyDown={event => {if (event.key === "Enter" || event.key === " ") {event.preventDefault(); onSelectDay(dayId);}}} onDragOver={event => event.preventDefault()} onDrop={event => {event.stopPropagation(); const item = appointments.find(value => value.id === event.dataTransfer.getData("text/appointment")); if (item) onMove(item, dayId);}}><span>{day.getDate()}</span>{events.slice(0, 3).map(item => <button className={`month-event status-${item.status}`} draggable onDragStart={event => event.dataTransfer.setData("text/appointment", item.id)} key={item.id} onClick={event => {event.stopPropagation(); onOpen(item);}} title={item.customerName}>{item.customerName}</button>)}{events.length > 3 && <small>+{events.length - 3}</small>}</div>;
+    return <div className={`month-day ${day.getMonth() !== calendarDate.getMonth() ? "muted" : ""} ${dayId === dateKey(today) ? "current" : ""}`} key={dayId} role="button" tabIndex={0} aria-label={`${formatDate(day.toISOString(), {weekday: "long", day: "numeric", month: "long"})}, ${events.length} rendez-vous`} onClick={() => onSelectDay(dayId)} onKeyDown={event => {if (event.key === "Enter" || event.key === " ") {event.preventDefault(); onSelectDay(dayId);}}} onDragOver={event => event.preventDefault()} onDrop={event => {event.stopPropagation(); const item = appointments.find(value => value.id === event.dataTransfer.getData("text/appointment")); if (item) onMove(item, dayId);}}><span>{day.getDate()}</span>{events.slice(0, 3).map(item => <button className={`month-event status-${item.status}`} draggable onDragStart={event => event.dataTransfer.setData("text/appointment", item.id)} key={item.id} onClick={event => {event.stopPropagation(); onOpen(item);}} title={item.customerName}>{item.customerName}</button>)}{events.length > 3 && <small>+{events.length - 3}</small>}</div>;
   })}</div></section>;
 }
 

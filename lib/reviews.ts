@@ -5,7 +5,7 @@ const dataset=process.env.NEXT_PUBLIC_SANITY_DATASET||"production";
 const sanityToken=process.env.SANITY_API_TOKEN;
 const resend=process.env.RESEND_API_KEY;
 const origin=process.env.SITE_URL||SITE_URL;
-const emailFrom=process.env.EMAIL_FROM||"Super-Service <devis@mail.super-service.ch>";
+const emailFrom="Super-Service <info@super-service.ch>";
 const emailTo=process.env.EMAIL_TO||"info@super-service.ch";
 const moderationSecret=process.env.REVIEW_MODERATION_SECRET||sanityToken;
 const moderationLifetime=7*24*60*60;
@@ -43,7 +43,7 @@ export async function sendEndOfJobReviewRequest({name,email}:{name:string,email:
       <p style="margin:28px 0"><a href="${reviewLink}" style="display:inline-block;padding:14px 22px;background:#e51d27;color:#fff;text-decoration:none;border-radius:8px;font-weight:700">Donner mon avis</a></p>
       <p>Merci encore pour votre confiance.</p>
       <p>Cordialement,<br><strong>L’équipe Super-Service</strong><br><a href="mailto:info@super-service.ch">info@super-service.ch</a></p>
-    </div>`,emailTo,"Super-Service <info@super-service.ch>");
+    </div>`,emailTo);
 }
 
 export async function sendQuoteRequest(body:Record<string,string>){const name=escapeHtml(body.name.trim());const phone=escapeHtml(body.phone.trim());const address=escapeHtml(body.address.trim());const email=body.email.trim().toLowerCase();const service=escapeHtml(body.service.trim());const city=escapeHtml(body.city.trim());const date=escapeHtml(body.date?.trim()||"Date non précisée");const message=lineBreaks(body.message.trim());const internalMessage=`<h1>Nouvelle demande de devis</h1><p><strong>Service :</strong> ${service}</p><p><strong>Client :</strong> ${name}<br><strong>Téléphone :</strong> ${phone}<br><strong>E-mail :</strong> ${escapeHtml(email)}<br><strong>Adresse :</strong> ${address}<br><strong>Commune :</strong> ${city}<br><strong>Date souhaitée :</strong> ${date}</p><p><strong>Message :</strong><br>${message}</p>`;const customerMessage=`<h1>Nous avons bien reçu votre demande</h1><p>Bonjour ${name},</p><p>Merci d’avoir contacté Super-Service. Nous avons bien reçu votre demande concernant <strong>${service}</strong>.</p><p>Notre équipe va l’étudier et vous répondra dans les meilleurs délais, généralement sous 24 heures.</p><p>Pour compléter votre demande, vous pouvez répondre directement à cet e-mail ou nous contacter au <a href="tel:+41783223368">+41 78 322 33 68</a>.</p><p>Cordialement,<br><strong>L’équipe Super-Service</strong><br><a href="mailto:info@super-service.ch">info@super-service.ch</a></p>`;await mail(emailTo,`Nouvelle demande de devis – ${body.service.trim()}`,internalMessage,email);await mail(email,"Nous avons bien reçu votre demande de devis",customerMessage,emailTo)}

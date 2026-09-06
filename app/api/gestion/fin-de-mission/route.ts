@@ -1,8 +1,6 @@
-import {getAdminSession} from "@/lib/admin-auth";
 import {sendEndOfJobReviewRequest} from "@/lib/reviews";
 
 export async function POST(req:Request){
-  if(!await getAdminSession())return Response.json({message:"Accès non autorisé"},{status:401});
   try{
     const body=await req.json() as Record<string,string>;
     const name=body.name?.trim();

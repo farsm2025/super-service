@@ -1,10 +1,11 @@
-import {redirect} from "next/navigation";
-import {getAdminSession} from "@/lib/admin-auth";
+import type {Metadata} from "next";
 import {FinDeMissionForm} from "./form";
 
-export const dynamic="force-dynamic";
+export const metadata:Metadata={
+  title:"Fin de mission – Super-Service",
+  robots:{index:false,follow:false},
+};
 
-export default async function FinDeMissionPage(){
-  if(!await getAdminSession())redirect("/gestion/connexion");
+export default function FinDeMissionPage(){
   return <FinDeMissionForm/>;
 }

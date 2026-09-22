@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Super-Service Lausanne", description: "Déménagement, nettoyage et multiservices dans le canton de Vaud.", images: ["/logo-super-service.jpg"] },
   alternates: { canonical: "/" },
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg",
+  },
   appleWebApp: {capable:true,title:"Super-Service"},
   robots: {
     index: SITE_LAUNCHED,

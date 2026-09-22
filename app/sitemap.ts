@@ -9,6 +9,7 @@ const servicePages = [
   "/services/montage-de-meubles",
   "/services/debarras",
   "/services/petits-travaux-jardinage",
+  "/services/cartons-demenagement",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

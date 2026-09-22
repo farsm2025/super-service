@@ -11,6 +11,7 @@ const services = [
   { title: "Montage de meubles", description: "Montage et démontage de lits, armoires, tables, étagères et autres meubles, seul ou avec un déménagement.", href: "/services/montage-de-meubles", image: "/images/montage-meubles/montage-meuble-lausanne.webp", alt: "Montage professionnel d’un meuble à Lausanne" },
   { title: "Débarras", description: "Tri, chargement et évacuation des encombrants dans les appartements, maisons, caves et locaux.", href: "/services/debarras", image: "/images/debarras/debarras-cave-lausanne.webp", alt: "Cave à débarrasser à Lausanne dans le canton de Vaud" },
   { title: "Petits travaux et jardinage", description: "Bricolage, fixations, petites interventions électriques, entretien de jardin et taille de haies.", href: "/services/petits-travaux-jardinage", image: "/images/petits-travaux-jardinage/entretien-jardin-lausanne.webp", alt: "Jardin entretenu par un service de jardinage à Lausanne" },
+  { title: "Cartons de déménagement", description: "Deux formats de cartons pour préparer votre déménagement. Vente prochainement disponible.", href: "/services/cartons-demenagement", image: "/images/demenagement/equipe-demenagement-lausanne.webp", alt: "Cartons et préparation d'un déménagement à Lausanne" },
 ];
 
 export const metadata: Metadata = {

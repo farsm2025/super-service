@@ -22,7 +22,7 @@ export async function exchangeMagicLink(token:string){
   if(!rows[0])return null;
   await sql`UPDATE admin_magic_links SET used_at=now() WHERE id=${rows[0].id}`;
   const sessionToken=createSecret();
-  await sql`INSERT INTO admin_sessions (email,token_hash,expires_at) VALUES (${String(rows[0].email)},${hash(sessionToken)},now()+interval '30 days')`;
+  await sql`INSERT INTO admin_sessions (email,token_hash,expires_at) VALUES (${String(rows[0].email)},${hash(sessionToken)},now()+interval '365 days')`;
   return sessionToken;
 }
 

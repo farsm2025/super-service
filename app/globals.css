@@ -39,3 +39,36 @@
 .service-photo{aspect-ratio:4/3}
 .service-icon svg{width:27px;height:27px}.icon-link svg{width:20px;height:20px}.breadcrumbs{max-width:1100px;margin:0 auto 24px}.breadcrumbs ol{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none;color:#d9e6f4;font-size:13px;font-weight:700}.breadcrumbs li{display:flex;align-items:center;gap:8px}.breadcrumbs li:not(:last-child):after{content:"›";color:#91acd0}.breadcrumbs a:hover{text-decoration:underline;text-underline-offset:3px}.breadcrumbs [aria-current="page"]{color:#fff}
 .mobile-actions svg{width:20px;height:20px}.driver-option-icon svg{width:28px;height:28px}
+
+.hero-with-cartons{position:relative}
+.cartons-home-card{position:absolute;z-index:5;top:105px;right:clamp(24px,5vw,72px);width:255px;min-height:205px;padding:24px;border-radius:14px;background:linear-gradient(145deg,#fff,#f4f8fd);border:1px solid #d8e3ef;box-shadow:0 22px 55px #061a3640;color:var(--blue);display:flex;flex-direction:column;justify-content:space-between;transition:transform .2s ease,box-shadow .2s ease}
+.cartons-home-card:hover{transform:translateY(-4px);box-shadow:0 26px 65px #061a3650}
+.cartons-home-badge{align-self:flex-start;background:var(--red);color:#fff;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:6px 9px;border-radius:999px}
+.cartons-home-card strong{font-size:21px;line-height:1.15;letter-spacing:-.02em}
+.cartons-home-link{font-size:13px;font-weight:800;color:#0a4c9e}
+.cartons-home-link span{display:inline-block;margin-left:4px}
+.cartons-intro-photo{position:relative;min-height:360px;margin:0 7vw 60px;border-radius:16px;overflow:hidden;background:#dce7f3}
+.cartons-intro-photo img{object-fit:cover}
+.cartons-coming-badge{position:absolute;top:22px;right:22px;z-index:2;background:var(--red);color:#fff;font-weight:900;text-transform:uppercase;letter-spacing:.08em;font-size:12px;padding:10px 14px;border-radius:999px;box-shadow:0 10px 25px #07182e38}
+.cartons-section{padding:0 7vw 90px;max-width:1200px;margin:0 auto}
+.cartons-section-head{max-width:760px;margin-bottom:38px}
+.cartons-section-head h2{font-size:clamp(30px,4vw,46px);line-height:1.1;margin:0 0 14px}
+.cartons-section-head p{color:var(--muted)}
+.cartons-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.carton-product-card{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 14px 35px #0a315312}
+.carton-visual{height:210px;background:linear-gradient(135deg,#edf4ff,#dce8f7);display:grid;place-items:center;position:relative}
+.carton-box-shape{width:150px;height:110px;background:#c9955e;border:2px solid #9d6e3f;position:relative;box-shadow:inset 0 0 0 1px #e7ba87}
+.carton-box-shape.large{width:190px;height:135px}
+.carton-box-shape:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:18px;transform:translateX(-50%);background:#d8ab76}
+.carton-box-shape:after{content:"Super-Service";position:absolute;left:18px;bottom:14px;font-size:11px;font-weight:900;color:#6d4a2e;letter-spacing:.04em}
+.carton-product-copy{padding:28px}
+.carton-product-copy h3{font-size:25px;margin:0 0 8px;color:var(--blue)}
+.carton-size{font-weight:800;color:#52677d;margin-bottom:18px}
+.carton-price-row{display:flex;align-items:end;justify-content:space-between;gap:15px;padding-top:18px;border-top:1px solid var(--line)}
+.carton-price-row span{font-size:13px;color:var(--muted)}
+.carton-price-row strong{font-size:28px;color:var(--blue)}
+.carton-temp-note{font-size:12px;color:var(--muted);margin-top:10px}
+.cartons-contact{margin-top:36px;padding:32px;border-radius:14px;background:var(--pale);display:flex;align-items:center;justify-content:space-between;gap:20px}
+.cartons-contact p{margin:0;color:var(--muted);max-width:650px}
+@media(max-width:1000px){.cartons-home-card{width:220px;right:24px}.cartons-grid{grid-template-columns:1fr}}
+@media(max-width:680px){.hero-with-cartons{background:#fff}.cartons-home-card{position:relative;top:auto;right:auto;width:auto;min-height:auto;margin:16px 15px 42px;padding:20px;gap:14px}.cartons-intro-photo{min-height:240px;margin:0 20px 45px}.cartons-section{padding:0 20px 75px}.cartons-contact{align-items:flex-start;flex-direction:column}.carton-visual{height:180px}}

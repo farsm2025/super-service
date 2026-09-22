@@ -36,7 +36,14 @@ export default async function Home({searchParams}:{searchParams:SearchParams}) {
   const reviewSent=params.avis==="envoye";
   return <main>
     <Header reviewCount={reviewItems.length}/>
-    <HeroVideoCarousel />
+    <div className="hero-with-cartons">
+      <HeroVideoCarousel />
+      <Link className="cartons-home-card" href="/services/cartons-demenagement" aria-label="Découvrir les cartons de déménagement">
+        <span className="cartons-home-badge">Bientôt disponible</span>
+        <strong>Commande de cartons pour déménagement</strong>
+        <span className="cartons-home-link">Découvrir les formats <span>→</span></span>
+      </Link>
+    </div>
     <section className="trust-strip" aria-label="Nos engagements">
       <div><strong>24 h</strong><span>pour votre devis gratuit</span></div><div><strong>Vaud</strong><span>Lausanne et tout le canton</span></div><div><strong>7j/7</strong><span>selon disponibilité</span></div><div><strong>5★</strong><span>des clients satisfaits</span></div>
     </section>

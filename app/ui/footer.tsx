@@ -63,6 +63,7 @@ export function Footer() {
         <Link href="/services/montage-de-meubles">Montage de meubles</Link>
         <Link href="/services/debarras">Débarras</Link>
         <Link href="/services/petits-travaux-jardinage">Petits travaux</Link>
+        <Link href="/services/cartons-demenagement">Cartons de déménagement</Link>
       </div>
       <div>
         <h3>Contact</h3>

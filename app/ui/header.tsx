@@ -14,7 +14,7 @@ export function Header({reviewCount=testimonials.length}:{reviewCount?:number}){
     <nav className={open?"nav open":"nav"} aria-label="Navigation principale">
       <Link href="/#services" onClick={closeMenu}>Services</Link>
       <Link href="/services/location-camion" onClick={closeMenu}>Location de camion</Link>
-      <Link className="reviews-nav-link" href="/#avis" onClick={closeMenu}>Avis <span className="reviews-count" aria-label={`${reviewCount} avis`}>{reviewCount}</span></Link>
+      <Link className="reviews-nav-link" href="/#avis" onClick={closeMenu}>Avis clients</Link>
       <Link href="/#a-propos" onClick={closeMenu}>À propos</Link>
       <Link href="/#contact" onClick={closeMenu}>Contact</Link>
     </nav>

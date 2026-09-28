@@ -72,3 +72,45 @@
 .cartons-contact p{margin:0;color:var(--muted);max-width:650px}
 @media(max-width:1000px){.cartons-home-card{width:220px;right:24px}.cartons-grid{grid-template-columns:1fr}}
 @media(max-width:680px){.hero-with-cartons{background:#fff}.cartons-home-card{position:relative;top:auto;right:auto;width:auto;min-height:auto;margin:16px 15px 42px;padding:20px;gap:14px}.cartons-intro-photo{min-height:240px;margin:0 20px 45px}.cartons-section{padding:0 20px 75px}.cartons-contact{align-items:flex-start;flex-direction:column}.carton-visual{height:180px}}
+
+
+/* Mobile intro heading: single-column layout */
+@media(max-width:680px){
+  .section.intro{padding-top:52px;padding-bottom:70px}
+  .intro .section-heading{
+    display:flex!important;
+    flex-direction:column;
+    align-items:stretch;
+    width:100%;
+    max-width:100%;
+    margin:0 auto 36px;
+    text-align:left;
+    gap:0;
+  }
+  .intro .section-heading .eyebrow{
+    width:100%;
+    margin:0 0 16px;
+    text-align:center;
+    font-size:11px;
+    line-height:1.45;
+    letter-spacing:.14em;
+  }
+  .intro .section-heading h2{
+    width:100%;
+    margin:0 0 16px;
+    text-align:center;
+    font-size:clamp(30px,9vw,38px);
+    line-height:1.08;
+    letter-spacing:-.025em;
+    word-break:normal;
+    overflow-wrap:normal;
+  }
+  .intro .section-heading>p:last-child{
+    width:100%;
+    max-width:none;
+    margin:0;
+    text-align:left;
+    font-size:16px;
+    line-height:1.55;
+  }
+}

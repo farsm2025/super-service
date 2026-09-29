@@ -39,6 +39,7 @@ declare global {
           extras: {
             setup: Record<string, never>;
             featureType: "whatsapp_business_app_onboarding";
+            version: "v4";
           };
         }
       ) => void;

@@ -31,5 +31,5 @@ export const metadata: Metadata = {
     },
   },
 };
-const schema = { "@context":"https://schema.org", "@type":"MovingCompany", "@id":`${SITE_URL}/#organization`, name:"Super-Service", url:SITE_URL, image:absoluteUrl("/logo-super-service.jpg"), telephone:"+41783223368", email:"info@super-service.ch", address:{"@type":"PostalAddress",streetAddress:"Rue du Clos-de-Bulle 5",postalCode:"1004",addressLocality:"Lausanne",addressCountry:"CH"}, areaServed:{"@type":"AdministrativeArea",name:"Canton de Vaud"}, priceRange:"CHF" };
+const schema = { "@context":"https://schema.org", "@type":"MovingCompany", "@id":`${SITE_URL}/#organization`, name:"Super-Service", url:SITE_URL, image:absoluteUrl("/logo-super-service.jpg"), telephone:"+41783223368", email:"info@super-service.ch", address:{"@type":"PostalAddress",streetAddress:"Chemin d'Entre-Bois 36",postalCode:"1018",addressLocality:"Lausanne",addressCountry:"CH"}, areaServed:{"@type":"AdministrativeArea",name:"Canton de Vaud"}, priceRange:"CHF" };
 export default function RootLayout({children}:{children:React.ReactNode}) { return <html lang="fr" className={inter.variable}><body><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema)}} />{children}<PrivacyBanner/></body></html>; }

@@ -12,6 +12,12 @@ type EmbeddedSignupData = {
   business_id?: string;
 };
 
+type DebugEvent = {
+  at: string;
+  source: string;
+  detail: string;
+};
+
 declare global {
   interface Window {
     FB?: {
@@ -33,7 +39,6 @@ declare global {
           extras: {
             setup: Record<string, never>;
             featureType: "whatsapp_business_app_onboarding";
-            sessionInfoVersion: "3";
           };
         }
       ) => void;
@@ -46,6 +51,14 @@ export default function WhatsAppConnectPage() {
   const [sdkReady, setSdkReady] = useState(false);
   const [status, setStatus] = useState("Chargement du SDK Meta…");
   const [result, setResult] = useState<EmbeddedSignupData | null>(null);
+  const [debugEvents, setDebugEvents] = useState<DebugEvent[]>([]);
+
+  function addDebug(source: string, detail: string) {
+    setDebugEvents((prev) => [
+      ...prev,
+      {at: new Date().toLocaleTimeString("fr-CH"), source, detail},
+    ].slice(-12));
+  }
 
   useEffect(() => {
     window.fbAsyncInit = () => {
@@ -72,13 +85,24 @@ export default function WhatsAppConnectPage() {
       }
 
       if (!payload || typeof payload !== "object") return;
+
       const message = payload as {
         type?: string;
         event?: string;
+        version?: number;
         data?: EmbeddedSignupData;
       };
 
       if (message.type !== "WA_EMBEDDED_SIGNUP") return;
+
+      addDebug(
+        "WA_EMBEDDED_SIGNUP",
+        JSON.stringify({
+          event: message.event,
+          version: message.version,
+          data: message.data ?? null,
+        })
+      );
 
       if (
         (message.event === "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING" ||
@@ -88,9 +112,11 @@ export default function WhatsAppConnectPage() {
         setResult(message.data);
         setStatus("Coexistence WhatsApp terminée.");
       } else if (message.event === "CANCEL") {
-        setStatus("Connexion annulée.");
+        setStatus("Connexion annulée par Meta ou par l’utilisateur.");
       } else if (message.event === "ERROR") {
         setStatus("Meta a signalé une erreur pendant la connexion.");
+      } else {
+        setStatus(`Événement Meta reçu : ${message.event ?? "inconnu"}`);
       }
     };
 
@@ -105,14 +131,22 @@ export default function WhatsAppConnectPage() {
     }
 
     setResult(null);
+    setDebugEvents([]);
     setStatus("Ouverture du parcours de coexistence Meta…");
 
     window.FB.login(
       (response) => {
         if (response.authResponse?.code) {
-          setStatus("Autorisation reçue. Terminez maintenant le parcours WhatsApp Business App dans la fenêtre Meta.");
+          addDebug("FB.login", "Code d’autorisation reçu.");
+          setStatus(
+            "Autorisation Facebook reçue. Si le parcours WhatsApp ne continue pas, regardez le journal technique ci-dessous."
+          );
         } else if (response.status === "not_authorized") {
+          addDebug("FB.login", "Autorisation refusée ou incomplète.");
           setStatus("Autorisation refusée ou incomplète.");
+        } else {
+          addDebug("FB.login", `Retour sans code. Statut : ${response.status ?? "inconnu"}`);
+          setStatus("Meta a fermé le parcours sans renvoyer de code d’autorisation.");
         }
       },
       {
@@ -122,7 +156,6 @@ export default function WhatsAppConnectPage() {
         extras: {
           setup: {},
           featureType: "whatsapp_business_app_onboarding",
-          sessionInfoVersion: "3",
         },
       }
     );
@@ -154,13 +187,13 @@ export default function WhatsAppConnectPage() {
         padding: 32,
         boxShadow: "0 12px 35px rgba(0,0,0,.08)",
       }}>
-        <p style={{margin: 0, color: "#667085", fontSize: 14}}>Super-Service · Test coexistence</p>
+        <p style={{margin: 0, color: "#667085", fontSize: 14}}>Super-Service · Test coexistence v4</p>
         <h1 style={{fontSize: 32, lineHeight: 1.15, margin: "8px 0 14px"}}>
           Connexion WhatsApp Business
         </h1>
         <p style={{fontSize: 17, lineHeight: 1.6, color: "#344054"}}>
-          Cette page lance explicitement le parcours Meta de coexistence afin de conserver
-          WhatsApp Business sur le téléphone tout en ajoutant l’accès API.
+          Cette version lance le sélecteur de coexistence WhatsApp Business App avec le format
+          actuel du parcours Embedded Signup et affiche les événements réellement renvoyés par Meta.
         </p>
 
         <div style={{
@@ -210,6 +243,28 @@ export default function WhatsAppConnectPage() {
             <div>ID Business : {result.business_id ?? "non renvoyé"}</div>
           </div>
         )}
+
+        <div style={{
+          marginTop: 18,
+          background: "#fffaf0",
+          border: "1px solid #f0d9a7",
+          borderRadius: 12,
+          padding: 16,
+        }}>
+          <strong>Journal technique</strong>
+          {debugEvents.length === 0 ? (
+            <div style={{marginTop: 8, color: "#667085"}}>Aucun événement reçu pour l’instant.</div>
+          ) : (
+            <div style={{marginTop: 8, display: "grid", gap: 8}}>
+              {debugEvents.map((item, index) => (
+                <div key={index} style={{fontSize: 13, overflowWrap: "anywhere"}}>
+                  <strong>{item.at} · {item.source}</strong><br />
+                  {item.detail}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </section>
     </main>
   );

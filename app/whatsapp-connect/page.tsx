@@ -30,6 +30,11 @@ declare global {
           config_id: string;
           response_type: "code";
           override_default_response_type: boolean;
+          extras: {
+            setup: Record<string, never>;
+            featureType: "whatsapp_business_app_onboarding";
+            sessionInfoVersion: "3";
+          };
         }
       ) => void;
     };
@@ -51,11 +56,11 @@ export default function WhatsAppConnectPage() {
         version: "v26.0",
       });
       setSdkReady(true);
-      setStatus("Prêt à lancer la connexion WhatsApp.");
+      setStatus("Prêt à lancer la coexistence WhatsApp.");
     };
 
     const onMessage = (event: MessageEvent) => {
-      if (!event.origin.includes("facebook.com")) return;
+      if (!event.origin || !/^https:\/\/(.*\.)?facebook\.com$/.test(event.origin)) return;
 
       let payload: unknown = event.data;
       if (typeof payload === "string") {
@@ -75,9 +80,13 @@ export default function WhatsAppConnectPage() {
 
       if (message.type !== "WA_EMBEDDED_SIGNUP") return;
 
-      if (message.event === "FINISH" && message.data) {
+      if (
+        (message.event === "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING" ||
+          message.event === "FINISH") &&
+        message.data
+      ) {
         setResult(message.data);
-        setStatus("Connexion WhatsApp terminée.");
+        setStatus("Coexistence WhatsApp terminée.");
       } else if (message.event === "CANCEL") {
         setStatus("Connexion annulée.");
       } else if (message.event === "ERROR") {
@@ -96,12 +105,12 @@ export default function WhatsAppConnectPage() {
     }
 
     setResult(null);
-    setStatus("Ouverture de Meta…");
+    setStatus("Ouverture du parcours de coexistence Meta…");
 
     window.FB.login(
       (response) => {
         if (response.authResponse?.code) {
-          setStatus("Autorisation reçue. Finalisez le parcours WhatsApp dans la fenêtre Meta.");
+          setStatus("Autorisation reçue. Terminez maintenant le parcours WhatsApp Business App dans la fenêtre Meta.");
         } else if (response.status === "not_authorized") {
           setStatus("Autorisation refusée ou incomplète.");
         }
@@ -110,6 +119,11 @@ export default function WhatsAppConnectPage() {
         config_id: META_CONFIG_ID,
         response_type: "code",
         override_default_response_type: true,
+        extras: {
+          setup: {},
+          featureType: "whatsapp_business_app_onboarding",
+          sessionInfoVersion: "3",
+        },
       }
     );
   }
@@ -140,14 +154,13 @@ export default function WhatsAppConnectPage() {
         padding: 32,
         boxShadow: "0 12px 35px rgba(0,0,0,.08)",
       }}>
-        <p style={{margin: 0, color: "#667085", fontSize: 14}}>Super-Service · Test technique</p>
+        <p style={{margin: 0, color: "#667085", fontSize: 14}}>Super-Service · Test coexistence</p>
         <h1 style={{fontSize: 32, lineHeight: 1.15, margin: "8px 0 14px"}}>
           Connexion WhatsApp Business
         </h1>
         <p style={{fontSize: 17, lineHeight: 1.6, color: "#344054"}}>
-          Cette page temporaire sert uniquement à lancer le parcours Meta avec la configuration
-          WhatsApp de Super-Service et à vérifier la coexistence avec le numéro déjà utilisé
-          dans l’application WhatsApp Business.
+          Cette page lance explicitement le parcours Meta de coexistence afin de conserver
+          WhatsApp Business sur le téléphone tout en ajoutant l’accès API.
         </p>
 
         <div style={{
@@ -157,9 +170,8 @@ export default function WhatsAppConnectPage() {
           padding: 16,
           margin: "22px 0",
         }}>
-          <strong>Important :</strong> cette page ne stocke ni token ni mot de passe. Ne validez
-          aucune option qui demanderait de supprimer ou de migrer définitivement le numéro
-          WhatsApp existant.
+          <strong>Important :</strong> ne validez aucune option demandant de supprimer le compte
+          WhatsApp Business du téléphone ou de migrer définitivement le numéro hors de l’app.
         </div>
 
         <button
@@ -177,7 +189,7 @@ export default function WhatsAppConnectPage() {
             color: "#fff",
           }}
         >
-          Connecter WhatsApp avec Meta
+          Lancer la coexistence WhatsApp
         </button>
 
         <div style={{marginTop: 22, paddingTop: 18, borderTop: "1px solid #eaecf0"}}>

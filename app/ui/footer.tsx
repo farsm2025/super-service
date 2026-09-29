@@ -70,9 +70,9 @@ export function Footer() {
         <a href="tel:+41783223368">+41 78 322 33 68</a>
         <a href="mailto:info@super-service.ch">info@super-service.ch</a>
         <p>
-          Rue du Clos-de-Bulle 5
+          Chemin d&apos;Entre-Bois 36
           <br />
-          1004 Lausanne
+          1018 Lausanne
         </p>
       </div>
       <div>

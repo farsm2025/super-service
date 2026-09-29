@@ -157,6 +157,7 @@ export default function WhatsAppConnectPage() {
         extras: {
           setup: {},
           featureType: "whatsapp_business_app_onboarding",
+          version: "v4",
         },
       }
     );

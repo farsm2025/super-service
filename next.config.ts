@@ -30,6 +30,7 @@ const nextConfig: NextConfig = {
           ...(process.env.SITE_LAUNCHED === "true"?[]:[{key:"X-Robots-Tag",value:"noindex, nofollow, noarchive"}]),
         ],
       },
+      {source:"/paiement/:path*",headers:[{key:"Referrer-Policy",value:"no-referrer"},{key:"Cache-Control",value:"no-store"}]},
     ];
   },
   async redirects() {

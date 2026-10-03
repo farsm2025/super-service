@@ -1,0 +1,18 @@
+"use client";
+import {useCallback,useEffect,useState} from "react";
+type Deposit={status:string;captureBefore:string|null;capturedAmount:number;operation:"capture"|"release"|null;linkExpired:boolean};
+const labels:Record<string,string>={pending:"En attente de l’autorisation du client",authorized:"100 CHF réservés",captured:"100 CHF encaissés",released:"Caution libérée",expired:"Autorisation expirée"};
+export function DepositPanel({appointmentId}:{appointmentId:string}) {
+  const [enabled,setEnabled]=useState(false);const [deposit,setDeposit]=useState<Deposit|null>(null);const [link,setLink]=useState("");const [message,setMessage]=useState("");const [busy,setBusy]=useState(false);
+  const endpoint=`/api/gestion/cautions/${appointmentId}`;
+  const refresh=useCallback(async()=>{const res=await fetch(endpoint,{cache:"no-store"});const data=await res.json();if(!res.ok)throw new Error(data.error||"Statut indisponible");setEnabled(data.enabled===true);setDeposit(data.deposit||null);setLink(data.link||"");},[endpoint]);
+  useEffect(()=>{let active=true;fetch(endpoint,{cache:"no-store"}).then(async res=>{const data=await res.json();if(!active)return;if(!res.ok)throw new Error(data.error||"Statut indisponible");setEnabled(data.enabled===true);setDeposit(data.deposit||null);setLink(data.link||"");}).catch(error=>{if(active)setMessage(error.message);});return()=>{active=false;};},[endpoint]);
+  async function act(action:"create"|"capture"|"release") {
+    if(action==="capture"&&!window.confirm("Confirmer l’encaissement de la caution de 100 CHF en mode test ?"))return;
+    if(action==="release"&&!window.confirm("Libérer la caution en mode test ?"))return;
+    setBusy(true);setMessage("");try{const res=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,confirmed:action==="capture"})});const data=await res.json();if(!res.ok)throw new Error(data.error);setDeposit(data.deposit);setLink(data.link);setMessage(action==="create"?"Lien créé. Aucun message n’a été envoyé au client.":"Statut actualisé.");}catch(error){setMessage(error instanceof Error?error.message:"Action impossible");}finally{setBusy(false);}
+  }
+  if(!enabled)return message?<p role="alert">{message}</p>:null;
+  const authorized=deposit?.status==="authorized";
+  return <section className="editable-details"><h3>Caution camion — Test</h3><p>{deposit?labels[deposit.status]:"Aucune caution demandée"}</p>{deposit?.captureBefore&&<p>Expiration : {new Date(deposit.captureBefore).toLocaleString("fr-CH",{timeZone:"Europe/Zurich"})}</p>}{deposit?.operation&&authorized&&<p>Décision réservée : {deposit.operation==="capture"?"encaissement":"libération"}. En cas d’interruption, réessayez cette même action.</p>}{!deposit&&<button disabled={busy} onClick={()=>act("create")}>Créer le lien de caution de 100 CHF</button>}{deposit?.status==="pending"&&!deposit.linkExpired&&link&&<><p><a href={link} target="_blank" rel="noreferrer">Ouvrir le paiement de test</a></p><button disabled={busy} onClick={()=>navigator.clipboard.writeText(link).then(()=>setMessage("Lien copié.")).catch(()=>setMessage("Copie impossible. Ouvrez le lien pour le copier."))}>Copier le lien</button></>}{authorized&&<div className="decision-buttons"><button disabled={busy||deposit.operation==="capture"} onClick={()=>act("release")}>Libérer la caution</button><button disabled={busy||deposit.operation==="release"} onClick={()=>act("capture")}>Encaisser 100 CHF (test)</button></div>}<p><button disabled={busy} onClick={()=>{setBusy(true);refresh().catch(error=>setMessage(error.message)).finally(()=>setBusy(false));}}>Actualiser</button></p>{message&&<p role="status">{message}</p>}</section>;
+}

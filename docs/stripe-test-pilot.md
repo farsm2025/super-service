@@ -63,3 +63,24 @@ réels Stripe ; tests de code seuls ne valident pas ces connexions externes.
 Documentation : https://docs.stripe.com/payments/place-a-hold-on-a-payment-method
 https://docs.stripe.com/webhooks
 https://docs.stripe.com/testing
+
+## Commandes de cartons (test)
+
+Appliquer également `db/migrations/20261003_stripe_test_orders.sql` à la branche de test uniquement.
+La page `/services/cartons-demenagement` expose le panier uniquement lorsque le pilote test est activé.
+Prix de test calculés côté serveur : standard 490 centimes CHF, grand 690 centimes CHF ; 0 à 99 de chaque format.
+Le paiement se fait sur Stripe Checkout. Chaque tentative utilise un identifiant conservé dans le navigateur pour récupérer la même session lors des retries ; « Nouveau panier » permet une nouvelle commande volontaire.
+Le retour de Stripe ne constitue pas une preuve de paiement : le serveur vérifie session, métadonnées, montant, devise et mode test. Le statut payé ne régresse pas.
+Aucune livraison, réservation de stock ni notification n'est déclenchée par ce pilote.
+Les commandes sont consultables dans `/gestion/commandes` avec authentification administrateur.
+
+Ajouter à la destination webhook existante :
+- `checkout.session.completed`
+- `checkout.session.async_payment_succeeded`
+- `checkout.session.async_payment_failed`
+- `checkout.session.expired`
+
+Tester 2 cartons standard et 3 grands : total 30.50 CHF, payer avec la carte de test,
+actualiser le retour et vérifier la commande « Payée — Test » dans Gestion.
+Vérifier aussi le retour sans payer, le double clic et une nouvelle tentative après une erreur réseau.
+Les tarifs, stocks, retrait/livraison, taxes et conditions de vente doivent être confirmés avant toute activation réelle.

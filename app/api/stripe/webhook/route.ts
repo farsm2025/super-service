@@ -1,6 +1,7 @@
 import {NextResponse} from "next/server";
 import {stripeClient,stripeTestEnabled} from "@/lib/stripe-config";
 import {syncDeposit} from "@/lib/deposits";
+import {syncCartonOrder} from "@/lib/carton-orders";
 import type Stripe from "stripe";
 export const dynamic="force-dynamic";
 export async function POST(request:Request) {
@@ -20,6 +21,14 @@ export async function POST(request:Request) {
       const row=await syncDeposit(current);
       // Retry if Stripe succeeded while the initial DB write was temporarily unavailable.
       if(!row)return NextResponse.json({error:"Payment not yet recorded"},{status:503});
+    }catch{return NextResponse.json({error:"Retry later"},{status:503});}
+  }
+  if(["checkout.session.completed","checkout.session.async_payment_succeeded","checkout.session.async_payment_failed","checkout.session.expired"].includes(event.type)) {
+    const session=event.data.object as Stripe.Checkout.Session;
+    if(session.metadata?.application!=="super-service" || session.metadata?.kind!=="cartons")return NextResponse.json({received:true});
+    try {
+      const current=await stripeClient().checkout.sessions.retrieve(session.id);
+      if(!await syncCartonOrder(current))return NextResponse.json({error:"Order not yet recorded"},{status:503});
     }catch{return NextResponse.json({error:"Retry later"},{status:503});}
   }
   return NextResponse.json({received:true});

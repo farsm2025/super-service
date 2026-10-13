@@ -43,7 +43,9 @@
     "typescript": "5.9.3",
     "vinext": "0.0.50",
     "vite": "8.0.13",
-    "wrangler": "4.92.0"
+    "wrangler": "4.92.0",
+    "@sanity/blueprints": "0.24.0",
+    "@sanity/functions": "1.7.3"
   },
   "type": "module",
   "displayName": "Super-Service"

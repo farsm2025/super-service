@@ -40,3 +40,17 @@ next-env.d.ts
 /.sites-runtime/
 /outputs/
 /work/
+
+# Sanity Functions
+functions/**/.env*
+functions/**/.build/
+functions/**/node_modules/
+
+# Dependencies and generated files
+node_modules/
+.sanity/
+*.tsbuildinfo
+
+# Sanity generated files
+sanity-functions/.sites-runtime/
+sanity-functions/functions/*/.build/

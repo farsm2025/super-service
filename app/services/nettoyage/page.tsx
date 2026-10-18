@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PageShell } from "../../ui/page-shell";
 import { Realizations } from "../../ui/realizations";
 import { ServiceGallery, type ServicePhoto } from "../../ui/service-gallery";
@@ -52,7 +53,7 @@ export default function Page() {
           <h2>Des locaux propres, prêts à être rendus ou réutilisés</h2>
           <p>
             La prestation est adaptée à la surface, au niveau de salissure et au
-            délai disponible.
+            délai disponible. Pour libérer les pièces avant notre intervention, nous pouvons également organiser un <Link className="contextual-link" href="/services/debarras">débarras</Link>.
           </p>
         </div>
 
@@ -82,13 +83,13 @@ export default function Page() {
             <h3>Fin de chantier</h3>
             <p>
               Évacuation des poussières, traces et résidus après rénovation ou
-              petits travaux.
+              <Link className="contextual-link" href="/services/petits-travaux-jardinage">petits travaux</Link>.
             </p>
           </article>
           <article>
             <h3>Nettoyage avec déménagement</h3>
             <p>
-              Une seule équipe coordonne le départ des meubles puis la remise en
+              Une seule équipe coordonne le <Link className="contextual-link" href="/services/demenagement">déménagement</Link> puis la remise en
               état du logement.
             </p>
           </article>

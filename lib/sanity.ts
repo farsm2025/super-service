@@ -38,7 +38,7 @@ export async function getRealizations(service?:string,featuredOnly=false):Promis
     const items=await sanityClient.fetch<Realization[]>(
       `*[_type=="realization" && defined(title) && defined(mainImage.asset)]|order(coalesce(order,10) asc,completedAt desc,_createdAt desc){_id,title,"service":coalesce(service->slug.current,service.slug.current,service),featured,city,description,"imageUrl":mainImage.asset->url,"imageAlt":coalesce(mainImage.alt,title)}`,
       {},
-      {cache:"no-store"},
+      {next:{revalidate:60}},
     );
     const requestedService=service?normalizeService(service):undefined;
     return items.filter((item)=>{
@@ -57,7 +57,7 @@ export async function getPublishedTestimonials():Promise<PublicTestimonial[]>{
     const items=await sanityClient.fetch<Array<{_id:string;name:string;comment:string;service:string;rating?:number;publishedAt?:string;verifiedAt?:string;submittedAt?:string}>>(
       `*[_type=="testimonial" && status=="published" && defined(name) && defined(comment)]|order(coalesce(publishedAt,verifiedAt,submittedAt,_createdAt) desc){_id,name,comment,service,rating,publishedAt,verifiedAt,submittedAt}`,
       {},
-      {cache:"no-store"},
+      {next:{revalidate:60}},
     );
     const formatter=new Intl.DateTimeFormat("fr-CH",{day:"numeric",month:"long",year:"numeric"});
     return items.map((item)=>{

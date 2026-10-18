@@ -39,7 +39,7 @@ export default function Page() {
           <p>
             Nous adaptons l’équipe, le véhicule et le matériel au volume à
             transporter. Vos meubles et objets fragiles sont protégés avant le
-            chargement.
+            chargement. Si vous conduisez vous-même, découvrez aussi notre <Link className="contextual-link" href="/services/location-camion">location de camion à Lausanne</Link>.
           </p>
         </div>
 
@@ -87,7 +87,7 @@ export default function Page() {
             <h3>Déménagement privé</h3>
             <p>
               Appartement, maison, cave ou garde-meubles dans le canton de Vaud
-              et au-delà.
+              et au-delà. Après le départ, notre <Link className="contextual-link" href="/services/nettoyage">nettoyage de fin de bail</Link> peut préparer le logement pour l’état des lieux.
             </p>
           </article>
           <article>
@@ -111,7 +111,7 @@ export default function Page() {
             <h3>Emballage et protection</h3>
             <p>
               Cartons, couvertures et protections adaptés pour préserver vos
-              biens pendant le transport.
+              biens pendant le transport. Découvrez les formats de <Link className="contextual-link" href="/services/cartons-demenagement">cartons de déménagement</Link> présentés sur notre site.
             </p>
           </article>
         </div>

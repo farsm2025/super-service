@@ -18,9 +18,26 @@ const legacyRoutes = [
 ];
 
 const nextConfig: NextConfig = {
-  images: {remotePatterns: [{protocol: "https", hostname: "cdn.sanity.io"}]},
+  images: {
+    remotePatterns: [{protocol: "https", hostname: "cdn.sanity.io"}],
+    // Deliver modern responsive formats and keep optimized variants cached for a day.
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 86400,
+  },
   async headers() {
     return [
+      // Static public photos and logos only. Never cache personalized pages or APIs.
+      ...["/images/:path*", "/logo-super-service.jpg", "/logo-header.jpg"].map(
+        (source) => ({
+          source,
+          headers: [
+            {
+              key: "Cache-Control",
+              value: "public, max-age=3600, s-maxage=86400",
+            },
+          ],
+        }),
+      ),
       {
         source: "/:path*",
         headers: [

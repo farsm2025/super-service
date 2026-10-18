@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PageShell } from "../../ui/page-shell";
 import { Realizations } from "../../ui/realizations";
 import { ServiceGallery, type ServicePhoto } from "../../ui/service-gallery";
@@ -50,7 +51,7 @@ export default function Page() {
           <h2>Libérez votre espace sans gérer seul la manutention</h2>
           <p>
             Nous évaluons les objets à retirer, préparons le chargement et
-            organisons leur évacuation de manière responsable.
+            organisons leur évacuation de manière responsable. Une fois les lieux vidés, un <Link className="contextual-link" href="/services/nettoyage">nettoyage professionnel</Link> peut compléter l’intervention.
           </p>
         </div>
 
@@ -65,7 +66,7 @@ export default function Page() {
           <article>
             <h3>Appartements et maisons</h3>
             <p>
-              Débarras complet ou partiel après un déménagement, une succession
+              Débarras complet ou partiel après un <Link className="contextual-link" href="/services/demenagement">déménagement</Link>, une succession
               ou un changement d’aménagement.
             </p>
           </article>
@@ -87,7 +88,7 @@ export default function Page() {
             <h3>Transport et évacuation</h3>
             <p>
               Les encombrants sont transportés vers une filière appropriée en
-              tenant compte des possibilités de réemploi et de recyclage.
+              tenant compte des possibilités de réemploi et de recyclage. Pour déplacer les objets que vous souhaitez conserver, découvrez notre <Link className="contextual-link" href="/services/transport-et-livraison">transport et livraison</Link>.
             </p>
           </article>
         </div>

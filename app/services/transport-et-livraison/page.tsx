@@ -53,7 +53,7 @@ export default function Page() {
           <h2>Un transport organisé selon le volume et l’accès</h2>
           <p>
             Nous choisissons le véhicule et la manutention nécessaires pour
-            transporter vos biens avec soin jusqu’à leur destination.
+            transporter vos biens avec soin jusqu’à leur destination. Pour transporter vos affaires vous-même, consultez notre <Link className="contextual-link" href="/services/location-camion">location de camion</Link>.
           </p>
         </div>
 
@@ -69,14 +69,14 @@ export default function Page() {
             <h3>Transport de meubles et d’objets</h3>
             <p>
               Meubles, électroménager et objets volumineux ou lourds transportés
-              avec précaution.
+              avec précaution. Nous proposons aussi le <Link className="contextual-link" href="/services/montage-de-meubles">montage de meubles</Link> à destination.
             </p>
           </article>
           <article>
             <h3>Livraison à domicile</h3>
             <p>
               Récupération d’achats volumineux et livraison jusqu’à votre
-              logement ou votre entreprise.
+              logement ou votre entreprise. Pour déplacer l’ensemble de vos affaires, découvrez notre <Link className="contextual-link" href="/services/demenagement">service de déménagement</Link>.
             </p>
           </article>
           <article>

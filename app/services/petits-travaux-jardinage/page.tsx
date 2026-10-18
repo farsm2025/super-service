@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PageShell } from "../../ui/page-shell";
 import { Realizations } from "../../ui/realizations";
 import { ServiceGallery, type ServicePhoto } from "../../ui/service-gallery";
@@ -50,7 +51,7 @@ export default function Page() {
           <h2>Une aide pratique pour votre logement ou vos extérieurs</h2>
           <p>
             Décrivez-nous le travail à réaliser : nous confirmons la prestation,
-            le matériel nécessaire et la durée estimée avant l’intervention.
+            le matériel nécessaire et la durée estimée avant l’intervention. Pour préparer un espace encombré, notre <Link className="contextual-link" href="/services/debarras">service de débarras</Link> peut également vous accompagner.
           </p>
         </div>
 
@@ -66,7 +67,7 @@ export default function Page() {
             <h3>Bricolage</h3>
             <p>
               Montage, ajustements, petites réparations et travaux courants dans
-              votre logement ou bureau.
+              votre logement ou bureau. Pour les armoires, lits et étagères, consultez notre <Link className="contextual-link" href="/services/montage-de-meubles">montage de meubles</Link>.
             </p>
           </article>
           <article>
@@ -87,7 +88,7 @@ export default function Page() {
             <h3>Jardinage</h3>
             <p>
               Entretien ponctuel des extérieurs, taille de haies et remise en
-              ordre du jardin.
+              ordre du jardin. Pour la remise en état des espaces intérieurs, découvrez notre <Link className="contextual-link" href="/services/nettoyage">nettoyage professionnel</Link>.
             </p>
           </article>
         </div>

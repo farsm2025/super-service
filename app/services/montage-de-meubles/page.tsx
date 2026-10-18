@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PageShell } from "../../ui/page-shell";
 import { Realizations } from "../../ui/realizations";
 import { ServiceGallery, type ServicePhoto } from "../../ui/service-gallery";
@@ -50,7 +51,7 @@ export default function Page() {
           <h2>Un service réservé seul ou avec votre déménagement</h2>
           <p>
             Nous pouvons intervenir uniquement pour le montage d’un meuble ou
-            coordonner son démontage, son transport et son remontage à la nouvelle
+            coordonner son démontage, son <Link className="contextual-link" href="/services/transport-et-livraison">transport</Link> et son remontage à la nouvelle
             adresse.
           </p>
         </div>
@@ -81,14 +82,14 @@ export default function Page() {
             <h3>Meubles neufs</h3>
             <p>
               Montage de meubles livrés en kit en suivant la notice et en
-              contrôlant leur stabilité.
+              contrôlant leur stabilité. Pour les autres aménagements du logement, consultez nos <Link className="contextual-link" href="/services/petits-travaux-jardinage">petits travaux</Link>.
             </p>
           </article>
           <article>
             <h3>Avec un déménagement</h3>
             <p>
               Le démontage, le transport et le remontage peuvent être intégrés à
-              votre prestation de déménagement.
+              votre <Link className="contextual-link" href="/services/demenagement">prestation de déménagement</Link>.
             </p>
           </article>
         </div>

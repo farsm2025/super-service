@@ -9,6 +9,7 @@ import { Footer } from "./ui/footer";
 import { Icon } from "./ui/icons";
 import { getPublishedTestimonials } from "../lib/sanity";
 import { testimonials } from "./data/testimonials";
+import { SITE_URL } from "../lib/site";
 
 const services = [
   { icon: "moving" as const, title: "Déménagement", text: "Déménagements privés et professionnels à Lausanne et dans tout le canton de Vaud, avec protection soignée de vos biens.", href: "/services/demenagement" },
@@ -19,6 +20,17 @@ const services = [
   { icon: "recycling" as const, title: "Débarras", text: "Débarras de caves, appartements, bureaux et chantiers avec tri et évacuation responsable des encombrants.", href: "/services/debarras" },
   { icon: "tools" as const, title: "Petits travaux", text: "Bricolage, petites interventions électriques, fixation d’éléments au mur, jardinage et taille de haies.", href: "/services/petits-travaux-jardinage" },
 ];
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${SITE_URL}/#website`,
+  url: `${SITE_URL}/`,
+  name: "Super-Service Lausanne",
+  alternateName: "Super-Service",
+  inLanguage: "fr-CH",
+  publisher: { "@id": `${SITE_URL}/#organization` },
+};
 
 const steps = [
   ["01", "Vous nous contactez", "Par téléphone, WhatsApp ou formulaire. Expliquez-nous simplement votre besoin."],
@@ -35,6 +47,7 @@ export default async function Home({searchParams}:{searchParams:SearchParams}) {
   const reviewItems=[...publishedTestimonials,...testimonials.map((item,index)=>({...item,_id:`legacy-${index}`,rating:5}))];
   const reviewSent=params.avis==="envoye";
   return <main>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(websiteSchema).replace(/</g, "\\u003c")}} />
     <Header reviewCount={reviewItems.length}/>
     <div className="hero-with-cartons">
       <HeroVideoCarousel />

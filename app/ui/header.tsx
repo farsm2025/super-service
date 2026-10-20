@@ -15,6 +15,7 @@ export function Header({reviewCount=testimonials.length}:{reviewCount?:number}){
       <Link href="/#services" onClick={closeMenu}>Services</Link>
       <Link href="/services/location-camion" onClick={closeMenu}>Location de camion</Link>
       <Link className="reviews-nav-link" href="/#avis" onClick={closeMenu}>Avis clients</Link>
+      <Link href="/blog" onClick={closeMenu}>Blog</Link>
       <Link href="/#a-propos" onClick={closeMenu}>À propos</Link>
       <Link href="/#contact" onClick={closeMenu}>Contact</Link>
     </nav>

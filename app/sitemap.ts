@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "../lib/site";
+import {getBlogPosts} from "../lib/blog";
 
 const servicePages = [
   "/services/demenagement",
@@ -12,19 +13,21 @@ const servicePages = [
   "/services/cartons-demenagement",
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const blogPosts = await getBlogPosts();
   const pages = [
     "",
     "/services",
     ...servicePages,
     "/avis",
+    "/blog",
     "/devis",
     "/rendez-vous",
     "/mentions-legales",
     "/confidentialite",
   ];
 
-  return pages.map((url, index) => ({
+  const basePages = pages.map((url, index) => ({
     url: SITE_URL + url,
     lastModified: new Date(),
     changeFrequency: (index <= servicePages.length ? "monthly" : "yearly") as
@@ -32,4 +35,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       | "yearly",
     priority: index === 0 ? 1 : index <= servicePages.length ? 0.85 : 0.5,
   }));
+  return [...basePages, ...blogPosts.map(post=>({
+    url: SITE_URL + "/blog/" + post.slug,
+    lastModified: new Date(post.publishedAt + "T12:00:00Z"),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }))];
 }

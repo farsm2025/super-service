@@ -69,6 +69,10 @@ export function Footer() {
         <h3>Contact</h3>
         <a href="tel:+41783223368">+41 78 322 33 68</a>
         <a href="mailto:info@super-service.ch">info@super-service.ch</a>
+        <div className="footer-opening-hours">
+          <p>Lundi à samedi : 7h30 – 17h00</p>
+          <p>Dimanche : fermé</p>
+        </div>
         <p>
           Chemin d&apos;Entre-Bois 36
           <br />

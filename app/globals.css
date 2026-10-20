@@ -114,3 +114,20 @@
     line-height:1.55;
   }
 }
+
+/* Static hero: retain legible CTAs and eliminate video downloads. */
+.hero-static{background:#06336c}
+.hero-static-visual{position:absolute;inset:0;overflow:hidden}
+.hero-static-image{object-fit:cover;object-position:center center}
+.hero-static .hero-overlay{background:linear-gradient(90deg,rgba(1,15,40,.93) 0%,rgba(2,23,54,.87) 37%,rgba(2,25,52,.24) 80%,rgba(2,25,52,.14) 100%)}
+.hero-static .hero-content{width:min(740px,90%)}
+.hero-static .hero-actions{position:relative;z-index:3}
+.hero-opening-hours{display:flex;flex-direction:column;gap:3px;margin-top:20px;font-size:15px;font-weight:750;line-height:1.4;color:#fff;text-shadow:0 1px 5px rgba(0,0,0,.55)}
+.footer-opening-hours{margin-top:13px}
+.footer-opening-hours p{margin:3px 0;color:#fff;font-weight:650}
+@media(max-width:680px){
+  .hero-static-image{object-position:68% center}
+  .hero-static .hero-overlay{background:linear-gradient(90deg,rgba(0,15,39,.95),rgba(1,20,47,.83) 72%,rgba(1,20,47,.55))}
+  .hero-static .hero-content{width:auto}
+  .hero-opening-hours{font-size:14px}
+}

@@ -28,6 +28,7 @@ export default async function BlogArticle({params}:RouteProps){
  const post=await getBlogPost(slug);
  if(!post)notFound();
  const blocks=parseBlogMarkdown(post.body);
+ const isCleaning=post.slug==="checklist-nettoyage-fin-de-bail-lausanne";
  const headings=blocks.flatMap(b=>b.type==="h2"&&b.text!==post.title?[b.text]:[]);
  const publicationDate=new Intl.DateTimeFormat("fr-CH",{day:"numeric",month:"long",year:"numeric",timeZone:"Europe/Zurich"}).format(new Date(post.publishedAt+"T12:00:00Z"));
  const url=`${SITE_URL}/blog/${post.slug}`;
@@ -56,19 +57,44 @@ export default async function BlogArticle({params}:RouteProps){
          if(block.type==="h2")return block.text===post.title?null:<h2 id={sectionId(block.text)} key={i}>{block.text}</h2>;
          if(block.type==="h3")return <h3 key={i}>{block.text}</h3>;
          if(block.type==="paragraph")return <p key={i}>{block.text}</p>;
+         if(block.type==="table")return <div className="blog-table-wrap" role="region" aria-label="Comparatif des situations et réflexes conseillés" tabIndex={0} key={i}>
+           <table className="blog-compare-table"><thead><tr>{block.headers.map((head,j)=><th key={j} scope="col">{head}</th>)}</tr></thead>
+           <tbody>{block.rows.map((row,j)=><tr key={j}>{row.map((cell,k)=><td key={k}>{cell}</td>)}</tr>)}</tbody></table>
+         </div>;
          if(block.type!=="list")return null;
          const checkList=block.items.every(item=>item.checklist);
-         return <ul key={i} className={checkList?"blog-checklist":"blog-list"}>
-           {block.items.map((item,j)=><li key={j}>{item.checklist?<span className="blog-check-mark" aria-hidden="true">☐</span>:null}{item.text}</li>)}
-         </ul>;
+         const items=block.items.map((item,j)=><li key={j}>{item.checklist?<span className="blog-check-mark" aria-hidden="true">☐</span>:null}{item.text}</li>);
+         return block.ordered?<ol key={i} className="blog-list blog-numbered">{items}</ol>:
+           <ul key={i} className={checkList?"blog-checklist":"blog-list"}>{items}</ul>;
        })}
        <div className="blog-service-links">
-         <h2>Services utiles pour votre déménagement</h2>
-         <p>Retrouvez les prestations de Super-Service adaptées à votre organisation.</p>
-         <div><Link href="/services/demenagement">Déménagement à Lausanne →</Link><Link href="/services/location-camion">Location de camion →</Link><Link href="/services/nettoyage">Nettoyage de fin de bail →</Link><Link href="/services/debarras">Débarras et évacuation →</Link><Link href="/services/montage-de-meubles">Montage de meubles →</Link></div>
+         <h2>{isCleaning?"Des services pour votre remise de logement":"Services utiles pour votre déménagement"}</h2>
+         <p>{isCleaning?"Découvrez nos prestations à Lausanne et dans le canton de Vaud.":"Retrouvez les prestations de Super-Service adaptées à votre organisation."}</p>
+         <div>{isCleaning?<>
+           <Link href="/services/nettoyage">Nettoyage de fin de bail →</Link>
+           <Link href="/services/demenagement">Déménagement à Lausanne →</Link>
+           <Link href="/services/debarras">Débarras et évacuation →</Link>
+           <Link href="/blog/checklist-demenagement-lausanne">Checklist du déménagement →</Link>
+         </>:<>
+           <Link href="/services/demenagement">Déménagement à Lausanne →</Link>
+           <Link href="/services/location-camion">Location de camion →</Link>
+           <Link href="/services/nettoyage">Nettoyage de fin de bail →</Link>
+           <Link href="/services/debarras">Débarras et évacuation →</Link>
+           <Link href="/services/montage-de-meubles">Montage de meubles →</Link>
+           <Link href="/blog/checklist-nettoyage-fin-de-bail-lausanne">Checklist nettoyage fin de bail →</Link>
+         </>}</div>
          <Link className="button button-primary" href="/devis">Demander votre devis gratuit</Link>
        </div>
-       <section className="blog-official-sources" aria-labelledby="sources-title">
+       {isCleaning?<section className="blog-official-sources" aria-labelledby="sources-title">
+         <h2 id="sources-title">Sources et ressources utiles</h2>
+         <p>Pour approfondir les recommandations sur les états des lieux et l’usure normale :</p>
+         <ul>
+           <li><a href="https://www.chuv.ch/fr/logements/loc-home/depart/etat-des-lieux-de-sortie/" target="_blank" rel="noopener noreferrer">CHUV – État des lieux de sortie et checklists de nettoyage ↗</a></li>
+           <li><a href="https://vaud.asloca.ch/actualit%C3%A9s/que-faut-il-savoir-etat-lieux-sortie" target="_blank" rel="noopener noreferrer">ASLOCA Vaud – Ce qu’il faut savoir sur l’état des lieux de sortie ↗</a></li>
+           <li><a href="https://vaud.asloca.ch/faq/etat-lieux" target="_blank" rel="noopener noreferrer">ASLOCA Vaud – Questions fréquentes sur l’état des lieux ↗</a></li>
+           <li><a href="https://www.vd.ch/territoire-et-construction/logement/droit-du-bail" target="_blank" rel="noopener noreferrer">État de Vaud – Droit du bail et Règles et usages locatifs ↗</a></li>
+         </ul>
+       </section>:       <section className="blog-official-sources" aria-labelledby="sources-title">
          <h2 id="sources-title">Sources officielles utiles</h2>
          <p>Pour les formalités et réglementations évoquées dans l’article, consultez les documents officiels :</p>
          <ul>
@@ -77,10 +103,10 @@ export default async function BlogArticle({params}:RouteProps){
            <li><a href="https://www.lausanne.ch/apps/actualites/Next/serve.php?id=79&amp;kind=recueil" target="_blank" rel="noopener noreferrer">Ville de Lausanne : règlement sur la circulation et le stationnement ↗</a></li>
            <li><a href="https://www.lausanne.ch/apps/actualites/Next/serve.php?id=233&amp;kind=recueil" target="_blank" rel="noopener noreferrer">Ville de Lausanne : gestion des déchets et encombrants ↗</a></li>
          </ul>
-       </section>
+       </section>}
      </article>
    </div>
-   <section className="blog-end-cta"><div><p className="eyebrow light">Contact Super-Service</p><h2>Un déménagement prévu à Lausanne ?</h2><p>Expliquez-nous votre projet, les accès et la date souhaitée. Nous vous aidons à organiser la suite.</p></div><Link href="/devis" className="button button-primary">Demander un devis gratuit</Link></section>
+   <section className="blog-end-cta"><div><p className="eyebrow light">Contact Super-Service</p><h2>{isCleaning?"Un nettoyage de fin de bail prévu à Lausanne ?":"Un déménagement prévu à Lausanne ?"}</h2><p>{isCleaning?"Précisez la surface du logement, les équipements à nettoyer et la date de l’état des lieux.":"Expliquez-nous votre projet, les accès et la date souhaitée. Nous vous aidons à organiser la suite."}</p></div><Link href="/devis" className="button button-primary">Demander un devis gratuit</Link></section>
    <Footer/><MobileActions/>
  </main>;
 }

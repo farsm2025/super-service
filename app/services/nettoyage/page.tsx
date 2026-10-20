@@ -53,7 +53,7 @@ export default function Page() {
           <h2>Des locaux propres, prêts à être rendus ou réutilisés</h2>
           <p>
             La prestation est adaptée à la surface, au niveau de salissure et au
-            délai disponible. Pour libérer les pièces avant notre intervention, nous pouvons également organiser un <Link className="contextual-link" href="/services/debarras">débarras</Link>.
+            délai disponible. Pour libérer les pièces avant notre intervention, nous pouvons également organiser un <Link className="contextual-link" href="/services/debarras">débarras</Link>. Pour préparer la remise des clés, consultez notre <Link className="contextual-link" href="/blog/checklist-nettoyage-fin-de-bail-lausanne">checklist de nettoyage de fin de bail</Link>.
           </p>
         </div>
 

@@ -5,7 +5,7 @@ export function HeroVideoCarousel() {
   return (
     <section className="hero hero-static">
       <div className="hero-static-visual" aria-hidden="true">
-        <Image src="/hero-super-service.webp" alt="" fill priority sizes="100vw" quality={80} className="hero-static-image" />
+        <Image src="/hero-super-service.jpg" alt="" fill priority sizes="100vw" quality={80} className="hero-static-image" />
       </div>
       <div className="hero-overlay" />
       <div className="hero-content">

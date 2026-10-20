@@ -78,6 +78,7 @@ export function Footer() {
       <div>
         <h3>Informations</h3>
         <Link href="/avis">Avis clients</Link>
+        <Link href="/blog">Blog</Link>
         <Link href="/mentions-legales">Mentions légales</Link>
         <Link href="/confidentialite">Confidentialité</Link>
         <Link href="/studio">Gestion du contenu</Link>

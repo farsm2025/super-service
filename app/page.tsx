@@ -58,7 +58,7 @@ export default async function Home({searchParams}:{searchParams:SearchParams}) {
       </Link>
     </div>
     <section className="trust-strip" aria-label="Nos engagements">
-      <div><strong>24 h</strong><span>pour votre devis gratuit</span></div><div><strong>Vaud</strong><span>Lausanne et tout le canton</span></div><div><strong>7j/7</strong><span>selon disponibilité</span></div><div><strong>5★</strong><span>des clients satisfaits</span></div>
+      <div><strong>24 h</strong><span>pour votre devis gratuit</span></div><div><strong>Vaud</strong><span>Lausanne et tout le canton</span></div><div><strong>6j/7</strong><span>du lundi au samedi</span></div><div><strong>5★</strong><span>des clients satisfaits</span></div>
     </section>
     <section className="section intro" id="services">
       <div className="section-heading"><p className="eyebrow">Un seul partenaire, plusieurs solutions</p><h2>Déménagement, nettoyage et location de camion</h2><p>Particuliers, entreprises et régies : pour un <Link className="contextual-link" href="/services/demenagement">déménagement à Lausanne</Link>, un <Link className="contextual-link" href="/services/nettoyage">nettoyage de fin de bail</Link> ou un <Link className="contextual-link" href="/services/transport-et-livraison">transport de meubles</Link>, Super-Service coordonne vos prestations sans multiplier les interlocuteurs.</p></div>

@@ -1,4 +1,5 @@
 import {articleMarkdown} from "./blog-content";
+import {nettoyageArticleMarkdown} from "./blog-content-nettoyage";
 import {sanityClient} from "./sanity";
 
 export type BlogPost={
@@ -27,6 +28,19 @@ export const originalBlogPost:BlogPost={
  body:articleMarkdown,
 };
 
+export const nettoyageBlogPost:BlogPost={
+ slug:"checklist-nettoyage-fin-de-bail-lausanne",
+ title:"Checklist nettoyage fin de bail : les points vérifiés par les régies",
+ excerpt:"Cuisine, salle de bains, vitres, stores et état des lieux : la checklist pièce par pièce pour rendre un logement propre à Lausanne et dans le canton de Vaud.",
+ publishedAt:"2026-10-20",
+ category:"Conseils nettoyage",
+ image:"/images/nettoyage/agent-nettoyage-super-service-vaud.webp",
+ imageAlt:"Agent de nettoyage Super-Service intervenant dans le canton de Vaud",
+ seoTitle:"Checklist nettoyage fin de bail à Lausanne | Super-Service",
+ seoDescription:"Nettoyage de fin de bail à Lausanne : checklist pièce par pièce, points contrôlés à l’état des lieux, usure normale, régies et conseils pratiques.",
+ body:nettoyageArticleMarkdown,
+};
+
 type CmsPost=Omit<BlogPost,"image"|"imageAlt"|"body"> & {image?:string;imageAlt?:string;body?:string};
 
 export async function getBlogPosts():Promise<BlogPost[]>{
@@ -37,7 +51,7 @@ export async function getBlogPosts():Promise<BlogPost[]>{
      "image":coverImage.asset->url,"imageAlt":coverImage.alt,"body":contentMarkdown
    }`,{},{next:{revalidate:60}});
  }catch(error){console.error("Blog Sanity: impossible de charger les articles",error)}
- const merged=new Map<string,BlogPost>([[originalBlogPost.slug,originalBlogPost]]);
+ const merged=new Map<string,BlogPost>([[originalBlogPost.slug,originalBlogPost],[nettoyageBlogPost.slug,nettoyageBlogPost]]);
  for(const item of cms){
    if(!item.slug||!item.title||!item.body)continue;
    const existing=merged.get(item.slug);

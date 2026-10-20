@@ -10,7 +10,7 @@ export const sanityClient=createClient({
 export type Realization={_id:string;title:string;service:string;featured?:boolean;city?:string;description?:string;imageUrl?:string;imageAlt?:string};
 export type PublicTestimonial={_id:string;name:string;text:string;date:string;service:string;rating:number};
 export type RentalVehicle={vehicleId?:"iveco"|"citroen";name?:string;volume?:string;feature?:string;halfDayPrice?:string;fullDayPrice?:string};
-export type ServiceContent={title?:string;description?:string;seoTitle?:string;seoDescription?:string;rentalVehicles?:RentalVehicle[];driverHalfDaySupplement?:string;driverFullDaySupplement?:string;licenseRequired?:string;includedMileage?:string;deposit?:string;pickupLocation?:string;rentalConditions?:string};
+export type ServiceContent={title?:string;description?:string;seoTitle?:string;seoDescription?:string;rentalVehicles?:RentalVehicle[];licenseRequired?:string;includedMileage?:string;deposit?:string;pickupLocation?:string;rentalConditions?:string};
 const serviceAliases:Record<string,string>={
   demenagement:"demenagement",
   nettoyage:"nettoyage",
@@ -71,4 +71,4 @@ export async function getPublishedTestimonials():Promise<PublicTestimonial[]>{
   }
 }
 
-export async function getServiceBySlug(slug:string):Promise<ServiceContent|null>{try{return await sanityClient.fetch(`*[_type=="service"&&slug.current==$slug][0]{title,description,seoTitle,seoDescription,rentalVehicles[]{vehicleId,name,volume,feature,halfDayPrice,fullDayPrice},driverHalfDaySupplement,driverFullDaySupplement,licenseRequired,includedMileage,deposit,pickupLocation,rentalConditions}`,{slug},{next:{revalidate:60}})}catch{return null}}
+export async function getServiceBySlug(slug:string):Promise<ServiceContent|null>{try{return await sanityClient.fetch(`*[_type=="service"&&slug.current==$slug][0]{title,description,seoTitle,seoDescription,rentalVehicles[]{vehicleId,name,volume,feature,halfDayPrice,fullDayPrice},licenseRequired,includedMileage,deposit,pickupLocation,rentalConditions}`,{slug},{next:{revalidate:60}})}catch{return null}}

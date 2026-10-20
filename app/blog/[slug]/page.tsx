@@ -28,7 +28,7 @@ export default async function BlogArticle({params}:RouteProps){
  const post=await getBlogPost(slug);
  if(!post)notFound();
  const blocks=parseBlogMarkdown(post.body);
- const headings=blocks.filter(b=>b.type==="h2"&&b.text!==post.title);
+ const headings=blocks.flatMap(b=>b.type==="h2"&&b.text!==post.title?[b.text]:[]);
  const publicationDate=new Intl.DateTimeFormat("fr-CH",{day:"numeric",month:"long",year:"numeric",timeZone:"Europe/Zurich"}).format(new Date(post.publishedAt+"T12:00:00Z"));
  const url=`${SITE_URL}/blog/${post.slug}`;
  const schema={"@context":"https://schema.org","@type":"BlogPosting","@id":url+"#article",headline:post.title,description:post.seoDescription,image:absoluteUrl(post.image),datePublished:post.publishedAt,author:{"@type":"Organization",name:"Super-Service",url:SITE_URL},publisher:{"@id":SITE_URL+"/#organization"},mainEntityOfPage:url,inLanguage:"fr-CH"};
@@ -50,7 +50,7 @@ export default async function BlogArticle({params}:RouteProps){
    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(breadcrumb)}}/>
    <div className="blog-article-cover"><Image src={post.image} alt={post.imageAlt} fill priority sizes="(max-width:900px) 100vw, 1200px"/></div>
    <div className="blog-article-layout">
-     <aside className="blog-toc" aria-label="Sommaire"><h2>Dans cet article</h2><ol>{headings.map(h=><li key={h.text}><a href={`#${sectionId(h.text)}`}>{h.text}</a></li>)}</ol><Link href="/devis" className="blog-toc-cta">Demander un devis →</Link></aside>
+     <aside className="blog-toc" aria-label="Sommaire"><h2>Dans cet article</h2><ol>{headings.map(h=><li key={h}><a href={`#${sectionId(h)}`}>{h}</a></li>)}</ol><Link href="/devis" className="blog-toc-cta">Demander un devis →</Link></aside>
      <article className="blog-prose" aria-label={post.title}>
        {blocks.map((block,i)=>{
          if(block.type==="h2")return block.text===post.title?null:<h2 id={sectionId(block.text)} key={i}>{block.text}</h2>;

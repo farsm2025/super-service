@@ -73,11 +73,7 @@ export function Footer() {
           <p>Lundi à samedi : 7h30 – 17h00</p>
           <p>Dimanche : fermé</p>
         </div>
-        <p>
-          Chemin d&apos;Entre-Bois 36
-          <br />
-          1018 Lausanne
-        </p>
+
       </div>
       <div>
         <h3>Informations</h3>

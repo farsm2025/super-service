@@ -56,6 +56,7 @@ export default async function BlogArticle({params}:RouteProps){
          if(block.type==="h2")return block.text===post.title?null:<h2 id={sectionId(block.text)} key={i}>{block.text}</h2>;
          if(block.type==="h3")return <h3 key={i}>{block.text}</h3>;
          if(block.type==="paragraph")return <p key={i}>{block.text}</p>;
+         if(block.type!=="list")return null;
          const checkList=block.items.every(item=>item.checklist);
          return <ul key={i} className={checkList?"blog-checklist":"blog-list"}>
            {block.items.map((item,j)=><li key={j}>{item.checklist?<span className="blog-check-mark" aria-hidden="true">☐</span>:null}{item.text}</li>)}

@@ -1,4 +1,4 @@
-export const articleMarkdown = \`## Checklist ultime pour un déménagement sans stress à Lausanne
+export const articleMarkdown = `## Checklist ultime pour un déménagement sans stress à Lausanne
 
 Cartons à préparer, camion à réserver, changements d’adresse et appartement à nettoyer : un déménagement demande de coordonner beaucoup de choses. À Lausanne, les accès en pente, les possibilités de stationnement et les immeubles sans ascenseur méritent aussi une attention particulière.
 
@@ -225,4 +225,4 @@ Super Service propose des prestations de déménagement, de transport, de débar
 
 Pour préparer votre demande, indiquez vos deux adresses, la date souhaitée, les étages et les meubles à transporter. Quelques photos permettront aussi de mieux comprendre vos besoins.
 
-Découvrez les services de Super Service et demandez votre devis.\`;
+Découvrez les services de Super Service et demandez votre devis.`;

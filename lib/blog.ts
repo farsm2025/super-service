@@ -36,7 +36,7 @@ export const nettoyageBlogPost:BlogPost={
  category:"Conseils nettoyage",
  image:"/images/nettoyage/agent-nettoyage-super-service-vaud.webp",
  imageAlt:"Agent de nettoyage Super-Service intervenant dans le canton de Vaud",
- seoTitle:"Checklist nettoyage fin de bail à Lausanne | Super-Service",
+ seoTitle:"Checklist nettoyage fin de bail à Lausanne",
  seoDescription:"Nettoyage de fin de bail à Lausanne : checklist pièce par pièce, points contrôlés à l’état des lieux, usure normale, régies et conseils pratiques.",
  body:nettoyageArticleMarkdown,
 };

@@ -2,17 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageShell } from "../../ui/page-shell";
 import { Realizations } from "../../ui/realizations";
+import {CleaningSections} from "./cleaning-sections";
 import { ServiceGallery, type ServicePhoto } from "../../ui/service-gallery";
 
 export const metadata: Metadata = {
-  title: "Nettoyage de fin de bail à Lausanne",
+  title: "Entreprise de nettoyage à Lausanne",
   description:
-    "Nettoyage professionnel de fin de bail, bureaux et fin de chantier à Lausanne et dans le canton de Vaud. Devis gratuit sous 24 h.",
+    "Entreprise de nettoyage à Lausanne et dans le canton de Vaud. Fin de bail, bureaux, commerces, vitres et fin de chantier. Demandez un devis gratuit.",
   alternates: { canonical: "/services/nettoyage" },
   openGraph: {
-    title: "Nettoyage professionnel à Lausanne | Super-Service",
+    title: "Entreprise de nettoyage à Lausanne | Super-Service",
     description:
-      "Nettoyage de fin de bail, bureaux, vitres et fin de chantier à Lausanne et dans le canton de Vaud.",
+      "Nettoyage de fin de bail, bureaux, commerces, vitres et fin de chantier à Lausanne et dans le canton de Vaud.",
     url: "/services/nettoyage",
     images: [
       {
@@ -45,22 +46,21 @@ export default function Page() {
     <PageShell
       eyebrow="Service principal"
       breadcrumbLabel="Nettoyage"
-      title="Nettoyage professionnel à Lausanne"
-      intro="Fin de bail, bureaux ou après travaux : nous remettons les lieux en état avec une attention particulière aux détails."
+      title="Entreprise de nettoyage à Lausanne et dans le canton de Vaud"
+      intro="Super-Service propose des prestations de nettoyage pour les particuliers, les entreprises et les régies à Lausanne et dans le canton de Vaud. Fin de bail, bureaux, commerces ou fin de chantier : nous adaptons notre intervention à vos besoins. Demandez votre devis gratuit."
     >
       <section className="content-section">
         <div className="content-lead">
-          <h2>Des locaux propres, prêts à être rendus ou réutilisés</h2>
+          <h2>Nos services de nettoyage à Lausanne</h2>
           <p>
-            La prestation est adaptée à la surface, au niveau de salissure et au
-            délai disponible. Pour libérer les pièces avant notre intervention, nous pouvons également organiser un <Link className="contextual-link" href="/services/debarras">débarras</Link>. Pour préparer la remise des clés, consultez notre <Link className="contextual-link" href="/blog/checklist-nettoyage-fin-de-bail-lausanne">checklist de nettoyage de fin de bail</Link>.
+            Nous adaptons nos prestations à la surface, au niveau de salissure et au délai disponible pour les logements, bureaux, commerces et locaux après travaux. Pour libérer les pièces avant notre intervention, nous pouvons également organiser un <Link className="contextual-link" href="/services/debarras">débarras</Link>. Pour préparer la remise des clés, consultez notre <Link className="contextual-link" href="/blog/checklist-nettoyage-fin-de-bail-lausanne">checklist de nettoyage de fin de bail</Link>.
           </p>
         </div>
 
         <ServiceGallery
           id="nettoyage-en-images"
           eyebrow="Le soin dans chaque détail"
-          title="Un nettoyage professionnel, du matériel au résultat"
+          title="Une entreprise de nettoyage attentive aux détails"
           photos={photos}
         />
 
@@ -68,33 +68,31 @@ export default function Page() {
           <article>
             <h3>Nettoyage de fin de bail</h3>
             <p>
-              Cuisine, sanitaires, sols, surfaces, vitres et détails importants
-              avant l’état des lieux.
+              Cuisine, sanitaires, sols, placards, vitres et autres surfaces accessibles à préparer avant l’état des lieux.
             </p>
           </article>
           <article>
             <h3>Bureaux et commerces</h3>
             <p>
-              Nettoyage ponctuel ou régulier des espaces professionnels et zones
-              communes.
+              Entretien ponctuel ou régulier des bureaux, commerces et espaces professionnels selon les surfaces et la fréquence demandées.
             </p>
           </article>
           <article>
             <h3>Fin de chantier</h3>
             <p>
-              Évacuation des poussières, traces et résidus après rénovation ou
+              Nettoyage des poussières, traces et résidus accessibles après une rénovation ou des{" "}
               <Link className="contextual-link" href="/services/petits-travaux-jardinage">petits travaux</Link>.
             </p>
           </article>
           <article>
-            <h3>Nettoyage avec déménagement</h3>
+            <h3>Nettoyage de vitres</h3>
             <p>
-              Une seule équipe coordonne le <Link className="contextual-link" href="/services/demenagement">déménagement</Link> puis la remise en
-              état du logement.
+              Vitres, cadres et surfaces vitrées accessibles, selon les matériaux et les conditions d’accès.
             </p>
           </article>
         </div>
       </section>
+      <CleaningSections />
       <Realizations service="nettoyage" />
     </PageShell>
   );

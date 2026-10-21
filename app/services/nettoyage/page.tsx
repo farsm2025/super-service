@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageShell } from "../../ui/page-shell";
 import { Realizations } from "../../ui/realizations";
+import {CleaningSections} from "./cleaning-sections";
 import { ServiceGallery, type ServicePhoto } from "../../ui/service-gallery";
 
 export const metadata: Metadata = {
@@ -79,7 +80,7 @@ export default function Page() {
           <article>
             <h3>Fin de chantier</h3>
             <p>
-              Nettoyage des poussières, traces et résidus accessibles après une rénovation ou des
+              Nettoyage des poussières, traces et résidus accessibles après une rénovation ou des{" "}
               <Link className="contextual-link" href="/services/petits-travaux-jardinage">petits travaux</Link>.
             </p>
           </article>
@@ -91,6 +92,7 @@ export default function Page() {
           </article>
         </div>
       </section>
+      <CleaningSections />
       <Realizations service="nettoyage" />
     </PageShell>
   );

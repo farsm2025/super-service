@@ -53,10 +53,21 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
   const [notice, setNotice] = useState("");
   const [reminderState, setReminderState] = useState<ReminderState>("loading");
   const [reminderMessage, setReminderMessage] = useState("");
+  const refreshInFlight = useRef(false);
+  const lastRefreshAt = useRef(Date.now());
 
   async function refresh() {
-    const response = await fetch("/api/gestion/rendez-vous", {cache: "no-store"});
-    if (response.ok) setAppointments((await response.json()).appointments);
+    if (refreshInFlight.current) return;
+    refreshInFlight.current = true;
+    lastRefreshAt.current = Date.now();
+    try {
+      const response = await fetch("/api/gestion/rendez-vous", {cache: "no-store"});
+      if (response.ok) setAppointments((await response.json()).appointments);
+    } catch (error) {
+      console.error("Calendar refresh failed", error);
+    } finally {
+      refreshInFlight.current = false;
+    }
   }
 
   useEffect(() => {
@@ -70,8 +81,25 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
       }catch{return "unsupported"}
     };
     reminderStatus().then(setReminderState);
-    const timer = window.setInterval(refresh, 30000);
-    return () => window.clearInterval(timer);
+    // Only poll while the calendar is visible; Neon can sleep when the tab is inactive.
+    const refreshIfVisible = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    const onFocus = () => {
+      // Avoid duplicate calls when both focus and visibilitychange fire on return.
+      if (Date.now() - lastRefreshAt.current > 10000) refreshIfVisible();
+    };
+    const timer = window.setInterval(refreshIfVisible, 15 * 60 * 1000);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("focus", onFocus);
+    };
   }, []);
 
   useEffect(() => {
@@ -113,7 +141,7 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
       const response=await fetch("/api/gestion/push",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({subscription:subscription.toJSON()})});
       if(!response.ok){await subscription.unsubscribe();throw new Error("Push registration failed")}
       setReminderState("on");
-      setReminderMessage("Rappels activés : une notification sera envoyée une heure avant chaque rendez-vous.");
+      setReminderMessage("Rappels activés : une notification sera envoyée environ 24 heures avant chaque rendez-vous.");
     }catch(error){
       console.error("Reminder toggle failed",error);
       setReminderState("off");

@@ -54,7 +54,7 @@ function reminderBody(row:DueReminder){
 export async function sendDueAppointmentReminders(){
   configureWebPush();
   const sql=database();
-  const rows=await sql.query(`SELECT a.id AS appointment_id,a.customer_name,a.customer_address,a.starts_at,s.id AS subscription_id,s.subscription FROM appointments a CROSS JOIN push_subscriptions s LEFT JOIN appointment_push_deliveries d ON d.appointment_id=a.id AND d.subscription_id=s.id AND d.scheduled_for=a.starts_at WHERE a.status IN ('confirmed','modified') AND a.starts_at>now()+interval '23 hours 30 minutes' AND a.starts_at<=now()+interval '24 hours' AND d.id IS NULL ORDER BY a.starts_at LIMIT 100`,[]) as DueReminder[];
+  const rows=await sql.query(`SELECT a.id AS appointment_id,a.customer_name,a.customer_address,a.starts_at,s.id AS subscription_id,s.subscription FROM appointments a CROSS JOIN push_subscriptions s LEFT JOIN appointment_push_deliveries d ON d.appointment_id=a.id AND d.subscription_id=s.id AND d.scheduled_for=a.starts_at WHERE a.status IN ('confirmed','modified') AND a.starts_at>now()+interval '22 hours 55 minutes' AND a.starts_at<=now()+interval '24 hours' AND d.id IS NULL ORDER BY a.starts_at LIMIT 100`,[]) as DueReminder[];
   let sent=0;
   let failed=0;
   for(const row of rows){

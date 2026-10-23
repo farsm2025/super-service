@@ -9,7 +9,7 @@ async function authorized(){return Boolean(await getAdminSession())}
 
 export async function GET(){
   if(!await authorized())return NextResponse.json({error:"Non autorisé"},{status:401});
-  return NextResponse.json({publicKey:vapidPublicKey(),reminderMinutes:60});
+  return NextResponse.json({publicKey:vapidPublicKey(),reminderMinutes:1440});
 }
 
 export async function POST(request:Request){

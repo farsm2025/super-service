@@ -40,7 +40,7 @@ export async function sendPushActivationConfirmation(subscription:PushSubscripti
   configureWebPush();
   await webpush.sendNotification(subscription,JSON.stringify({
     title:"Rappels Super-Service activés",
-    body:"Ce téléphone recevra une notification une heure avant chaque rendez-vous.",
+    body:"Ce téléphone recevra une notification environ 24 heures avant chaque rendez-vous.",
     url:"/gestion",
     tag:"super-service-push-activation",
   }),{TTL:60*10,urgency:"high"});
@@ -54,14 +54,14 @@ function reminderBody(row:DueReminder){
 export async function sendDueAppointmentReminders(){
   configureWebPush();
   const sql=database();
-  const rows=await sql.query(`SELECT a.id AS appointment_id,a.customer_name,a.customer_address,a.starts_at,s.id AS subscription_id,s.subscription FROM appointments a CROSS JOIN push_subscriptions s LEFT JOIN appointment_push_deliveries d ON d.appointment_id=a.id AND d.subscription_id=s.id AND d.scheduled_for=a.starts_at WHERE a.status IN ('confirmed','modified') AND a.starts_at>now() AND a.starts_at<=now()+interval '60 minutes' AND d.id IS NULL ORDER BY a.starts_at LIMIT 100`,[]) as DueReminder[];
+  const rows=await sql.query(`SELECT a.id AS appointment_id,a.customer_name,a.customer_address,a.starts_at,s.id AS subscription_id,s.subscription FROM appointments a CROSS JOIN push_subscriptions s LEFT JOIN appointment_push_deliveries d ON d.appointment_id=a.id AND d.subscription_id=s.id AND d.scheduled_for=a.starts_at WHERE a.status IN ('confirmed','modified') AND a.starts_at>now()+interval '23 hours 30 minutes' AND a.starts_at<=now()+interval '24 hours' AND d.id IS NULL ORDER BY a.starts_at LIMIT 100`,[]) as DueReminder[];
   let sent=0;
   let failed=0;
   for(const row of rows){
     const claimed=await sql.query(`INSERT INTO appointment_push_deliveries (appointment_id,subscription_id,scheduled_for) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING RETURNING id`,[row.appointment_id,row.subscription_id,row.starts_at]);
     if(!claimed[0])continue;
     try{
-      await webpush.sendNotification(row.subscription,JSON.stringify({title:"Rendez-vous dans 1 heure",body:reminderBody(row),url:`/gestion?demande=${row.appointment_id}`,tag:`appointment-${row.appointment_id}-${row.starts_at}`}),{TTL:60*60,urgency:"high"});
+      await webpush.sendNotification(row.subscription,JSON.stringify({title:"Rendez-vous demain",body:reminderBody(row),url:`/gestion?demande=${row.appointment_id}`,tag:`appointment-${row.appointment_id}-${row.starts_at}`}),{TTL:60*60,urgency:"high"});
       sent+=1;
     }catch(error){
       failed+=1;

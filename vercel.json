@@ -6,7 +6,7 @@
   "crons": [
     {
       "path": "/api/cron/rappels-rendez-vous",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 * * * *"
     }
   ]
 }

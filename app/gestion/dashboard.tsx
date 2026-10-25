@@ -141,7 +141,7 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
       const response=await fetch("/api/gestion/push",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({subscription:subscription.toJSON()})});
       if(!response.ok){await subscription.unsubscribe();throw new Error("Push registration failed")}
       setReminderState("on");
-      setReminderMessage("Rappels activés : une notification sera envoyée environ 24 heures avant chaque rendez-vous.");
+      setReminderMessage("Rappels activés : deux notifications seront envoyées, environ 24 heures puis 1 à 2 heures avant chaque rendez-vous.");
     }catch(error){
       console.error("Reminder toggle failed",error);
       setReminderState("off");

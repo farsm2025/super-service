@@ -9,7 +9,7 @@ import {getBlogPosts} from "../lib/blog";
 const pageLastModified:Record<string,string>={
   "/":"2026-10-29",
   "/services":"2026-10-29",
-  "/services/demenagement":"2026-10-18",
+  "/services/demenagement":"2026-10-29",
   "/services/nettoyage":"2026-10-21",
   "/services/location-camion":"2026-10-20",
   "/services/transport-et-livraison":"2026-10-18",

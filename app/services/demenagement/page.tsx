@@ -39,7 +39,7 @@ export default function Page() {
           <p>
             Nous adaptons l’équipe, le véhicule et le matériel au volume à
             transporter. Vos meubles et objets fragiles sont protégés avant le
-            chargement. Si vous conduisez vous-même, découvrez aussi notre <Link className="contextual-link" href="/services/location-camion">location de camion à Lausanne</Link>.
+            chargement. Pour planifier les étapes, consultez notre <Link className="contextual-link" href="/blog/checklist-demenagement-lausanne">checklist de déménagement à Lausanne</Link>. Si vous conduisez vous-même, découvrez aussi notre <Link className="contextual-link" href="/services/location-camion">location de camion à Lausanne</Link>.
           </p>
         </div>
 

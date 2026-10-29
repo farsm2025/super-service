@@ -38,7 +38,7 @@ export default function ServicesPage() {
         <div className="services-directory-heading">
           <p className="eyebrow">Une solution pour chaque besoin</p>
           <h2 id="services-directory-title">Choisissez le service qui vous convient</h2>
-          <p>Chaque prestation peut être organisée séparément ou combinée avec d’autres services selon votre projet.</p>
+          <p>Chaque prestation peut être organisée séparément ou combinée avec d’autres services selon votre projet. Pour organiser votre départ, découvrez notre <Link className="contextual-link" href="/services/demenagement">entreprise de déménagement à Lausanne</Link>, notre <Link className="contextual-link" href="/services/nettoyage">entreprise de nettoyage à Lausanne</Link> et nos solutions de <Link className="contextual-link" href="/services/location-camion">location de camion avec ou sans chauffeur</Link>.</p>
         </div>
         <div className="services-directory-grid">
           {services.map((service) => (

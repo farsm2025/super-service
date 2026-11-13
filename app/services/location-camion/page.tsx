@@ -89,13 +89,13 @@ export default async function Page(){
                 <span>Demi-journée (6 h)</span>
                 <strong>CHF 110.–</strong>
                 <small className="rental-mileage">200 km inclus</small>
-                <div className="rental-unlimited"><span>Kilométrage illimité</span><strong>CHF 200.–</strong></div>
+                <div className="rental-unlimited"><span>Kilométrage illimité</span><strong>CHF 220.–</strong></div>
               </div>
               <div className="featured-price">
                 <span>Journée (12 h)</span>
                 <strong>CHF 220.–</strong>
                 <small className="rental-mileage">400 km inclus</small>
-                <div className="rental-unlimited"><span>Kilométrage illimité</span><strong>CHF 400.–</strong></div>
+                <div className="rental-unlimited"><span>Kilométrage illimité</span><strong>CHF 440.–</strong></div>
               </div>
             </div>}
           <p className="rental-base-note">Tarifs du camion sans chauffeur</p>

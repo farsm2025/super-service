@@ -2,7 +2,7 @@
 import {useEffect,useMemo,useRef,useState} from "react";
 import type {ChangeEvent,FormEvent} from "react";
 import type {QuoteNote,QuoteStatus} from "@/lib/quote-types";
-import {quoteStatusLabels} from "@/lib/quote-notes";
+import {quoteStatusLabels} from "@/lib/quote-types";
 
 type FormState={firstName:string;lastName:string;phone:string;email:string;address:string;service:string;description:string;status:QuoteStatus;reminderAt:string};
 const blank:FormState={firstName:"",lastName:"",phone:"",email:"",address:"",service:"",description:"",status:"a_traiter",reminderAt:""};

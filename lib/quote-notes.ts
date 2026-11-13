@@ -1,16 +1,6 @@
 import {database} from "./db";
 
-export const quoteStatuses=["a_traiter","visite_prevue","devis_envoye","termine"] as const;
-export type QuoteStatus=typeof quoteStatuses[number];
-export const quoteStatusLabels:Record<QuoteStatus,string>={
-  a_traiter:"À traiter",visite_prevue:"Visite prévue",devis_envoye:"Devis envoyé",termine:"Terminé"
-};
-export type QuotePhoto={id:string;filename:string;caption:string;createdAt:string};
-export type QuoteNote={
-  id:string;firstName:string;lastName:string;phone:string;email:string;address:string;
-  service:string;description:string;status:QuoteStatus;appointmentId:string|null;
-  reminderAt:string|null;createdAt:string;updatedAt:string;photos:QuotePhoto[];
-};
+import {quoteStatuses,type QuoteNote,type QuoteStatus} from "./quote-types";
 type QuoteRow={id:string;first_name:string;last_name:string;phone:string;email:string;address:string;
  service:string;description:string;status:QuoteStatus;appointment_id:string|null;reminder_at:string|null;
  created_at:string;updated_at:string};
@@ -42,7 +32,8 @@ export function noteInput(body:Record<string,unknown>){
   const field=(key:string,max:number)=>typeof body[key]==="string"?(body[key] as string).trim().slice(0,max):"";
   const status=field("status",30);
   const rawReminder=field("reminderAt",40);
-  const reminderAt=rawReminder&&/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(rawReminder)?new Date(rawReminder).toISOString():null;
+  const parsedReminder=rawReminder?new Date(rawReminder):null;
+  const reminderAt=parsedReminder&&!Number.isNaN(parsedReminder.getTime())?parsedReminder.toISOString():null;
   return {firstName:field("firstName",100),lastName:field("lastName",100),
     phone:field("phone",50),email:field("email",180),address:field("address",300),
     service:field("service",100),description:field("description",12000),

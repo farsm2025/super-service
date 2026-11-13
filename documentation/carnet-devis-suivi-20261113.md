@@ -35,3 +35,11 @@
 - Déploiement précédent de production Vercel : réassignable si besoin.
 - L'architecture prévoit de ne pas altérer les tables des rendez-vous.
 - Les nouvelles tables sont additives ; aucune suppression de données n'est nécessaire pour restaurer l'ancienne application.
+
+## Contrôles complémentaires du 13 novembre 2026
+- Variables Vercel preview propres à cette branche: `DATABASE_URL` et `QUOTE_NOTES_TEST_DATABASE_URL` configurées vers la branche Neon de test `br-bitter-pine-ax8w21g6`.
+- Le code du carnet refuse la connexion de production en mode preview si `QUOTE_NOTES_TEST_DATABASE_URL` manque.
+- Test SQL: création de la fiche TEST_CARNET_2, insertion puis lecture d'une image PNG 68 octets, mise à jour de la légende et du statut: réussis sur branche Neon de test.
+- Point de contrôle: production Neon contient 39 rendez-vous, la copie de test 37 (copie non synchronisée). Aucune écriture sur production.
+- Déploiement preview à reconstruire après configuration des variables. Le statut READY d'un ancien build ne prouve pas qu'il utilise les nouvelles variables.
+- La prise et l'affichage d'une vraie photo sur smartphone restent à tester par navigateur connecté. Aucune promesse de zéro surcoût Neon.

@@ -8,7 +8,7 @@ import {Realizations} from "../../ui/realizations";
 
 export function generateMetadata():Metadata{
   const title="Location de camions avec ou sans chauffeur à Lausanne";
-  const description="Location de deux camions avec ou sans chauffeur à Lausanne : Iveco Daily 17 m³ et Citroën Jumper 20 m³ avec hayon. Kilométrage illimité et permis B.";
+  const description="Location de deux camions avec ou sans chauffeur à Lausanne : Iveco Daily 17 m³ et Citroën Jumper 20 m³ avec hayon. Forfaits kilométriques ou kilométrage illimité pour l’Iveco Daily, avec permis B.";
   return {title,description,alternates:{canonical:"/services/location-camion"},openGraph:{title,description,images:[{url:"/images/location-camion/citroen-jumper-exterieur.webp",width:1600,height:1200,alt:"Camions de location avec ou sans chauffeur à Lausanne"}]}};
 }
 
@@ -57,7 +57,7 @@ export default async function Page(){
   const sharedDetails=[
     ["Permis nécessaire",service?.licenseRequired||"Permis catégorie B pour conduire vous-même"],
     ["Caution",service?.deposit||"CHF 100.– par véhicule"],
-    ["Kilométrage",service?.includedMileage||"Illimité"],
+    ["Kilométrage","Selon le véhicule et la formule choisie (voir tarifs ci-dessus)"],
     ["Prise en charge et restitution",service?.pickupLocation||"Rue du Clos-de-Bulle 5, 1004 Lausanne"],
   ];
   return <PageShell eyebrow="Avec ou sans chauffeur" breadcrumbLabel="Location de camion" title="Location de deux camions à Lausanne" intro="Choisissez le véhicule adapté à votre déménagement ou à votre transport : conduisez-le vous-même ou ajoutez un chauffeur au tarif de CHF 25.– par heure.">
@@ -69,7 +69,22 @@ export default async function Page(){
           <div className="rental-vehicle-gallery">
             {vehicle.images.map((image,index)=><figure key={image.src}><div className="rental-vehicle-photo"><Image src={image.src} alt={image.alt} fill priority={vehicle.vehicleId==="iveco"&&index===0} sizes="(max-width:680px) 100vw,(max-width:1100px) 50vw,300px"/></div><figcaption>{image.caption}</figcaption></figure>)}
           </div>
-          <div className="rental-prices" aria-label={`Tarifs sans chauffeur pour ${vehicle.name}`}><div><span>Demi-journée</span><strong>{vehicle.halfDayPrice}</strong></div><div className="featured-price"><span>Journée complète</span><strong>{vehicle.fullDayPrice}</strong></div></div>
+          {vehicle.vehicleId==="iveco"?
+            <div className="rental-prices" aria-label="Tarifs sans chauffeur pour le Grand fourgon Iveco Daily">
+              <div>
+                <span>Demi-journée (6 h)</span>
+                <strong>CHF 100.–</strong>
+                <small className="rental-mileage">200 km inclus</small>
+                <div className="rental-unlimited"><span>Kilométrage illimité</span><strong>CHF 200.–</strong></div>
+              </div>
+              <div className="featured-price">
+                <span>Journée (12 h)</span>
+                <strong>CHF 200.–</strong>
+                <small className="rental-mileage">400 km inclus</small>
+                <div className="rental-unlimited"><span>Kilométrage illimité</span><strong>CHF 400.–</strong></div>
+              </div>
+            </div>:
+            <div className="rental-prices" aria-label={`Tarifs sans chauffeur pour ${vehicle.name}`}><div><span>Demi-journée</span><strong>{vehicle.halfDayPrice}</strong></div><div className="featured-price"><span>Journée complète</span><strong>{vehicle.fullDayPrice}</strong></div></div>}
           <p className="rental-base-note">Tarifs du camion sans chauffeur</p>
           <Link className="button button-primary" href="/devis">Réserver avec ou sans chauffeur</Link>
         </article>)}

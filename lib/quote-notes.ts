@@ -4,7 +4,7 @@ import {quoteStatuses,type QuoteNote,type QuoteStatus} from "./quote-types";
 type QuoteRow={id:string;first_name:string;last_name:string;phone:string;email:string;address:string;
  service:string;description:string;status:QuoteStatus;appointment_id:string|null;reminder_at:string|null;
  created_at:string;updated_at:string};
-type PhotoRow={id:string;quote_id:string;filename:string;caption:string;created_at:string;pathname:string};
+type PhotoRow={id:string;quote_id:string;filename:string;caption:string;created_at:string};
 function mapped(row:QuoteRow,photos:PhotoRow[]):QuoteNote{
   return {id:row.id,firstName:row.first_name,lastName:row.last_name,phone:row.phone,
     email:row.email,address:row.address,service:row.service,description:row.description,
@@ -18,14 +18,14 @@ const columns="id,first_name,last_name,phone,email,address,service,description,s
 export async function listQuoteNotes():Promise<QuoteNote[]>{
   const sql=database();
   const notes=await sql.query(`SELECT ${columns} FROM quote_notes ORDER BY updated_at DESC LIMIT 500`,[]) as QuoteRow[];
-  const photos=await sql.query("SELECT id,quote_id,filename,caption,created_at,pathname FROM quote_photos ORDER BY created_at",[]) as PhotoRow[];
+  const photos=await sql.query("SELECT id,quote_id,filename,caption,created_at FROM quote_photos ORDER BY created_at",[]) as PhotoRow[];
   return notes.map(row=>mapped(row,photos));
 }
 export async function getQuoteNote(id:string):Promise<QuoteNote|null>{
   const sql=database();
   const notes=await sql.query(`SELECT ${columns} FROM quote_notes WHERE id=$1`,[id]) as QuoteRow[];
   if(!notes.length)return null;
-  const photos=await sql.query("SELECT id,quote_id,filename,caption,created_at,pathname FROM quote_photos WHERE quote_id=$1 ORDER BY created_at",[id]) as PhotoRow[];
+  const photos=await sql.query("SELECT id,quote_id,filename,caption,created_at FROM quote_photos WHERE quote_id=$1 ORDER BY created_at",[id]) as PhotoRow[];
   return mapped(notes[0],photos);
 }
 export function noteInput(body:Record<string,unknown>){
@@ -65,12 +65,26 @@ export async function linkQuoteAppointment(id:string,appointmentId:string|null){
 }
 export async function getPhotoRecord(photoId:string){
   const sql=database();
-  const rows=await sql.query("SELECT id,quote_id,pathname,filename,caption FROM quote_photos WHERE id=$1",[photoId]) as PhotoRow[];
+  const rows=await sql.query("SELECT id,quote_id,filename,caption,mime_type FROM quote_photos WHERE id=$1",[photoId]) as Array<{id:string;quote_id:string;filename:string;caption:string;mime_type:string}>;
   return rows[0]||null;
 }
-export async function addQuotePhoto(quoteId:string,pathname:string,filename:string){
+export async function readQuotePhoto(photoId:string){
   const sql=database();
-  const rows=await sql.query("INSERT INTO quote_photos(quote_id,pathname,filename) VALUES($1,$2,$3) RETURNING id",[quoteId,pathname,filename]);
+  const rows=await sql.query("SELECT encode(photo_data,'base64') AS base64,mime_type FROM quote_photos WHERE id=$1",[photoId]) as Array<{base64:string;mime_type:string}>;
+  return rows[0]||null;
+}
+export async function addQuotePhoto(quoteId:string,data:ArrayBuffer,mimeType:string,filename:string){
+  const sql=database();
+  // A deliberately strict shared limit guards the existing Neon calendar project.
+  if(data.byteLength===0||data.byteLength>450_000)throw new Error("Photo compressée trop volumineuse (450 Ko maximum)");
+  const base64=Buffer.from(data).toString("base64");
+  const rows=await sql.query(`INSERT INTO quote_photos(quote_id,photo_data,mime_type,filename)
+    SELECT $1,decode($2,'base64'),$3,$4
+    WHERE (SELECT count(*) FROM quote_photos WHERE quote_id=$1)<15
+      AND (SELECT coalesce(sum(octet_length(photo_data)),0) FROM quote_photos)+$5 <= 60000000
+      AND EXISTS(SELECT 1 FROM quote_notes WHERE id=$1)
+    RETURNING id`,[quoteId,base64,mimeType,filename.slice(0,180),data.byteLength]);
+  if(!rows.length)throw new Error("Limite de 15 photos par fiche ou 60 Mo pour le carnet atteinte");
   return String(rows[0].id);
 }
 export async function updateQuotePhotoCaption(id:string,caption:string){

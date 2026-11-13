@@ -60,7 +60,7 @@ export default async function Page(){
     ["Kilométrage","Selon le véhicule et la formule choisie (voir tarifs ci-dessus)"],
     ["Prise en charge et restitution",service?.pickupLocation||"Rue du Clos-de-Bulle 5, 1004 Lausanne"],
   ];
-  return <PageShell eyebrow="Avec ou sans chauffeur" breadcrumbLabel="Location de camion" title="Location de deux camions à Lausanne" intro="Choisissez le véhicule adapté à votre déménagement ou à votre transport : conduisez-le vous-même ou ajoutez un chauffeur au tarif de CHF 25.– par heure.">
+  return <PageShell eyebrow="Avec ou sans chauffeur" breadcrumbLabel="Location de camion" title="Location de deux camions à Lausanne" intro="Choisissez le véhicule adapté à votre déménagement ou à votre transport : conduisez-le vous-même ou ajoutez un chauffeur au tarif de CHF 30.– par heure.">
     <section className="rental-fleet" aria-labelledby="fleet-title">
       <div className="section-heading compact"><p className="eyebrow">Deux véhicules disponibles</p><h2 id="fleet-title">Choisissez le volume adapté à votre besoin</h2><p>Comparez les deux véhicules, leurs équipements et leurs tarifs de location.</p></div>
       <div className="rental-vehicle-grid">
@@ -104,7 +104,7 @@ export default async function Page(){
       </div>
       <aside className="driver-option" aria-labelledby="driver-option-title">
         <div className="driver-option-copy"><span className="driver-option-icon"><Icon name="driver"/></span><div><p className="eyebrow light">Option chauffeur</p><h2 id="driver-option-title">Vous préférez être accompagné ?</h2><p>Ajoutez un chauffeur à la location de l’Iveco Daily ou du Citroën Jumper.</p></div></div>
-        <div className="driver-option-prices"><div><span>Tarif chauffeur</span><strong>+ CHF 25.– / heure</strong></div></div>
+        <div className="driver-option-prices"><div><span>Tarif chauffeur</span><strong>+ CHF 30.– / heure</strong></div></div>
         <p className="driver-option-note">Le supplément chauffeur s’ajoute au tarif de location du véhicule choisi.</p>
       </aside>
     </section>

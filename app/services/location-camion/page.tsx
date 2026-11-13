@@ -35,8 +35,8 @@ const defaultVehicles:VehiclePresentation[]=[
     name:"Citroën Jumper avec hayon",
     volume:"20 m³",
     feature:"Caisse grand volume avec hayon élévateur",
-    halfDayPrice:"CHF 75.–",
-    fullDayPrice:"CHF 150.–",
+    halfDayPrice:"CHF 110.–",
+    fullDayPrice:"CHF 220.–",
     images:[
       {src:"/images/location-camion/citroen-jumper-exterieur.webp",alt:"Citroën Jumper de 20 m³ avec hayon à louer à Lausanne",caption:"Citroën Jumper – caisse de 20 m³"},
       {src:"/images/location-camion/citroen-jumper-hayon.webp",alt:"Hayon et espace de chargement du Citroën Jumper de 20 m³",caption:"Espace de chargement avec hayon"},
@@ -84,7 +84,20 @@ export default async function Page(){
                 <div className="rental-unlimited"><span>Kilométrage illimité</span><strong>CHF 400.–</strong></div>
               </div>
             </div>:
-            <div className="rental-prices" aria-label={`Tarifs sans chauffeur pour ${vehicle.name}`}><div><span>Demi-journée</span><strong>{vehicle.halfDayPrice}</strong></div><div className="featured-price"><span>Journée complète</span><strong>{vehicle.fullDayPrice}</strong></div></div>}
+            <div className="rental-prices" aria-label="Tarifs sans chauffeur pour le Citroën Jumper avec hayon">
+              <div>
+                <span>Demi-journée (6 h)</span>
+                <strong>CHF 110.–</strong>
+                <small className="rental-mileage">200 km inclus</small>
+                <div className="rental-unlimited"><span>Kilométrage illimité</span><strong>CHF 200.–</strong></div>
+              </div>
+              <div className="featured-price">
+                <span>Journée (12 h)</span>
+                <strong>CHF 220.–</strong>
+                <small className="rental-mileage">400 km inclus</small>
+                <div className="rental-unlimited"><span>Kilométrage illimité</span><strong>CHF 400.–</strong></div>
+              </div>
+            </div>}
           <p className="rental-base-note">Tarifs du camion sans chauffeur</p>
           <Link className="button button-primary" href="/devis">Réserver avec ou sans chauffeur</Link>
         </article>)}

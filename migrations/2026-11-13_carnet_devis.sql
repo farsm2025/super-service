@@ -20,7 +20,8 @@ CREATE INDEX IF NOT EXISTS quote_notes_appointment_idx ON quote_notes(appointmen
 CREATE TABLE IF NOT EXISTS quote_photos (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   quote_id uuid NOT NULL REFERENCES quote_notes(id) ON DELETE CASCADE,
-  pathname text NOT NULL UNIQUE,
+  photo_data bytea NOT NULL CHECK (octet_length(photo_data) <= 450000),
+  mime_type text NOT NULL CHECK (mime_type IN ('image/jpeg','image/png','image/webp')),
   filename text NOT NULL DEFAULT '',
   caption text NOT NULL DEFAULT '',
   created_at timestamptz NOT NULL DEFAULT now()

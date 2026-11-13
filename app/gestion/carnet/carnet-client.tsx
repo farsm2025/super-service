@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useMemo,useRef,useState} from "react";
 import type {ChangeEvent,FormEvent} from "react";
-import type {QuoteNote,QuoteStatus} from "@/lib/quote-notes";
+import type {QuoteNote,QuoteStatus} from "@/lib/quote-types";
 import {quoteStatusLabels} from "@/lib/quote-notes";
 
 type FormState={firstName:string;lastName:string;phone:string;email:string;address:string;service:string;description:string;status:QuoteStatus;reminderAt:string};

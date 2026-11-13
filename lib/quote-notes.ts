@@ -1,4 +1,17 @@
-import {database} from "./db";
+import {neon} from "@neondatabase/serverless";
+
+/**
+ * Le carnet n'utilise jamais la connexion générale en prévisualisation.
+ * Renseigner QUOTE_NOTES_TEST_DATABASE_URL avec la connexion de la branche Neon de test,
+ * ou bloquer les opérations. En production, la connexion habituelle est conservée.
+ */
+function quoteDatabase(){
+  const preview=process.env.VERCEL_ENV==="preview";
+  const connectionString=preview?process.env.QUOTE_NOTES_TEST_DATABASE_URL:process.env.DATABASE_URL;
+  if(!connectionString)throw new Error(preview?"Carnet de devis indisponible en prévisualisation sans base Neon de test.":"DATABASE_URL manquant");
+  return neon(connectionString);
+}
+const database=quoteDatabase;
 
 import {quoteStatuses,type QuoteNote,type QuoteStatus} from "./quote-types";
 type QuoteRow={id:string;first_name:string;last_name:string;phone:string;email:string;address:string;

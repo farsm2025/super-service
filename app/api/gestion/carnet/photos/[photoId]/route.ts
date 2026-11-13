@@ -1,7 +1,6 @@
 import {NextResponse} from "next/server";
 import {getAdminSession} from "@/lib/admin-auth";
-import {getPhotoRecord,updateQuotePhotoCaption} from "@/lib/quote-notes";
-import {readPrivateQuotePhoto} from "@/lib/private-quote-photo";
+import {getPhotoRecord,readQuotePhoto,updateQuotePhotoCaption} from "@/lib/quote-notes";
 export const dynamic="force-dynamic";
 type Context={params:Promise<{photoId:string}>};
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -11,9 +10,10 @@ export async function GET(_:Request,{params}:Context){
   const photo=await getPhotoRecord(photoId);
   if(!photo)return NextResponse.json({error:"Photo introuvable"},{status:404});
   try{
-    const original=await readPrivateQuotePhoto(photo.pathname);
-    const type=original.headers.get("content-type")||"image/jpeg";
-    return new Response(original.body,{headers:{"Content-Type":type,"Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff","Content-Security-Policy":"default-src 'none'; sandbox"}});
+    const original=await readQuotePhoto(photoId);
+    if(!original)return NextResponse.json({error:"Photo introuvable"},{status:404});
+    const type=original.mime_type;
+    return new Response(Buffer.from(original.base64,"base64"),{headers:{"Content-Type":type,"Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff","Content-Security-Policy":"default-src 'none'; sandbox"}});
   }catch(error){console.error("Photo read failed",error);return NextResponse.json({error:"Photo indisponible"},{status:502})}
 }
 export async function PATCH(request:Request,{params}:Context){

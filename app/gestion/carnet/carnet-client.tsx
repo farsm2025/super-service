@@ -8,6 +8,14 @@ type FormState={firstName:string;lastName:string;phone:string;email:string;addre
 const blank:FormState={firstName:"",lastName:"",phone:"",email:"",address:"",service:"",description:"",status:"a_traiter",reminderAt:""};
 const services=["Déménagement","Nettoyage","Transport et livraison","Débarras","Montage de meubles","Petits travaux et jardinage","Location de camion","Autre"];
 type ExistingAppointment={id:string;customerName:string;preferredDate:string};
+type NewAppointmentForm={name:string;email:string;phone:string;address:string;requestType:string;reason:string;startsAt:string;adminNotes:string};
+function appointmentFromNote(note:QuoteNote):NewAppointmentForm{
+  const service=note.service.toLowerCase();
+  const requestType=service.includes("déménag")?"demenagement":service.includes("nettoy")?"nettoyage":service.includes("livraison")||service.includes("transport")?"livraison":service.includes("débarras")?"debarras":service.includes("travaux")||service.includes("montage")||service.includes("jardinage")?"travaux":"visite";
+  return {name:[note.firstName,note.lastName].filter(Boolean).join(" "),email:note.email,phone:note.phone,address:note.address,requestType,
+    reason:(note.description.trim()||("Visite pour devis : "+(note.service||"prestation à définir"))).slice(0,2000),startsAt:"",adminNotes:""};
+}
+
 function editForm(note:QuoteNote):FormState{
   return {firstName:note.firstName,lastName:note.lastName,phone:note.phone,email:note.email,address:note.address,
     service:note.service,description:note.description,status:note.status,
@@ -48,6 +56,9 @@ export function CarnetClient(){
   const [loading,setLoading]=useState(true);
   const [appointments,setAppointments]=useState<ExistingAppointment[]>([]);
   const [uploading,setUploading]=useState(false);
+  const [newAppointment,setNewAppointment]=useState<NewAppointmentForm|null>(null);
+  const [creatingAppointment,setCreatingAppointment]=useState(false);
+
   const camera=useRef<HTMLInputElement>(null);
   const files=useRef<HTMLInputElement>(null);
   const selected=notes.find(n=>n.id===selectedId)||null;
@@ -66,8 +77,8 @@ export function CarnetClient(){
     const text=[note.firstName,note.lastName,note.phone,note.address,note.service,note.description].join(" ").toLowerCase();
     return text.includes(search.trim().toLowerCase())&&(!filter||note.status===filter);
   }),[notes,search,filter]);
-  function select(note:QuoteNote){setSelectedId(note.id);setForm(editForm(note));setError("");setMessage("")}
-  function createNew(){setSelectedId(null);setForm(blank);setError("");setMessage("");window.scrollTo({top:0,behavior:"smooth"})}
+  function select(note:QuoteNote){setNewAppointment(null);setSelectedId(note.id);setForm(editForm(note));setError("");setMessage("")}
+  function createNew(){setNewAppointment(null);setSelectedId(null);setForm(blank);setError("");setMessage("");window.scrollTo({top:0,behavior:"smooth"})}
   function setField<K extends keyof FormState>(key:K,value:FormState[K]){setForm(old=>({...old,[key]:value}))}
   async function save(e:FormEvent){
     e.preventDefault();setBusy(true);setError("");setMessage("");
@@ -108,6 +119,28 @@ export function CarnetClient(){
       const data=await responseMessage(await fetch("/api/gestion/carnet/"+selected.id,{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({action:"link_appointment",appointmentId:id||null})}));
       await refresh();setMessage(data.note?.appointmentId?"Rendez-vous associé.":"Rendez-vous dissocié.");
     }catch(e){setError(e instanceof Error?e.message:"Association impossible")}finally{setBusy(false)}
+  }
+  async function createAppointmentFromNote(e:FormEvent<HTMLFormElement>){
+    e.preventDefault();
+    if(!selected||!newAppointment||creatingAppointment)return;
+    if(selected.appointmentId){setError("Cette fiche possède déjà un rendez-vous associé. Vérifiez-le avant d'en créer un autre.");return}
+    if(!window.confirm("Confirmer la création du rendez-vous ? En production, un e-mail sera envoyé au client."))return;
+    setCreatingAppointment(true);setError("");setMessage("");
+    let createdId:string|null=null;
+    try{
+      const data=await responseMessage(await fetch("/api/gestion/rendez-vous",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(newAppointment)}));
+      const appointment=data.appointment as {id?:string;customerName?:string;preferredDate?:string};
+      if(!appointment?.id)throw new Error("Création non confirmée par le calendrier.");
+      createdId=appointment.id;
+      setAppointments(old=>[...old,{id:appointment.id!,customerName:appointment.customerName||newAppointment.name,preferredDate:appointment.preferredDate||newAppointment.startsAt.slice(0,10)}]);
+      const association=await responseMessage(await fetch("/api/gestion/carnet/"+selected.id,{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({action:"link_appointment",appointmentId:appointment.id})}));
+      if(!association.note?.appointmentId)throw new Error("Association non confirmée.");
+      await refresh();setNewAppointment(null);setMessage("Rendez-vous créé et associé à la fiche. Retrouvez-le dans le calendrier.");
+    }catch(err){
+      const reason=err instanceof Error?err.message:"Création impossible";
+      setError(createdId?"Le rendez-vous a été créé dans le calendrier mais son association à la fiche a échoué. Ne le recréez pas : associez-le depuis la liste. Détail : "+reason:reason);
+      if(createdId)await refresh();
+    }finally{setCreatingAppointment(false)}
   }
   return <div className="carnet-layout">
     <div className="carnet-heading"><div><p className="admin-kicker">Gestion des demandes</p><h1>Carnet de devis</h1><p>Coordonnées, travaux, photos et suivi : tout dans une fiche.</p></div><button type="button" className="admin-primary" onClick={createNew}>+ Nouvelle note</button></div>
@@ -175,7 +208,23 @@ export function CarnetClient(){
             <option value="">Aucun rendez-vous associé</option>
             {appointments.map(a=><option key={a.id} value={a.id}>{a.customerName} · {a.preferredDate}</option>)}
           </select>
-          <p><a href="/gestion">Ouvrir le calendrier pour fixer un nouveau rendez-vous</a></p>
+          {!newAppointment?<button type="button" className="carnet-add-appointment" disabled={busy||creatingAppointment||!!selected.appointmentId} onClick={()=>{setError("");setMessage("");setNewAppointment(appointmentFromNote(selected));}}>＋ Créer un rendez-vous depuis cette fiche</button>:<form className="carnet-new-appointment" onSubmit={createAppointmentFromNote}>
+            <h4>Nouveau rendez-vous pour cette fiche</h4>
+            <p>Vérifiez les coordonnées préremplies. Un e-mail valide est obligatoire pour créer un rendez-vous.</p>
+            <label>Nom et prénom *<input required maxLength={120} value={newAppointment.name} onChange={e=>setNewAppointment(v=>v?{...v,name:e.target.value}:v)}/></label>
+            <label>E-mail *<input required type="email" maxLength={180} value={newAppointment.email} onChange={e=>setNewAppointment(v=>v?{...v,email:e.target.value}:v)}/></label>
+            <div className="carnet-two">
+              <label>Téléphone *<input required maxLength={50} type="tel" value={newAppointment.phone} onChange={e=>setNewAppointment(v=>v?{...v,phone:e.target.value}:v)}/></label>
+              <label>Date et heure *<input required type="datetime-local" value={newAppointment.startsAt} onChange={e=>setNewAppointment(v=>v?{...v,startsAt:e.target.value}:v)}/></label>
+            </div>
+            <label>Adresse *<input required maxLength={300} value={newAppointment.address} onChange={e=>setNewAppointment(v=>v?{...v,address:e.target.value}:v)}/></label>
+            <label>Type *<select value={newAppointment.requestType} onChange={e=>setNewAppointment(v=>v?{...v,requestType:e.target.value}:v)}><option value="visite">Visite</option><option value="demenagement">Déménagement</option><option value="nettoyage">Nettoyage</option><option value="travaux">Travaux</option><option value="livraison">Livraison</option><option value="debarras">Débarras</option><option value="autre">Autre</option></select></label>
+            <label>Motif *<textarea required rows={3} maxLength={2000} value={newAppointment.reason} onChange={e=>setNewAppointment(v=>v?{...v,reason:e.target.value}:v)}/></label>
+            <label>Notes internes<textarea rows={2} maxLength={2000} value={newAppointment.adminNotes} onChange={e=>setNewAppointment(v=>v?{...v,adminNotes:e.target.value}:v)}/></label>
+            <div className="carnet-appointment-actions"><button type="submit" className="admin-primary" disabled={creatingAppointment}>{creatingAppointment?"Création…":"Confirmer le rendez-vous"}</button><button type="button" disabled={creatingAppointment} onClick={()=>setNewAppointment(null)}>Annuler</button></div>
+          </form>}
+          {selected.appointmentId&&<p>Un rendez-vous est déjà associé à cette fiche. Pour éviter un doublon, dissociez-le uniquement si vous devez en créer un nouveau.</p>}
+          <p><a href="/gestion">Voir le calendrier</a></p>
         </div>}
       </section>
     </div>

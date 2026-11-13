@@ -23,7 +23,7 @@ async function compressImage(file:File):Promise<File>{
   // Re-encode locally to remove EXIF metadata and keep upload size below Vercel's limit.
   const bitmap=await createImageBitmap(file);
   try{
-    const ratio=Math.min(1,1600/Math.max(bitmap.width,bitmap.height));
+    const ratio=Math.min(1,1200/Math.max(bitmap.width,bitmap.height));
     const canvas=document.createElement("canvas");
     canvas.width=Math.max(1,Math.round(bitmap.width*ratio));
     canvas.height=Math.max(1,Math.round(bitmap.height*ratio));
@@ -31,8 +31,8 @@ async function compressImage(file:File):Promise<File>{
     if(!context)throw new Error("Impossible de préparer la photo");
     context.fillStyle="#ffffff";context.fillRect(0,0,canvas.width,canvas.height);
     context.drawImage(bitmap,0,0,canvas.width,canvas.height);
-    const output=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Compression impossible")),"image/jpeg",.78));
-    if(output.size>3_000_000)throw new Error("Photo trop volumineuse.");
+    const output=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Compression impossible")),"image/jpeg",.68));
+    if(output.size>450_000)throw new Error("Photo encore trop volumineuse après compression (450 Ko maximum).");
     return new File([output],(file.name.replace(/\.[^.]+$/,"")||"photo")+".jpg",{type:"image/jpeg"});
   }finally{bitmap.close()}
 }

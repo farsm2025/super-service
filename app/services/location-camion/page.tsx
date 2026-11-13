@@ -56,7 +56,7 @@ export default async function Page(){
   const vehicles=mergeVehicles(service?.rentalVehicles);
   const sharedDetails=[
     ["Permis nécessaire",service?.licenseRequired||"Permis catégorie B pour conduire vous-même"],
-    ["Caution",service?.deposit||"CHF 100.– par véhicule"],
+    ["Caution","CHF 150.– par véhicule (Iveco Daily et Citroën Jumper)"],
     ["Kilométrage","Selon le véhicule et la formule choisie (voir tarifs ci-dessus)"],
     ["Prise en charge et restitution",service?.pickupLocation||"Rue du Clos-de-Bulle 5, 1004 Lausanne"],
   ];

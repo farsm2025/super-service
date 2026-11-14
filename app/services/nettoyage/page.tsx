@@ -93,6 +93,15 @@ export default function Page() {
         </div>
       </section>
       <CleaningSections />
+
+      <section className="content-section" aria-labelledby="avis-super-service-nettoyage-title">
+        <div className="content-lead">
+          <h2 id="avis-super-service-nettoyage-title">Découvrez les retours de nos clients</h2>
+          <p>
+            Avant de nous confier votre intervention, vous pouvez consulter les <Link className="contextual-link" href="/avis">avis clients de Super-Service</Link> pour découvrir leur expérience avec notre équipe. Les photos de réalisations de nettoyage seront affichées ci-dessous dès que des exemples authentiques seront disponibles dans notre espace de contenu.
+          </p>
+        </div>
+      </section>
       <Realizations service="nettoyage" />
     </PageShell>
   );

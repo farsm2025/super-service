@@ -58,10 +58,23 @@ export function CarnetClient(){
   const [uploading,setUploading]=useState(false);
   const [newAppointment,setNewAppointment]=useState<NewAppointmentForm|null>(null);
   const [creatingAppointment,setCreatingAppointment]=useState(false);
+  const [emailStatus,setEmailStatus]=useState<"unknown"|"checking"|"sent"|"failed"|"skipped">("unknown");
+  const [resendingEmail,setResendingEmail]=useState(false);
 
   const camera=useRef<HTMLInputElement>(null);
   const files=useRef<HTMLInputElement>(null);
   const selected=notes.find(n=>n.id===selectedId)||null;
+  useEffect(()=>{
+    const id=selected?.appointmentId;
+    if(!id){setEmailStatus("unknown");return}
+    let cancelled=false;setEmailStatus("checking");
+    fetch("/api/gestion/rendez-vous/"+id+"/confirmation",{cache:"no-store"})
+      .then(async response=>response.ok?response.json():{emailStatus:"unknown"})
+      .then(data=>{if(!cancelled)setEmailStatus(["sent","failed","skipped"].includes(data.emailStatus)?data.emailStatus:"unknown")})
+      .catch(()=>{if(!cancelled)setEmailStatus("unknown")});
+    return ()=>{cancelled=true};
+  },[selected?.appointmentId]);
+
   async function refresh(){
     try{
       const data=await responseMessage(await fetch("/api/gestion/carnet",{cache:"no-store"}));
@@ -120,6 +133,30 @@ export function CarnetClient(){
       await refresh();setMessage(data.note?.appointmentId?"Rendez-vous associé.":"Rendez-vous dissocié.");
     }catch(e){setError(e instanceof Error?e.message:"Association impossible")}finally{setBusy(false)}
   }
+  async function deleteSelectedQuote(){
+    if(!selected||busy||uploading||creatingAppointment||resendingEmail)return;
+    const name=[selected.firstName,selected.lastName].filter(Boolean).join(" ")||"cette fiche";
+    if(!window.confirm("Supprimer définitivement le devis de "+name+" et toutes ses photos ?"+(selected.appointmentId?"\\n\\nSon rendez-vous restera dans le calendrier.":"")))return;
+    setBusy(true);setError("");setMessage("");
+    try{
+      await responseMessage(await fetch("/api/gestion/carnet/"+selected.id,{method:"DELETE"}));
+      setSelectedId(null);setForm(blank);setNewAppointment(null);
+      await refresh();
+      setMessage("Devis et photos supprimés. Les rendez-vous du calendrier sont conservés.");
+    }catch(e){setError(e instanceof Error?e.message:"Suppression impossible")}finally{setBusy(false)}
+  }
+  async function resendConfirmation(){
+    if(!selected?.appointmentId||resendingEmail||emailStatus!=="failed")return;
+    if(!window.confirm("Renvoyer la confirmation de rendez-vous à l'adresse e-mail du calendrier ?"))return;
+    setResendingEmail(true);setError("");setMessage("");
+    try{
+      const data=await responseMessage(await fetch("/api/gestion/rendez-vous/"+selected.appointmentId+"/confirmation",{method:"POST"}));
+      setEmailStatus(data.emailStatus==="sent"?"sent":data.emailStatus==="skipped"?"skipped":"failed");
+      if(data.emailStatus==="sent")setMessage("Confirmation acceptée par le service d'envoi.");
+      else if(data.emailStatus==="skipped")setMessage("Aucun e-mail envoyé en prévisualisation.");
+      else setError("Le renvoi a échoué. Vérifiez les paramètres Resend.");
+    }catch(e){setError(e instanceof Error?e.message:"Renvoi impossible")}finally{setResendingEmail(false)}
+  }
   async function createAppointmentFromNote(e:FormEvent<HTMLFormElement>){
     e.preventDefault();
     if(!selected||!newAppointment||creatingAppointment)return;
@@ -135,7 +172,9 @@ export function CarnetClient(){
       setAppointments(old=>[...old,{id:appointment.id!,customerName:appointment.customerName||newAppointment.name,preferredDate:appointment.preferredDate||newAppointment.startsAt.slice(0,10)}]);
       const association=await responseMessage(await fetch("/api/gestion/carnet/"+selected.id,{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({action:"link_appointment",appointmentId:appointment.id})}));
       if(!association.note?.appointmentId)throw new Error("Association non confirmée.");
-      await refresh();setNewAppointment(null);setMessage("Rendez-vous créé et associé à la fiche. Retrouvez-le dans le calendrier.");
+      await refresh();setNewAppointment(null);
+      setEmailStatus(data.emailStatus==="sent"?"sent":data.emailStatus==="failed"?"failed":data.emailStatus==="skipped"?"skipped":"unknown");
+      setMessage(data.emailStatus==="sent"?"Rendez-vous créé et lié. Confirmation acceptée par le service d'envoi.":data.emailStatus==="skipped"?"Rendez-vous de test créé et lié ; aucun e-mail envoyé.":"Rendez-vous créé et lié, mais l'envoi de l'e-mail client a échoué.");
     }catch(err){
       const reason=err instanceof Error?err.message:"Création impossible";
       setError(createdId?"Le rendez-vous a été créé dans le calendrier mais son association à la fiche a échoué. Ne le recréez pas : associez-le depuis la liste. Détail : "+reason:reason);
@@ -223,8 +262,15 @@ export function CarnetClient(){
             <label>Notes internes<textarea rows={2} maxLength={2000} value={newAppointment.adminNotes} onChange={e=>setNewAppointment(v=>v?{...v,adminNotes:e.target.value}:v)}/></label>
             <div className="carnet-appointment-actions"><button type="submit" className="admin-primary" disabled={creatingAppointment}>{creatingAppointment?"Création…":"Confirmer le rendez-vous"}</button><button type="button" disabled={creatingAppointment} onClick={()=>setNewAppointment(null)}>Annuler</button></div>
           </form>}
+          {selected.appointmentId&&<div className="carnet-email-status" role="status">
+            {emailStatus==="checking"?<p>Vérification de la confirmation e-mail…</p>:emailStatus==="sent"?<p>✓ Confirmation acceptée par le service d'envoi (réception non garantie).</p>:emailStatus==="failed"?<><p>⚠ Le rendez-vous est créé, mais l'e-mail client n'a pas été envoyé.</p><button type="button" disabled={resendingEmail||busy} onClick={()=>void resendConfirmation()}>{resendingEmail?"Renvoi…":"Renvoyer la confirmation"}</button></>:emailStatus==="skipped"?<p>Environnement de test : aucun e-mail client envoyé.</p>:<p>Statut d'envoi non disponible pour ce rendez-vous.</p>}
+          </div>}
           {selected.appointmentId&&<p>Un rendez-vous est déjà associé à cette fiche. Pour éviter un doublon, dissociez-le uniquement si vous devez en créer un nouveau.</p>}
           <p><a href="/gestion">Voir le calendrier</a></p>
+        </div>}
+        {selected&&<div className="carnet-delete-section">
+          <button type="button" className="carnet-delete-btn" disabled={busy||uploading||creatingAppointment||resendingEmail} onClick={()=>void deleteSelectedQuote()}>Supprimer définitivement ce devis</button>
+          <p>La fiche et ses photos seront supprimées. Le rendez-vous associé restera dans le calendrier.</p>
         </div>}
       </section>
     </div>

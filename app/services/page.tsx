@@ -49,10 +49,45 @@ export default function ServicesPage() {
               <div className="services-directory-copy">
                 <h2>{service.title}</h2>
                 <p>{service.description}</p>
-                <Link className="detail-link" href={service.href}>Découvrir le service →</Link>
+                <Link className="detail-link" href={service.href}>{service.title} : détails et devis →</Link>
               </div>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="content-section" aria-labelledby="choisir-prestations-title">
+        <div className="content-lead">
+          <h2 id="choisir-prestations-title">Quelles prestations choisir pour votre projet ?</h2>
+          <p>
+            Certaines interventions se complètent : choisissez un service seul ou contactez-nous pour organiser plusieurs prestations autour de la même date. Voici quelques situations courantes.
+          </p>
+        </div>
+        <div className="detail-grid">
+          <article>
+            <h3>Vous préparez un déménagement ?</h3>
+            <p>
+              Notre <Link className="contextual-link" href="/services/demenagement">service de déménagement</Link> prend en charge le transport de vos affaires. Si vous préférez conduire, comparez nos <Link className="contextual-link" href="/services/location-camion">camions à louer</Link>. Vous pouvez aussi prévoir le <Link className="contextual-link" href="/services/montage-de-meubles">montage de vos meubles</Link>.
+            </p>
+          </article>
+          <article>
+            <h3>Vous rendez un logement ?</h3>
+            <p>
+              Un <Link className="contextual-link" href="/services/debarras">débarras</Link> peut aider à vider les pièces avant un <Link className="contextual-link" href="/services/nettoyage">nettoyage de fin de bail</Link>. Précisez la date de remise des clés et les surfaces concernées pour préparer votre demande.
+            </p>
+          </article>
+          <article>
+            <h3>Vous avez un besoin ponctuel ?</h3>
+            <p>
+              Pour des fixations, de petits ajustements ou l'entretien du jardin, consultez nos <Link className="contextual-link" href="/services/petits-travaux-jardinage">petits travaux et services de jardinage</Link>. Pour déplacer un meuble ou un objet volumineux, découvrez le <Link className="contextual-link" href="/services/transport-et-livraison">transport et la livraison</Link>.
+            </p>
+          </article>
+          <article>
+            <h3>Vous organisez une intervention professionnelle ?</h3>
+            <p>
+              Selon vos besoins, nous pouvons étudier le <Link className="contextual-link" href="/services/nettoyage">nettoyage de bureaux ou de commerces</Link> et le <Link className="contextual-link" href="/services/transport-et-livraison">transport d'équipements</Link>. Décrivez les locaux, les accès et vos contraintes horaires dans votre demande.
+            </p>
+          </article>
         </div>
       </section>
     </PageShell>

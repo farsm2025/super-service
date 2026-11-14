@@ -105,3 +105,11 @@ export async function updateQuotePhotoCaption(id:string,caption:string){
   const rows=await sql.query("UPDATE quote_photos SET caption=$2 WHERE id=$1 RETURNING id",[id,caption.slice(0,200)]);
   return rows.length>0;
 }
+
+/** Supprime uniquement la fiche de devis ; la contrainte ON DELETE CASCADE retire ses photos.
+ * Le rendez-vous référencé reste dans appointments. */
+export async function deleteQuoteNote(id:string){
+  const sql=database();
+  const rows=await sql.query("DELETE FROM quote_notes WHERE id=$1 RETURNING id",[id]);
+  return rows.length>0;
+}

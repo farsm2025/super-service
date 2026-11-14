@@ -93,6 +93,50 @@ export default function Page() {
           </article>
         </div>
       </section>
+
+      <section className="content-section" aria-labelledby="preparer-petits-travaux-title">
+        <div className="content-lead">
+          <h2 id="preparer-petits-travaux-title">Comment préparer votre demande de petits travaux ?</h2>
+          <p>
+            Une description précise nous aide à vérifier si l'intervention entre dans nos prestations et à établir un devis adapté. Selon le travail demandé, les dimensions, l'état des supports et l'accès au chantier peuvent modifier le matériel nécessaire.
+          </p>
+        </div>
+        <div className="detail-grid">
+          <article>
+            <h3>Pour du bricolage ou des fixations</h3>
+            <p>
+              Décrivez l'objet à poser ou à réparer, son emplacement et, si possible, les dimensions. Pour une fixation murale, précisez la nature du mur si vous la connaissez et joignez des photos de la zone.
+            </p>
+          </article>
+          <article>
+            <h3>Pour l'entretien d'un jardin</h3>
+            <p>
+              Indiquez les travaux souhaités, par exemple la taille d'une haie ou la remise en ordre d'un extérieur. Des photos, la longueur et la hauteur approximatives des végétaux ainsi que les conditions d'accès facilitent l'évaluation.
+            </p>
+          </article>
+          <article>
+            <h3>Pour connaître la faisabilité</h3>
+            <p>
+              Communiquez la commune, la date souhaitée et les éventuelles contraintes d'accès. Nous pourrons préciser les interventions proposées et les conditions du devis avant de convenir d'une date.
+            </p>
+          </article>
+          <article>
+            <h3>Pour une intervention électrique simple</h3>
+            <p>
+              Décrivez le luminaire ou l'accessoire concerné. Nous confirmerons si la demande est réalisable dans le cadre des interventions simples annoncées, hors travaux électriques réglementés.
+            </p>
+          </article>
+        </div>
+        <div className="content-lead">
+          <h2>Jardinage à Lausanne et sur La Côte : des exemples concrets</h2>
+          <p>
+            Parmi les réalisations publiées sur cette page figurent des tailles de haies à Gland. Pour une intervention à Lausanne, à Morges, à Gland ou dans une autre commune vaudoise, indiquez votre adresse pour vérifier les modalités de déplacement et la prestation possible.
+          </p>
+          <p>
+            Vous pouvez <Link className="contextual-link" href="/devis">demander un devis avec des photos</Link>. Si vous devez également évacuer des encombrants ou remettre un logement en état, consultez nos prestations de <Link className="contextual-link" href="/services/debarras">débarras</Link> et de <Link className="contextual-link" href="/services/nettoyage">nettoyage</Link>.
+          </p>
+        </div>
+      </section>
       <Realizations service="petits-travaux-jardinage" />
     </PageShell>
   );

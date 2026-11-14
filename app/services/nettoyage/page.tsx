@@ -98,7 +98,7 @@ export default function Page() {
         <div className="content-lead">
           <h2 id="avis-super-service-nettoyage-title">Découvrez les retours de nos clients</h2>
           <p>
-            Avant de nous confier votre intervention, vous pouvez consulter les <Link className="contextual-link" href="/avis">avis clients de Super-Service</Link> pour découvrir leur expérience avec notre équipe. Les photos de réalisations de nettoyage seront affichées ci-dessous dès que des exemples authentiques seront disponibles dans notre espace de contenu.
+            Pour mieux connaître notre équipe avant de nous confier votre nettoyage, consultez les <Link className="contextual-link" href="/avis">avis clients de Super-Service</Link> et découvrez leurs retours sur nos prestations et notre accompagnement.
           </p>
         </div>
       </section>

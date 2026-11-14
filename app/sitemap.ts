@@ -8,14 +8,14 @@ import {getBlogPosts} from "../lib/blog";
 // ne justifient pas de modifier toutes les dates.
 const pageLastModified:Record<string,string>={
   "/":"2026-10-29",
-  "/services":"2026-10-29",
+  "/services":"2026-11-14",
   "/services/demenagement":"2026-10-29",
-  "/services/nettoyage":"2026-10-21",
+  "/services/nettoyage":"2026-11-14",
   "/services/location-camion":"2026-10-20",
   "/services/transport-et-livraison":"2026-10-18",
   "/services/montage-de-meubles":"2026-10-18",
   "/services/debarras":"2026-10-18",
-  "/services/petits-travaux-jardinage":"2026-10-18",
+  "/services/petits-travaux-jardinage":"2026-11-14",
   "/services/cartons-demenagement":"2026-09-22",
   "/avis":"2026-08-26",
   "/blog":"2026-10-20",

@@ -93,6 +93,15 @@ export default function Page() {
         </div>
       </section>
       <CleaningSections />
+
+      <section className="content-section" aria-labelledby="avis-super-service-nettoyage-title">
+        <div className="content-lead">
+          <h2 id="avis-super-service-nettoyage-title">Découvrez les retours de nos clients</h2>
+          <p>
+            Pour mieux connaître notre équipe avant de nous confier votre nettoyage, consultez les <Link className="contextual-link" href="/avis">avis clients de Super-Service</Link> et découvrez leurs retours sur nos prestations et notre accompagnement.
+          </p>
+        </div>
+      </section>
       <Realizations service="nettoyage" />
     </PageShell>
   );

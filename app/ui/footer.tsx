@@ -81,7 +81,6 @@ export function Footer() {
         <Link href="/blog">Blog</Link>
         <Link href="/mentions-legales">Mentions légales</Link>
         <Link href="/confidentialite">Confidentialité</Link>
-        <Link href="/studio">Gestion du contenu</Link>
       </div>
       <small>© 2026 Super-Service. Tous droits réservés.</small>
     </footer>

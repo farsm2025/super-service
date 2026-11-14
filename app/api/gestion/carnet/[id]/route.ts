@@ -1,6 +1,6 @@
 import {NextResponse} from "next/server";
 import {getAdminSession} from "@/lib/admin-auth";
-import {getQuoteNote,noteInput,updateQuoteNote,linkQuoteAppointment} from "@/lib/quote-notes";
+import {getQuoteNote,noteInput,updateQuoteNote,linkQuoteAppointment,deleteQuoteNote} from "@/lib/quote-notes";
 export const dynamic="force-dynamic";
 type Context={params:Promise<{id:string}>};
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -25,4 +25,14 @@ export async function PATCH(request:Request,{params}:Context){
     const note=await updateQuoteNote(id,input);
     return note?NextResponse.json({note}):NextResponse.json({error:"Introuvable"},{status:404});
   }catch(error){console.error("Quote update failed",error);return NextResponse.json({error:"Modification impossible"},{status:500})}
+}
+
+export async function DELETE(_:Request,{params}:Context){
+  if(!await getAdminSession())return NextResponse.json({error:"Non autorisé"},{status:401});
+  const {id}=await params;
+  if(!uuid.test(id))return NextResponse.json({error:"Identifiant invalide"},{status:400});
+  try{
+    const deleted=await deleteQuoteNote(id);
+    return deleted?NextResponse.json({ok:true}):NextResponse.json({error:"Fiche introuvable"},{status:404});
+  }catch(error){console.error("Quote deletion failed",error);return NextResponse.json({error:"Suppression impossible"},{status:500})}
 }

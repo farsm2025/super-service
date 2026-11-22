@@ -1,5 +1,6 @@
 import {articleMarkdown} from "./blog-content";
 import {nettoyageArticleMarkdown} from "./blog-content-nettoyage";
+import {locationCamionArticleMarkdown} from "./blog-content-location-camion";
 import {sanityClient} from "./sanity";
 
 export type BlogPost={
@@ -44,6 +45,20 @@ export const nettoyageBlogPost:BlogPost={
  body:nettoyageArticleMarkdown,
 };
 
+export const locationCamionBlogPost:BlogPost={
+ slug:"location-camion-lausanne-prix-comparatif",
+ title:"Location de camion à Lausanne : comparatif des prix 2026 et checklists",
+ excerpt:"Comparez les tarifs des utilitaires et camions de 17 à 20 m³ à Lausanne, puis suivez nos checklists avant, pendant et après votre location.",
+ publishedAt:"2026-11-22",
+ updatedAt:"2026-11-22",
+ category:"Conseils location de camion",
+ image:"/images/location-camion/citroen-jumper-exterieur.webp",
+ imageAlt:"Citroën Jumper de 20 m³ avec hayon proposé à la location par Super-Service à Lausanne",
+ seoTitle:"Location camion Lausanne : prix 2026 et checklists",
+ seoDescription:"Location camion à Lausanne : comparez les prix 2026, les km inclus et les volumes 17 à 20 m³. Checklists pratiques pour réserver et restituer.",
+ body:locationCamionArticleMarkdown,
+};
+
 type CmsPost=Omit<BlogPost,"image"|"imageAlt"|"body"> & {image?:string;imageAlt?:string;body?:string};
 
 export async function getBlogPosts():Promise<BlogPost[]>{
@@ -54,7 +69,7 @@ export async function getBlogPosts():Promise<BlogPost[]>{
      "image":coverImage.asset->url,"imageAlt":coverImage.alt,"body":contentMarkdown
    }`,{},{next:{revalidate:60}});
  }catch(error){console.error("Blog Sanity: impossible de charger les articles",error)}
- const merged=new Map<string,BlogPost>([[originalBlogPost.slug,originalBlogPost],[nettoyageBlogPost.slug,nettoyageBlogPost]]);
+ const merged=new Map<string,BlogPost>([[originalBlogPost.slug,originalBlogPost],[nettoyageBlogPost.slug,nettoyageBlogPost],[locationCamionBlogPost.slug,locationCamionBlogPost]]);
  for(const item of cms){
    if(!item.slug||!item.title||!item.body)continue;
    const existing=merged.get(item.slug);

@@ -51,6 +51,7 @@ const defaultVehicles:VehiclePresentation[]=[
     fullDayPrice:"CHF 200.–",
     images:[
       {src:"/images/location-camion/renault-maxity-20m3.webp",alt:"Renault Maxity avec caisse de 20 m³ à louer à Lausanne",caption:"Renault Maxity – caisse de 20 m³"},
+      {src:"/images/location-camion/renault-maxity-20m3-side.webp",alt:"Renault Maxity 20 m³ en vue latérale à louer à Lausanne",caption:"Renault Maxity – vue latérale"},
     ],
   },
 ];

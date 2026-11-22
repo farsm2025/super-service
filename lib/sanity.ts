@@ -9,7 +9,7 @@ export const sanityClient=createClient({
 });
 export type Realization={_id:string;title:string;service:string;featured?:boolean;city?:string;description?:string;imageUrl?:string;imageAlt?:string};
 export type PublicTestimonial={_id:string;name:string;text:string;date:string;service:string;rating:number};
-export type RentalVehicle={vehicleId?:"iveco"|"citroen";name?:string;volume?:string;feature?:string;halfDayPrice?:string;fullDayPrice?:string};
+export type RentalVehicle={vehicleId?:"iveco"|"citroen"|"renault";name?:string;volume?:string;feature?:string;halfDayPrice?:string;fullDayPrice?:string};
 export type ServiceContent={title?:string;description?:string;seoTitle?:string;seoDescription?:string;rentalVehicles?:RentalVehicle[];licenseRequired?:string;includedMileage?:string;deposit?:string;pickupLocation?:string;rentalConditions?:string};
 const serviceAliases:Record<string,string>={
   demenagement:"demenagement",

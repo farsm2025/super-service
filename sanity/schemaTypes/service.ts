@@ -14,7 +14,7 @@ export const service = defineType({
     defineField({name: "seoTitle", title: "Titre SEO", type: "string"}),
     defineField({name: "seoDescription", title: "Meta description", type: "text"}),
     defineField({name: "rentalVehicles", title: "Véhicules disponibles", type: "array", fieldset: "rental", of: [{type: "object", name: "rentalVehicle", title: "Véhicule", fields: [
-      defineField({name: "vehicleId", title: "Véhicule", type: "string", options: {list: [{title: "Iveco Daily", value: "iveco"}, {title: "Citroën Jumper", value: "citroen"}], layout: "dropdown"}, validation: (rule) => rule.required()}),
+      defineField({name: "vehicleId", title: "Véhicule", type: "string", options: {list: [{title: "Iveco Daily", value: "iveco"}, {title: "Citroën Jumper", value: "citroen"}, {title: "Renault Maxity", value: "renault"}], layout: "dropdown"}, validation: (rule) => rule.required()}),
       defineField({name: "name", title: "Nom affiché", type: "string"}),
       defineField({name: "volume", title: "Volume", type: "string"}),
       defineField({name: "feature", title: "Description courte", type: "string"}),

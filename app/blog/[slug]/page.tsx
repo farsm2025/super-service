@@ -29,6 +29,7 @@ export default async function BlogArticle({params}:RouteProps){
  if(!post)notFound();
  const blocks=parseBlogMarkdown(post.body);
  const isCleaning=post.slug==="checklist-nettoyage-fin-de-bail-lausanne";
+ const isTruckRental=post.slug==="location-camion-lausanne-prix-comparatif";
  const headings=blocks.flatMap(b=>b.type==="h2"&&b.text!==post.title?[b.text]:[]);
  const publicationDate=new Intl.DateTimeFormat("fr-CH",{day:"numeric",month:"long",year:"numeric",timeZone:"Europe/Zurich"}).format(new Date(post.publishedAt+"T12:00:00Z"));
  const url=`${SITE_URL}/blog/${post.slug}`;
@@ -68,13 +69,18 @@ export default async function BlogArticle({params}:RouteProps){
            <ul key={i} className={checkList?"blog-checklist":"blog-list"}>{items}</ul>;
        })}
        <div className="blog-service-links">
-         <h2>{isCleaning?"Des services pour votre remise de logement":"Services utiles pour votre déménagement"}</h2>
-         <p>{isCleaning?"Découvrez nos prestations à Lausanne et dans le canton de Vaud.":"Retrouvez les prestations de Super-Service adaptées à votre organisation."}</p>
+         <h2>{isCleaning?"Des services pour votre remise de logement":isTruckRental?"Préparez votre location de camion":"Services utiles pour votre déménagement"}</h2>
+         <p>{isCleaning?"Découvrez nos prestations à Lausanne et dans le canton de Vaud.":isTruckRental?"Consultez nos véhicules et demandez une réservation adaptée à votre trajet.":"Retrouvez les prestations de Super-Service adaptées à votre organisation."}</p>
          <div>{isCleaning?<>
            <Link href="/services/nettoyage">Nettoyage de fin de bail →</Link>
            <Link href="/services/demenagement">Déménagement à Lausanne →</Link>
            <Link href="/services/debarras">Débarras et évacuation →</Link>
            <Link href="/blog/checklist-demenagement-lausanne">Checklist du déménagement →</Link>
+         </>:isTruckRental?<>
+           <Link href="/services/location-camion">Voir les trois camions et les tarifs →</Link>
+           <Link href="/services/demenagement">Déménagement avec Super-Service →</Link>
+           <Link href="/services/transport-et-livraison">Transport et livraison →</Link>
+           <Link href="/blog/checklist-demenagement-lausanne">Checklist déménagement →</Link>
          </>:<>
            <Link href="/services/demenagement">Déménagement à Lausanne →</Link>
            <Link href="/services/location-camion">Location de camion →</Link>
@@ -85,7 +91,15 @@ export default async function BlogArticle({params}:RouteProps){
          </>}</div>
          <Link className="button button-primary" href="/devis">Demander votre devis gratuit</Link>
        </div>
-       {isCleaning?<section className="blog-official-sources" aria-labelledby="sources-title">
+       {isTruckRental?<section className="blog-official-sources" aria-labelledby="sources-title">
+         <h2 id="sources-title">Sources des tarifs et vérifications</h2>
+         <p>Tarifs concurrents consultés le 22 novembre 2026. Les prix, disponibilités et conditions peuvent changer.</p>
+         <ul>
+           <li><a href="https://www.aloccars.ch/vehicules-de-location/location-utilitaires/" target="_blank" rel="noopener noreferrer">Aloc-Cars – tarifs des utilitaires de location ↗</a></li>
+           <li><a href="https://www.t-rent.ch/vehicule-utilitaire-lausanne/" target="_blank" rel="noopener noreferrer">T-Rent – location utilitaire Lausanne ↗</a></li>
+           <li><Link href="/services/location-camion">Super-Service – tarifs des trois camions ↗</Link></li>
+         </ul>
+       </section>:isCleaning?<section className="blog-official-sources" aria-labelledby="sources-title">
          <h2 id="sources-title">Sources et ressources utiles</h2>
          <p>Pour approfondir les recommandations sur les états des lieux et l’usure normale :</p>
          <ul>
@@ -106,7 +120,7 @@ export default async function BlogArticle({params}:RouteProps){
        </section>}
      </article>
    </div>
-   <section className="blog-end-cta"><div><p className="eyebrow light">Contact Super-Service</p><h2>{isCleaning?"Un nettoyage de fin de bail prévu à Lausanne ?":"Un déménagement prévu à Lausanne ?"}</h2><p>{isCleaning?"Précisez la surface du logement, les équipements à nettoyer et la date de l’état des lieux.":"Expliquez-nous votre projet, les accès et la date souhaitée. Nous vous aidons à organiser la suite."}</p></div><Link href="/devis" className="button button-primary">Demander un devis gratuit</Link></section>
+   <section className="blog-end-cta"><div><p className="eyebrow light">Contact Super-Service</p><h2>{isCleaning?"Un nettoyage de fin de bail prévu à Lausanne ?":isTruckRental?"Vous cherchez un camion à louer à Lausanne ?":"Un déménagement prévu à Lausanne ?"}</h2><p>{isCleaning?"Précisez la surface du logement, les équipements à nettoyer et la date de l’état des lieux.":isTruckRental?"Indiquez la date, le volume et le trajet pour organiser votre location avec ou sans chauffeur.":"Expliquez-nous votre projet, les accès et la date souhaitée. Nous vous aidons à organiser la suite."}</p></div><Link href="/devis" className="button button-primary">Demander un devis gratuit</Link></section>
    <Footer/><MobileActions/>
  </main>;
 }

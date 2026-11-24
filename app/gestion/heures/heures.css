@@ -3,3 +3,14 @@
   .admin-app,.admin-main,.hours-page{display:block!important;position:static!important;min-height:0!important;height:auto!important;overflow:visible!important;background:#fff!important;max-width:none!important;margin:0!important;padding:0!important}
   .no-print,.admin-top,.admin-bottom{display:none!important}
 .hours-print{display:block!important;position:static!important;font-family:Arial,sans-serif;color:#111;padding:0;font-size:10.5pt;line-height:1.4;break-inside:auto}.hours-print h1{color:#10263b;font-size:19pt;margin-bottom:0}.hours-print h2{font-size:15pt;border-bottom:2px solid #10263b;padding-bottom:12px}.hours-print table{width:100%;border-collapse:collapse;margin-top:18px;table-layout:auto}.hours-print thead{display:table-header-group}.hours-print tr{break-inside:avoid}.hours-print th:nth-child(3),.hours-print th:nth-child(4),.hours-print td:nth-child(3),.hours-print td:nth-child(4){text-align:right;white-space:nowrap}.hours-print th,.hours-print td{padding:10px 7px;border-bottom:1px solid #ddd;text-align:left}.hours-print tfoot{font-weight:800;background:#eee}.hours-print-note{font-size:9pt;color:#555;margin-top:28px}.hours-print-person{margin:22px 0 7px;font-size:13pt}.hours-print-date{margin-top:26px;text-align:right}.hours-print tfoot th{border-top:2px solid #10263b}@page{size:A4;margin:14mm}}
+/* Personnel / Heures — commandes de gestion dans la charte du calendrier. */
+.hours-person-actions{display:grid;gap:9px;margin-top:15px;padding:14px 0;border-top:1px solid var(--admin-border)}
+.hours-person-actions .hours-secondary,.hours-person-actions .hours-link{justify-self:stretch;text-align:center}
+.hours-person-actions small,.hours-muted{color:#64717d;font-size:.82rem;line-height:1.45}
+.hours-destructive{border-color:#e8b6bd;color:#a12631;background:#fff6f7}
+.hours-trash{margin-top:18px;padding:12px 14px;border:1px solid var(--admin-border);border-radius:11px;background:#f7f9fa}
+.hours-trash summary{cursor:pointer;font-weight:800;color:#465d6e}
+.hours-trash .hours-history{margin-top:12px}
+.hours-report-preview .hours-table input{padding:8px;min-width:95px}
+.hours-report-preview .hours-table td:nth-child(2) input{min-width:170px}
+@media(max-width:760px){.hours-person-actions{grid-template-columns:minmax(0,1fr)}.hours-buttons{gap:8px}.hours-buttons>button{min-height:42px}}

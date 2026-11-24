@@ -53,7 +53,6 @@ export function HeuresClient(){
   const trashReports=reports.filter(r=>Boolean(r.deletedAt));
   const hasHistory=reports.length>0||data.entries.some(e=>e.personId===personId);
   const latestVersion=(id:string)=>Math.max(0,...reports.filter(r=>r.id===id).map(r=>Number(r.version)));
-  const archivedOriginal=Boolean(reports.some(r=>r.id===selectedReport.split(":")[0]&&r.deletedAt));
   const report=reports.find(r=>r.id+":"+r.version===selectedReport)||null;
   const reportLines=corrections??report?.lines??[];
   const reportTotal=total(reportLines);
@@ -153,7 +152,7 @@ export function HeuresClient(){
             <label className="hours-label">Montant (CHF)<input required type="number" min="0" max="1000000" step="0.01" placeholder="75.00" value={form.amount} onChange={e=>change("amount",e.target.value)}/></label>
             <div className="hours-form-actions"><button className="admin-primary" disabled={working}>{editingId?"Enregistrer la modification":"Ajouter l’intervention"}</button>{editingId&&<button type="button" className="hours-secondary" onClick={()=>{setEditingId(null);setForm(blank())}}>Annuler</button>}</div>
           </form>}
-          <div className="hours-scroll"><table className="hours-table"><thead><tr><th>Date</th><th>Travail</th><th>Heures</th><th>Montant</th><th>Actions</th></tr></thead><tbody>{pending.map(l=><tr key={l.id}><td>{dateDisplay(l.date)}</td><td>{l.description}</td><td>{decimal(l.hours)} h</td><td>{francs(l.amountCents)}</td><td><button type="button" className="hours-link" onClick={()=>startEdit(l)}>Modifier</button><button type="button" className="hours-link hours-danger" onClick={()=>remove(l.id)}>Supprimer</button></td></tr>)}</tbody><tfoot><tr><th colSpan={2}>Grand total</th><th>{decimal(sums.hours)} h</th><th>{francs(sums.amount)}</th><th/></tr></tfoot></table>{!pending.length&&<p className="hours-empty">Aucune intervention en attente. Les anciennes restent dans l'historique.</p>}</div>
+          <div className="hours-scroll"><table className="hours-table"><thead><tr><th>Date</th><th>Travail</th><th>Heures</th><th>Montant</th><th>Actions</th></tr></thead><tbody>{pending.map(l=><tr key={l.id}><td>{dateDisplay(l.date)}</td><td>{l.description}</td><td>{decimal(l.hours)} h</td><td>{francs(l.amountCents)}</td><td><button type="button" className="hours-link" disabled={personArchived} onClick={()=>startEdit(l)}>Modifier</button><button type="button" disabled={personArchived} className="hours-link hours-danger" onClick={()=>remove(l.id)}>Supprimer</button></td></tr>)}</tbody><tfoot><tr><th colSpan={2}>Grand total</th><th>{decimal(sums.hours)} h</th><th>{francs(sums.amount)}</th><th/></tr></tfoot></table>{!pending.length&&<p className="hours-empty">Aucune intervention en attente. Les anciennes restent dans l'historique.</p>}</div>
           {!personArchived&&<div className="hours-close"><label className="hours-label">Clôturer jusqu'au<input type="date" value={cutoff} onChange={e=>setCutoff(e.target.value)}/></label><button type="button" className="admin-primary" disabled={working||!pending.some(e=>e.date<=cutoff)} onClick={close}>Clôturer le décompte</button></div>}
         </section>
         <section className="hours-card">

@@ -1,8 +1,8 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
-type Person={id:string;firstName:string;lastName:string};
+type Person={id:string;firstName:string;lastName:string;archivedAt:string|null};
 type Line={id:string;date:string;description:string;hours:number;amountCents:number;personId?:string};
-type Report={id:string;personId:string;cutoffDate:string;createdAt:string;version:number;lines:Line[]};
+type Report={id:string;personId:string;cutoffDate:string;createdAt:string;version:number;lines:Line[];deletedAt:string|null};
 type State={people:Person[];entries:Line[];reports:Report[]};
 const empty={people:[],entries:[],reports:[]} as State;
 const currentDate=()=>new Date().toLocaleDateString("en-CA",{timeZone:"Europe/Zurich"});
@@ -45,9 +45,15 @@ export function HeuresClient(){
     finally{setWorking(false)}
   }
   const person=data.people.find(p=>p.id===personId);
+  const personArchived=Boolean(person?.archivedAt);
   const pending=data.entries.filter(e=>e.personId===personId).sort((a,b)=>a.date.localeCompare(b.date));
   const sums=total(pending);
   const reports=data.reports.filter(r=>r.personId===personId);
+  const activeReports=reports.filter(r=>!r.deletedAt);
+  const trashReports=reports.filter(r=>Boolean(r.deletedAt));
+  const hasHistory=reports.length>0||data.entries.some(e=>e.personId===personId);
+  const latestVersion=(id:string)=>Math.max(0,...reports.filter(r=>r.id===id).map(r=>Number(r.version)));
+  const archivedOriginal=Boolean(reports.some(r=>r.id===selectedReport.split(":")[0]&&r.deletedAt));
   const report=reports.find(r=>r.id+":"+r.version===selectedReport)||null;
   const reportLines=corrections??report?.lines??[];
   const reportTotal=total(reportLines);
@@ -56,6 +62,24 @@ export function HeuresClient(){
   async function addPerson(event:React.FormEvent){
     event.preventDefault();const ok=await run({action:"person",...name},"Personne enregistrée.");
     if(ok){setName({firstName:"",lastName:""});}
+  }
+  async function personAction(action:"archive_person"|"restore_person"|"delete_person"){
+    if(!person)return;
+    const confirmation=action==="archive_person"
+      ?"Archiver "+person.firstName+" "+person.lastName+" ? Ses heures et anciens décomptes seront conservés."
+      :action==="restore_person"
+        ?"Réactiver cette personne et la rendre disponible pour les nouvelles interventions ?"
+        :"Supprimer définitivement cette fiche sans heures ni décomptes ?";
+    if(!window.confirm(confirmation))return;
+    const ok=await run({action,personId:person.id},action==="archive_person"?"Personne archivée, historique conservé.":action==="restore_person"?"Personne réactivée.":"Fiche supprimée.");
+    if(ok){setEditingId(null);setForm(blank());setSelectedReport("");setCorrections(null)}
+  }
+  async function reportAction(action:"trash_report"|"restore_report"){
+    if(!report)return;
+    const confirming=action==="trash_report"?"Mettre ce décompte et toutes ses versions dans la corbeille ? Les données pourront être restaurées.":"Restaurer ce décompte et toutes ses versions dans l'historique ?";
+    if(!window.confirm(confirming))return;
+    const ok=await run({action,reportId:report.id},action==="trash_report"?"Décompte déplacé dans la corbeille.":"Décompte restauré dans l'historique.");
+    if(ok){setSelectedReport("");setCorrections(null)}
   }
   async function saveEntry(event:React.FormEvent){
     event.preventDefault();if(!personId)return;
@@ -75,16 +99,24 @@ export function HeuresClient(){
     if(ok){const fresh=await request() as unknown as State;const chosen=fresh.reports.find(r=>r.personId===personId);if(chosen)setSelectedReport(chosen.id+":"+chosen.version);setCorrections(null)}
   }
   function startRevision(){
-    if(!report)return;
-    if(!window.confirm("Créer une nouvelle version de ce décompte ? L'original restera dans l'historique."))return;
+    if(!report||report.deletedAt)return;
+    if(Number(report.version)!==latestVersion(report.id)){setError("Sélectionnez la dernière version du décompte avant de le corriger.");return}
+    if(!window.confirm("Créer une version corrigée de ce décompte ? Les anciennes versions resteront dans l'historique."))return;
     setCorrections(report.lines.map(x=>({...x})));
   }
   function editArchived(index:number,key:"date"|"description"|"hours"|"amountCents",value:string){
     setCorrections(lines=>lines?.map((l,i)=>i===index?{...l,[key]:key==="hours"?Number(value):key==="amountCents"?Math.round(Number(value)*100):value}:l)||null);
   }
+  function addCorrection(){
+    setCorrections(lines=>lines?[...lines,{id:crypto.randomUUID(),date:currentDate(),description:"",hours:1,amountCents:0}]:lines);
+  }
+  function removeCorrection(id:string){
+    if(!window.confirm("Enlever cette ligne du décompte corrigé ? La version précédente la conservera."))return;
+    setCorrections(lines=>lines?.filter(l=>l.id!==id)||null);
+  }
   async function saveRevision(){
-    if(!report||!corrections)return;
-    const ok=await run({action:"revise",reportId:report.id,lines:corrections.map(l=>({id:l.id,date:l.date,description:l.description,hours:l.hours,amount:l.amountCents/100}))},"Nouvelle version enregistrée. La précédente reste disponible.");
+    if(!report||!corrections||report.deletedAt)return;
+    const ok=await run({action:"revise",reportId:report.id,expectedVersion:latestVersion(report.id),lines:corrections.map(l=>({id:l.id,date:l.date,description:l.description,hours:l.hours,amount:l.amountCents/100}))},"Nouvelle version enregistrée. La précédente reste disponible.");
     if(ok){const refreshed=await request() as unknown as State;const newest=refreshed.reports.find(r=>r.id===report.id);if(newest)setSelectedReport(newest.id+":"+newest.version);setCorrections(null)}
   }
   const visibleName=person?[person.firstName,person.lastName].join(" "):"";
@@ -97,9 +129,14 @@ export function HeuresClient(){
         <label className="hours-label">Sélectionner une personne
           <select value={personId} onChange={e=>{setPersonId(e.target.value);setEditingId(null);setForm(blank());setSelectedReport("");setCorrections(null)}}>
             {data.people.length===0&&<option value="">Ajoutez une personne</option>}
-            {data.people.map(p=><option value={p.id} key={p.id}>{p.firstName} {p.lastName}</option>)}
+            {data.people.map(p=><option value={p.id} key={p.id}>{p.firstName} {p.lastName}{p.archivedAt?" (archivée)":""}</option>)}
           </select>
         </label>
+        {person&&<div className="hours-person-actions">
+          {personArchived?<button type="button" className="hours-secondary" disabled={working} onClick={()=>personAction("restore_person")}>Réactiver la personne</button>:<button type="button" className="hours-secondary" disabled={working} onClick={()=>personAction("archive_person")}>Archiver la personne</button>}
+          {!hasHistory&&<button type="button" className="hours-link hours-danger" disabled={working} onClick={()=>personAction("delete_person")}>Supprimer la personne</button>}
+          {hasHistory&&<small>La suppression définitive est bloquée en présence d'heures ou de décomptes. L'archivage conserve l'historique.</small>}
+        </div>}
         <form onSubmit={addPerson} className="hours-person-form"><h3>Ajouter une personne</h3>
           <label className="hours-label">Prénom<input required maxLength={100} value={name.firstName} onChange={e=>setName(n=>({...n,firstName:e.target.value}))}/></label>
           <label className="hours-label">Nom<input required maxLength={100} value={name.lastName} onChange={e=>setName(n=>({...n,lastName:e.target.value}))}/></label>
@@ -108,19 +145,47 @@ export function HeuresClient(){
       </aside>
       <div className="hours-content">
         {person?<><section className="hours-card"><div className="hours-title"><div><p className="admin-kicker">Interventions non clôturées</p><h2>{visibleName}</h2></div><div className="hours-totals"><span>{decimal(sums.hours)} h</span><strong>{francs(sums.amount)}</strong></div></div>
-          <form onSubmit={saveEntry} className="hours-entry-form">
+          {personArchived&&<p className="hours-empty">Cette personne est archivée. Réactivez-la pour saisir ou clôturer de nouvelles heures.</p>}
+          {!personArchived&&<form onSubmit={saveEntry} className="hours-entry-form">
             <label className="hours-label">Date<input type="date" required value={form.date} onChange={e=>change("date",e.target.value)}/></label>
             <label className="hours-label hours-description">Travail effectué<input required maxLength={1000} placeholder="Déménagement, transport…" value={form.description} onChange={e=>change("description",e.target.value)}/></label>
             <label className="hours-label">Heures<input required type="number" min="0.01" max="24" step="0.01" placeholder="2.5" value={form.hours} onChange={e=>change("hours",e.target.value)}/></label>
             <label className="hours-label">Montant (CHF)<input required type="number" min="0" max="1000000" step="0.01" placeholder="75.00" value={form.amount} onChange={e=>change("amount",e.target.value)}/></label>
             <div className="hours-form-actions"><button className="admin-primary" disabled={working}>{editingId?"Enregistrer la modification":"Ajouter l’intervention"}</button>{editingId&&<button type="button" className="hours-secondary" onClick={()=>{setEditingId(null);setForm(blank())}}>Annuler</button>}</div>
-          </form>
+          </form>}
           <div className="hours-scroll"><table className="hours-table"><thead><tr><th>Date</th><th>Travail</th><th>Heures</th><th>Montant</th><th>Actions</th></tr></thead><tbody>{pending.map(l=><tr key={l.id}><td>{dateDisplay(l.date)}</td><td>{l.description}</td><td>{decimal(l.hours)} h</td><td>{francs(l.amountCents)}</td><td><button type="button" className="hours-link" onClick={()=>startEdit(l)}>Modifier</button><button type="button" className="hours-link hours-danger" onClick={()=>remove(l.id)}>Supprimer</button></td></tr>)}</tbody><tfoot><tr><th colSpan={2}>Grand total</th><th>{decimal(sums.hours)} h</th><th>{francs(sums.amount)}</th><th/></tr></tfoot></table>{!pending.length&&<p className="hours-empty">Aucune intervention en attente. Les anciennes restent dans l'historique.</p>}</div>
-          <div className="hours-close"><label className="hours-label">Clôturer jusqu'au<input type="date" value={cutoff} onChange={e=>setCutoff(e.target.value)}/></label><button type="button" className="admin-primary" disabled={working||!pending.some(e=>e.date<=cutoff)} onClick={close}>Clôturer le décompte</button></div>
+          {!personArchived&&<div className="hours-close"><label className="hours-label">Clôturer jusqu'au<input type="date" value={cutoff} onChange={e=>setCutoff(e.target.value)}/></label><button type="button" className="admin-primary" disabled={working||!pending.some(e=>e.date<=cutoff)} onClick={close}>Clôturer le décompte</button></div>}
         </section>
-        <section className="hours-card"><h2>Historique des décomptes</h2><p>Chaque version reste consultable et téléchargeable en PDF.</p>{reports.length?<div className="hours-history">{reports.map(r=><button className={"hours-history-entry"+(selectedReport===r.id+":"+r.version?" selected":"")} key={r.id+":"+r.version} onClick={()=>chooseReport(r.id+":"+r.version)}><span>Clôture du {dateDisplay(r.cutoffDate)} · Version {r.version}</span><strong>{decimal(total(r.lines).hours)} h · {francs(total(r.lines).amount)}</strong></button>)}</div>:<p className="hours-empty">Aucun décompte clôturé.</p>}
-          {report&&<div className="hours-report-preview"><h3>Décompte du {dateDisplay(report.cutoffDate)} — version {report.version}</h3><div className="hours-scroll"><table className="hours-table"><thead><tr><th>Date</th><th>Travail</th><th>Heures</th><th>Montant</th></tr></thead><tbody>{reportLines.map((l,i)=><tr key={l.id}><td>{corrections?<input type="date" value={l.date} onChange={e=>editArchived(i,"date",e.target.value)}/>:dateDisplay(l.date)}</td><td>{corrections?<input value={l.description} maxLength={1000} onChange={e=>editArchived(i,"description",e.target.value)}/>:l.description}</td><td>{corrections?<input type="number" min="0.01" max="24" step="0.01" value={l.hours} onChange={e=>editArchived(i,"hours",e.target.value)}/>:decimal(l.hours)+" h"}</td><td>{corrections?<input type="number" min="0" step="0.01" value={l.amountCents/100} onChange={e=>editArchived(i,"amountCents",e.target.value)}/>:francs(l.amountCents)}</td></tr>)}</tbody><tfoot><tr><th colSpan={2}>Grand total</th><th>{decimal(reportTotal.hours)} h</th><th>{francs(reportTotal.amount)}</th></tr></tfoot></table></div>
-            <div className="hours-buttons">{corrections?<><button className="admin-primary" onClick={saveRevision} disabled={working}>Enregistrer une nouvelle version</button><button className="hours-secondary" onClick={()=>setCorrections(null)}>Annuler</button></>:<><button className="admin-primary" onClick={()=>window.print()}>Imprimer / Enregistrer en PDF</button><button className="hours-secondary" onClick={startRevision}>Corriger ce décompte</button></>}</div>
+        <section className="hours-card">
+          <h2>Historique des décomptes</h2>
+          <p>Les anciennes versions restent accessibles. Vous pouvez corriger un décompte, ajouter ou retirer une intervention, ou le déplacer dans la corbeille.</p>
+          {activeReports.length?<div className="hours-history">{activeReports.map(r=><button type="button" className={"hours-history-entry"+(selectedReport===r.id+":"+r.version?" selected":"")} key={r.id+":"+r.version} onClick={()=>chooseReport(r.id+":"+r.version)}>
+            <span>Clôture du {dateDisplay(r.cutoffDate)} · Version {r.version}</span><strong>{decimal(total(r.lines).hours)} h · {francs(total(r.lines).amount)}</strong>
+          </button>)}</div>:<p className="hours-empty">Aucun décompte actif dans l'historique.</p>}
+          <details className="hours-trash"><summary>Corbeille ({new Set(trashReports.map(r=>r.id)).size} décompte(s))</summary>
+            {trashReports.length?<div className="hours-history">{trashReports.map(r=><button type="button" className={"hours-history-entry"+(selectedReport===r.id+":"+r.version?" selected":"")} key={r.id+":"+r.version} onClick={()=>chooseReport(r.id+":"+r.version)}>
+              <span>Corbeille · {dateDisplay(r.cutoffDate)} · Version {r.version}</span><strong>{decimal(total(r.lines).hours)} h · {francs(total(r.lines).amount)}</strong>
+            </button>)}</div>:<p className="hours-empty">La corbeille est vide.</p>}
+          </details>
+          {report&&<div className="hours-report-preview"><h3>Décompte du {dateDisplay(report.cutoffDate)} — version {report.version}{report.deletedAt?" (corbeille)":""}</h3>
+            <div className="hours-scroll"><table className="hours-table"><thead><tr><th>Date</th><th>Travail</th><th>Heures</th><th>Montant</th>{corrections&&<th>Action</th>}</tr></thead><tbody>{reportLines.map((l,i)=><tr key={l.id}>
+              <td>{corrections?<input type="date" value={l.date} onChange={e=>editArchived(i,"date",e.target.value)}/>:dateDisplay(l.date)}</td>
+              <td>{corrections?<input value={l.description} maxLength={1000} onChange={e=>editArchived(i,"description",e.target.value)}/>:l.description}</td>
+              <td>{corrections?<input type="number" min="0.01" max="24" step="0.01" value={l.hours} onChange={e=>editArchived(i,"hours",e.target.value)}/>:decimal(l.hours)+" h"}</td>
+              <td>{corrections?<input type="number" min="0" step="0.01" value={l.amountCents/100} onChange={e=>editArchived(i,"amountCents",e.target.value)}/>:francs(l.amountCents)}</td>
+              {corrections&&<td><button type="button" className="hours-link hours-danger" onClick={()=>removeCorrection(l.id)}>Retirer</button></td>}
+            </tr>)}</tbody><tfoot><tr><th colSpan={2}>Grand total</th><th>{decimal(reportTotal.hours)} h</th><th>{francs(reportTotal.amount)}</th>{corrections&&<th/>}</tr></tfoot></table></div>
+            <div className="hours-buttons">
+              {corrections?<><button className="hours-secondary" type="button" disabled={working} onClick={addCorrection}>+ Ajouter une intervention</button>
+                <button className="admin-primary" type="button" onClick={saveRevision} disabled={working}>Enregistrer la version corrigée</button>
+                <button className="hours-secondary" type="button" onClick={()=>setCorrections(null)}>Annuler</button></>:
+                <><button className="admin-primary" type="button" onClick={()=>window.print()}>Imprimer / Enregistrer en PDF</button>
+                  {report.deletedAt?<button className="hours-secondary" type="button" disabled={working} onClick={()=>reportAction("restore_report")}>Restaurer le décompte</button>:
+                  <><button className="hours-secondary" type="button" disabled={working} onClick={startRevision}>Corriger ce décompte</button>
+                    <button className="hours-secondary hours-destructive" type="button" disabled={working} onClick={()=>reportAction("trash_report")}>Mettre dans la corbeille</button></>}
+                </>}
+            </div>
+            {corrections&&<p className="hours-muted">L'original restera dans l'historique. Les totaux seront recalculés automatiquement.</p>}
           </div>}
         </section></>:<div className="hours-card"><p>Ajoutez une personne pour commencer.</p></div>}
       </div>

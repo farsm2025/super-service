@@ -42,7 +42,7 @@ export function generateHoursPdf(args:{name:string;cutoffDate:string;version:num
   const totalCHF=args.lines.reduce((s,r)=>s+Number(r.amountCents),0);
   y-=9;tx(122,y,"GRAND TOTAL",11,true);tx(450,y,hours(totalH),10,true);tx(505,y,amount(totalCHF).replace(" CHF",""),10,true);
   y-=32;tx(44,y,"Établi le "+dateFr(args.generatedDate),10);
-  y-=20;tx(44,y,"Décompte des interventions - ne constitue pas une fiche de salaire.",8);
+  y-=20;tx(44,y,"Décompte des interventions",8);
   pages.push(commands.join("\n"));
   const objects:string[]=[];
   const push=(content:string)=>{objects.push(content);return objects.length};

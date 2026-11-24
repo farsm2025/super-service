@@ -14,3 +14,10 @@
 .hours-report-preview .hours-table input{padding:8px;min-width:95px}
 .hours-report-preview .hours-table td:nth-child(2) input{min-width:170px}
 @media(max-width:760px){.hours-person-actions{grid-template-columns:minmax(0,1fr)}.hours-buttons{gap:8px}.hours-buttons>button{min-height:42px}}
+
+/* Saisie des prestations et envoi des relevés : charte existante conservée. */
+.hours-email-form{display:grid;gap:10px;margin-top:18px;padding:14px 0;border-top:1px solid var(--admin-border)}
+.hours-email-form button{justify-self:start}
+.hours-email-status{font-size:.87rem;font-weight:700;color:#4f6878;margin:12px 0 14px}
+.hours-email-form input,.hours-entry-form select{border:1px solid var(--admin-border);border-radius:9px;padding:11px;color:#172330;background:#fff;font:inherit;width:100%;min-width:0}
+@media(max-width:480px){.hours-email-form button{width:100%}}

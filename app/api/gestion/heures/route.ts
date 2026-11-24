@@ -1,10 +1,12 @@
 import {NextResponse} from "next/server";
 import {getAdminSession} from "@/lib/admin-auth";
 import {database} from "@/lib/db";
+import {sendHoursReport} from "@/lib/hours-email";
 
 export const dynamic="force-dynamic";
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const datePattern=/^\d{4}-\d{2}-\d{2}$/;
+const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function error(message:string,status=400){return NextResponse.json({error:message},{status})}
 function validDate(value:unknown):value is string{
   if(typeof value!=="string"||!datePattern.test(value))return false;
@@ -22,9 +24,9 @@ export async function GET(){
   if(!await getAdminSession())return error("Non autorisé",401);
   try{
     const sql=database();
-    const people=await sql.query("SELECT id,first_name AS \"firstName\",last_name AS \"lastName\",archived_at AS \"archivedAt\" FROM work_people ORDER BY archived_at NULLS FIRST,last_name,first_name",[]);
+    const people=await sql.query("SELECT id,first_name AS \"firstName\",last_name AS \"lastName\",email,archived_at AS \"archivedAt\" FROM work_people ORDER BY archived_at NULLS FIRST,last_name,first_name",[]);
     const entries=await sql.query("SELECT id,person_id AS \"personId\",to_char(work_date,'YYYY-MM-DD') AS date,description,hours::float8 AS hours,amount_cents AS \"amountCents\" FROM work_entries WHERE statement_id IS NULL ORDER BY work_date DESC,created_at DESC",[]);
-    const reports=await sql.query(`SELECT r.id,r.person_id AS "personId",to_char(r.cutoff_date,'YYYY-MM-DD') AS "cutoffDate",r.created_at AS "createdAt",r.deleted_at AS "deletedAt",v.version,v.lines FROM work_statements r JOIN work_statement_versions v ON v.statement_id=r.id ORDER BY r.created_at DESC,v.version DESC`,[]);
+    const reports=await sql.query(`SELECT r.id,r.person_id AS "personId",to_char(r.cutoff_date,'YYYY-MM-DD') AS "cutoffDate",r.created_at AS "createdAt",r.deleted_at AS "deletedAt",r.email_status AS "emailStatus",r.email_to AS "emailTo",r.emailed_at AS "emailedAt",r.email_error AS "emailError",v.version,v.lines FROM work_statements r JOIN work_statement_versions v ON v.statement_id=r.id ORDER BY r.created_at DESC,v.version DESC`,[]);
     return NextResponse.json({people,entries,reports},{headers:{"Cache-Control":"no-store"}});
   }catch(err){console.error("Hour register read failed",err);return error("Impossible de charger les décomptes. Vérifiez la migration Neon.",500)}
 }
@@ -38,8 +40,25 @@ export async function POST(request:Request){
       const firstName=typeof body.firstName==="string"?body.firstName.trim():"";
       const lastName=typeof body.lastName==="string"?body.lastName.trim():"";
       if(!firstName||!lastName||firstName.length>100||lastName.length>100)return error("Prénom et nom requis.");
-      const rows=await sql.query('INSERT INTO work_people(first_name,last_name) VALUES($1,$2) RETURNING id',[firstName,lastName]);
+      const email=typeof body.email==="string"?body.email.trim().toLowerCase():"";
+      if(email&&(!emailRegex.test(email)||email.length>254))return error("Adresse e-mail invalide.");
+      const rows=await sql.query('INSERT INTO work_people(first_name,last_name,email) VALUES($1,$2,$3) RETURNING id',[firstName,lastName,email]);
       return NextResponse.json({id:rows[0].id},{status:201});
+    }
+    if(body.action==="update_person_email"){
+      if(!validUuid(body.personId))return error("Personne invalide.");
+      const email=typeof body.email==="string"?body.email.trim().toLowerCase():"";
+      if(email&&(!emailRegex.test(email)||email.length>254))return error("Adresse e-mail invalide.");
+      const rows=await sql.query("UPDATE work_people SET email=$2 WHERE id=$1 RETURNING id",[body.personId,email]);
+      return rows.length?NextResponse.json({ok:true}):error("Personne introuvable.",404);
+    }
+    if(body.action==="resend_report"){
+      if(!validUuid(body.reportId))return error("Décompte invalide.");
+      const rows=await sql.query("SELECT id,email_status FROM work_statements WHERE id=$1 AND deleted_at IS NULL",[body.reportId]);
+      if(!rows.length)return error("Décompte introuvable.",404);
+      if(rows[0].email_status==="sent")return error("Ce décompte a déjà été envoyé.",409);
+      const status=await sendHoursReport(body.reportId);
+      return NextResponse.json({emailStatus:status.status,message:status.message});
     }
     if(body.action==="archive_person"||body.action==="restore_person"){
       if(!validUuid(body.personId))return error("Personne invalide.");
@@ -113,7 +132,16 @@ export async function POST(request:Request){
         FROM assigned HAVING count(*)>0 RETURNING statement_id
       )
       SELECT statement_id AS id FROM version`,[body.personId,body.cutoffDate]);
-      return rows.length?NextResponse.json({id:rows[0].id}):error("Aucune intervention non clôturée jusqu'à cette date.",409);
+      if(!rows.length)return error("Aucune intervention non clôturée jusqu'à cette date.",409);
+      const reportId=String(rows[0].id);
+      // Une erreur d'envoi ne doit jamais annuler visuellement une clôture déjà enregistrée.
+      try{
+        const delivery=await sendHoursReport(reportId);
+        return NextResponse.json({id:reportId,emailStatus:delivery.status,message:delivery.message});
+      }catch(error){
+        console.error("Work report closed but notification could not start",error);
+        return NextResponse.json({id:reportId,emailStatus:"failed",message:"Décompte clôturé et archivé. L'envoi de l'e-mail n'a pas pu démarrer ; réessayez depuis l'historique."});
+      }
     }
     if(body.action==="revise"){
       if(!validUuid(body.reportId)||!Number.isInteger(Number(body.expectedVersion))||!Array.isArray(body.lines)||body.lines.length>1000)return error("Décompte incorrect.");

@@ -15,7 +15,7 @@ function validUuid(v:unknown):v is string{return typeof v==="string"&&uuid.test(
 function entryInput(body:Record<string,unknown>){
   const date=body.date,description=typeof body.description==="string"?body.description.trim():"";
   const hours=Number(body.hours),amount=Number(body.amount);
-  if(!validDate(date)||!description||description.length>1000||!Number.isFinite(hours)||hours<=0||hours>24||Math.round(hours*100)!==hours*100||!Number.isFinite(amount)||amount<0||amount>1000000||Math.abs(amount*100-Math.round(amount*100))>0.00001)throw Error("Vérifiez la date, la description, les heures (max. 24) et le montant en CHF.");
+  if(!validDate(date)||!description||description.length>1000||!Number.isFinite(hours)||hours<=0||hours>24||Math.abs(hours*100-Math.round(hours*100))>0.00001||!Number.isFinite(amount)||amount<0||amount>1000000||Math.abs(amount*100-Math.round(amount*100))>0.00001)throw Error("Vérifiez la date, la description, les heures (max. 24) et le montant en CHF.");
   return {date,description,hours,amountCents:Math.round(amount*100)};
 }
 export async function GET(){

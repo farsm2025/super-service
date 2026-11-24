@@ -8,7 +8,7 @@ export const metadata={title:"Carnet de devis | Super-Service",robots:{index:fal
 export default async function CarnetPage(){
   if(!await getAdminSession())redirect("/gestion/connexion");
   return <div className="admin-app">
-    <header className="admin-top"><div><span className="admin-brand">SUPER-SERVICE</span><p>Carnet de devis</p></div><div className="top-actions"><Link className="carnet-back" href="/gestion">← Calendrier</Link></div></header>
+    <header className="admin-top"><div><span className="admin-brand">SUPER-SERVICE</span><p>Carnet de devis</p></div><div className="top-actions"><Link className="carnet-back" href="/gestion">← Calendrier</Link><Link className="carnet-nav-link" href="/gestion/heures">Personnel / Heures</Link></div></header>
     <main className="admin-main"><CarnetClient/></main>
   </div>;
 }

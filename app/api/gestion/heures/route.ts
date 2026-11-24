@@ -107,12 +107,12 @@ export async function POST(request:Request){
       return rows.length?NextResponse.json({id:rows[0].id}):error("Aucune intervention non clôturée jusqu'à cette date.",409);
     }
     if(body.action==="revise"){
-      if(!validUuid(body.reportId)||!Number.isInteger(body.expectedVersion)||!Array.isArray(body.lines)||body.lines.length>1000)return error("Décompte incorrect.");
+      if(!validUuid(body.reportId)||!Number.isInteger(Number(body.expectedVersion))||!Array.isArray(body.lines)||body.lines.length>1000)return error("Décompte incorrect.");
       const latest=await sql.query(`SELECT v.version FROM work_statement_versions v
         JOIN work_statements s ON s.id=v.statement_id
         WHERE v.statement_id=$1 AND s.deleted_at IS NULL ORDER BY v.version DESC LIMIT 1`,[body.reportId]);
       if(!latest.length)return error("Décompte introuvable ou dans la corbeille.",404);
-      if(Number(latest[0].version)!==body.expectedVersion)return error("Ce décompte a été modifié depuis son ouverture. Rechargez la dernière version.",409);
+      if(Number(latest[0].version)!==Number(body.expectedVersion))return error("Ce décompte a été modifié depuis son ouverture. Rechargez la dernière version.",409);
       const unique=new Set<string>();
       const lines=body.lines.map(raw=>{
         if(!raw||typeof raw!=="object")throw Error("Ligne invalide.");
@@ -127,7 +127,7 @@ export async function POST(request:Request){
         SELECT s.id,$2::int+1,$3::jsonb FROM work_statements s
         WHERE s.id=$1::uuid AND s.deleted_at IS NULL
         AND (SELECT MAX(version) FROM work_statement_versions WHERE statement_id=s.id)=$2::int
-        RETURNING version`,[body.reportId,body.expectedVersion,JSON.stringify(lines)]);
+        RETURNING version`,[body.reportId,Number(body.expectedVersion),JSON.stringify(lines)]);
       return rows.length?NextResponse.json({version:rows[0].version}):error("Une autre modification a eu lieu. Rechargez le décompte.",409);
     }
     return error("Action inconnue.");

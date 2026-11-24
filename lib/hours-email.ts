@@ -12,7 +12,7 @@ export async function sendHoursReport(reportId:string):Promise<{status:string;me
   // Idempotency: one sender claims one report; sent reports cannot be sent again.
   const claimed=await sql.query(`UPDATE work_statements s SET email_status='sending',email_claimed_at=now(),email_error=NULL
     FROM work_people p WHERE s.id=$1 AND s.person_id=p.id AND s.deleted_at IS NULL
-      AND s.email_status IN ('pending','failed','skipped')
+      AND (s.email_status IN ('pending','failed','skipped') OR (s.email_status='sending' AND s.email_claimed_at < now()-interval '10 minutes'))
     RETURNING s.id,p.first_name,p.last_name,p.email,to_char(s.cutoff_date,'YYYY-MM-DD') AS cutoff_date,s.deleted_at,s.email_status,s.email_to,s.email_error`,[reportId]);
   if(!claimed.length)return {status:"already",message:"Décompte déjà envoyé ou en cours d’envoi."};
   const report=claimed[0] as StatementRow;

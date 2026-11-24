@@ -2,7 +2,8 @@
 import {useEffect,useState} from "react";
 import {usePathname} from "next/navigation";
 
-const MEASUREMENT_ID=process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID||"";
+// Identifiant de mesure GA4 public, intégré dans le bundle du navigateur.
+const MEASUREMENT_ID="G-YCB11F5MPG";
 export const ANALYTICS_CONSENT_KEY="super-service-analytics-consent-v1";
 export const ANALYTICS_CONSENT_EVENT="super-service-analytics-consent-changed";
 type Gtag=(...args:unknown[])=>void;

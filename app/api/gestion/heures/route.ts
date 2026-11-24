@@ -24,7 +24,7 @@ export async function GET(){
     const sql=database();
     const people=await sql.query("SELECT id,first_name AS \"firstName\",last_name AS \"lastName\" FROM work_people ORDER BY last_name,first_name",[]);
     const entries=await sql.query("SELECT id,person_id AS \"personId\",to_char(work_date,'YYYY-MM-DD') AS date,description,hours::float8 AS hours,amount_cents AS \"amountCents\" FROM work_entries WHERE statement_id IS NULL ORDER BY work_date DESC,created_at DESC",[]);
-    const reports=await sql.query(`SELECT r.id,r.person_id AS "personId",to_char(r.cutoff_date,'YYYY-MM-DD') AS "cutoffDate",r.created_at AS "createdAt",v.version,v.lines FROM work_statements r JOIN LATERAL (SELECT version,lines FROM work_statement_versions WHERE statement_id=r.id ORDER BY version DESC LIMIT 1) v ON true ORDER BY r.created_at DESC`,[]);
+    const reports=await sql.query(`SELECT r.id,r.person_id AS "personId",to_char(r.cutoff_date,'YYYY-MM-DD') AS "cutoffDate",r.created_at AS "createdAt",v.version,v.lines FROM work_statements r JOIN work_statement_versions v ON v.statement_id=r.id ORDER BY r.created_at DESC,v.version DESC`,[]);
     return NextResponse.json({people,entries,reports},{headers:{"Cache-Control":"no-store"}});
   }catch(err){console.error("Hour register read failed",err);return error("Impossible de charger les décomptes. Vérifiez la migration Neon.",500)}
 }

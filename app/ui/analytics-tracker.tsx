@@ -8,7 +8,7 @@ export const ANALYTICS_CONSENT_KEY="super-service-analytics-consent-v1";
 export const ANALYTICS_CONSENT_EVENT="super-service-analytics-consent-changed";
 type Gtag=(...args:unknown[])=>void;
 declare global {
-  interface Window {gtag?:Gtag;dataLayer?:unknown[][]}
+  interface Window {gtag?:Gtag;dataLayer?:unknown[]}
 }
 const blockedPath=(path:string)=>path==="/gestion"||path.startsWith("/gestion/")||path==="/studio"||path.startsWith("/studio/")||path==="/api"||path.startsWith("/api/");
 function hasConsent(){
@@ -17,7 +17,7 @@ function hasConsent(){
 function enableGA4(){
   if(!MEASUREMENT_ID||!/^G-[A-Z0-9]+$/.test(MEASUREMENT_ID)||window.gtag)return;
   window.dataLayer=window.dataLayer||[];
-  window.gtag=(...args:unknown[])=>{window.dataLayer?.push(args)};
+  window.gtag=function gtag(..._args:unknown[]){window.dataLayer?.push(arguments)};
   window.gtag("consent","default",{analytics_storage:"granted",ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied"});
   window.gtag("js",new Date());
   window.gtag("config",MEASUREMENT_ID,{send_page_view:false});

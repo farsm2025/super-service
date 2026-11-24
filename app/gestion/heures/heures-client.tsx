@@ -126,9 +126,11 @@ export function HeuresClient(){
       </div>
     </div>}
     {report&&!corrections&&<section className="hours-print">
-      <h1>SUPER-SERVICE</h1><h2>Décompte des heures</h2>
-      <p><strong>Personne :</strong> {visibleName}</p><p><strong>Clôturé au :</strong> {dateDisplay(report.cutoffDate)} · <strong>Version :</strong> {report.version}</p>
+      <h1>SUPER-SERVICE</h1><h2>Décompte des heures et des prestations</h2>
+      <p className="hours-print-person"><strong>{visibleName}</strong></p>
+      <p><strong>Décompte arrêté au :</strong> {dateDisplay(report.cutoffDate)} · <strong>Version :</strong> {report.version}</p>
       <table><thead><tr><th>Date</th><th>Travail effectué</th><th>Heures</th><th>Montant CHF</th></tr></thead><tbody>{report.lines.map(l=><tr key={l.id}><td>{dateDisplay(l.date)}</td><td>{l.description}</td><td>{decimal(l.hours)} h</td><td>{francs(l.amountCents)}</td></tr>)}</tbody><tfoot><tr><th colSpan={2}>GRAND TOTAL</th><th>{decimal(total(report.lines).hours)} h</th><th>{francs(total(report.lines).amount)}</th></tr></tfoot></table>
+      <p className="hours-print-date">Établi le {dateDisplay(currentDate())}</p>
       <p className="hours-print-note">Décompte des interventions — ne constitue pas une fiche de salaire.</p>
     </section>}
   </div>;

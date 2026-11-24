@@ -78,15 +78,15 @@ export function HeuresClient(){
     const fullName=[person.firstName,person.lastName].join(" ").trim();
     const countPending=data.entries.filter(e=>e.personId===person.id).length;
     const countReports=new Set(data.reports.filter(r=>r.personId===person.id).map(r=>r.id)).size;
-    if(!window.confirm("SUPPRESSION DÉFINITIVE de "+fullName+" ?\\n\\n"+countPending+" intervention(s) en cours et "+countReports+" décompte(s), avec toutes leurs versions, seront effacés.\\n\\nCette action est irréversible. Continuer ?"))return;
-    const typed=window.prompt("Deuxième confirmation : saisissez exactement le prénom et le nom de la personne à supprimer :\\n"+fullName);
+    if(!window.confirm("SUPPRESSION DÉFINITIVE de "+fullName+" ?\n\n"+countPending+" intervention(s) en cours et "+countReports+" décompte(s), avec toutes leurs versions, seront effacés.\n\nCette action est irréversible. Continuer ?"))return;
+    const typed=window.prompt("Deuxième confirmation : saisissez exactement le prénom et le nom de la personne à supprimer :\n"+fullName);
     if(typed!==fullName){if(typed!==null)setError("Suppression annulée : le nom saisi ne correspond pas.");return}
     const ok=await run({action:"permanent_delete_person",personId:person.id,confirmName:typed,confirmation:"SUPPRIMER DÉFINITIVEMENT"},"La personne et toutes ses données de suivi des heures ont été définitivement supprimées.");
     if(ok){setEditingId(null);setForm(blank());setSelectedReport("");setCorrections(null)}
   }
   async function deleteReportPermanently(){
     if(!report||working)return;
-    if(!window.confirm("SUPPRESSION DÉFINITIVE du décompte du "+dateDisplay(report.cutoffDate)+" ?\\nToutes ses versions et les heures enregistrées dans ce décompte seront supprimées. La personne sera conservée. Cette action est irréversible."))return;
+    if(!window.confirm("SUPPRESSION DÉFINITIVE du décompte du "+dateDisplay(report.cutoffDate)+" ?\nToutes ses versions et les heures enregistrées dans ce décompte seront supprimées. La personne sera conservée. Cette action est irréversible."))return;
     const typed=window.prompt("Deuxième confirmation : écrivez SUPPRIMER pour effacer définitivement ce décompte.");
     if(typed!=="SUPPRIMER"){if(typed!==null)setError("Suppression annulée : confirmation incorrecte.");return}
     const ok=await run({action:"permanent_delete_report",reportId:report.id,personId:report.personId,confirmation:"SUPPRIMER DÉFINITIVEMENT"},"Décompte et versions définitivement supprimés.");

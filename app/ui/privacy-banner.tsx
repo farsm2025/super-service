@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import {useEffect, useState} from "react";
+import {ANALYTICS_CONSENT_KEY,ANALYTICS_CONSENT_EVENT} from "./analytics-tracker";
 
-const STORAGE_KEY = "super-service-privacy-choice";
+const STORAGE_KEY = ANALYTICS_CONSENT_KEY;
 
 export function PrivacyBanner() {
   const [visible, setVisible] = useState(false);
@@ -12,11 +13,14 @@ export function PrivacyBanner() {
     const timer = window.setTimeout(() => {
       setVisible(localStorage.getItem(STORAGE_KEY) === null);
     }, 0);
-    return () => window.clearTimeout(timer);
+    const reopen=()=>setVisible(true);
+    window.addEventListener("super-service-privacy-open",reopen);
+    return () => {window.clearTimeout(timer);window.removeEventListener("super-service-privacy-open",reopen)};
   }, []);
 
   function saveChoice(choice: "accepted" | "refused") {
     localStorage.setItem(STORAGE_KEY, choice);
+    window.dispatchEvent(new Event(ANALYTICS_CONSENT_EVENT));
     setVisible(false);
   }
 
@@ -27,7 +31,7 @@ export function PrivacyBanner() {
       <div className="privacy-banner-copy">
         <strong>Protection de vos données</strong>
         <p>
-          Nous utilisons vos données uniquement pour répondre à vos demandes. Ce site mémorise votre choix sur cet appareil et n&apos;active aucun cookie publicitaire.
+          Avec votre accord, Google Analytics mesure les visites, demandes de devis et clics de contact pour améliorer notre site. Sans accord, aucune balise statistique Google Analytics n’est chargée. Votre choix est mémorisé sur cet appareil et peut être modifié dans notre politique de confidentialité.
         </p>
         <Link href="/confidentialite">Consulter la politique de confidentialité</Link>
       </div>

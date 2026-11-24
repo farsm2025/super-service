@@ -65,6 +65,24 @@ export async function POST(request:Request){
         WHERE id=$1 AND deleted_at IS ${trash?"NULL":"NOT NULL"} RETURNING id`,[body.reportId]);
       return rows.length?NextResponse.json({ok:true}):error("Décompte introuvable ou déjà déplacé.",409);
     }
+    if(body.action==="permanent_delete_person"){
+      if(!validUuid(body.personId)||body.confirmation!=="SUPPRIMER DÉFINITIVEMENT"||typeof body.confirmName!=="string")
+        return error("Confirmation de suppression invalide.",400);
+      const people=await sql.query("SELECT first_name,last_name FROM work_people WHERE id=$1",[body.personId]);
+      if(!people.length)return error("Personne introuvable.",404);
+      const fullName=[people[0].first_name,people[0].last_name].join(" ").trim();
+      if(body.confirmName.trim()!==fullName)return error("Le nom confirmé ne correspond pas à cette personne.",400);
+      const rows=await sql.query("SELECT work_delete_person_permanently($1::uuid) AS deleted",[body.personId]);
+      return rows[0]?.deleted===true?NextResponse.json({ok:true}):error("Suppression impossible.",409);
+    }
+    if(body.action==="permanent_delete_report"){
+      if(!validUuid(body.reportId)||!validUuid(body.personId)||body.confirmation!=="SUPPRIMER DÉFINITIVEMENT")
+        return error("Confirmation de suppression invalide.",400);
+      const statement=await sql.query("SELECT id FROM work_statements WHERE id=$1 AND person_id=$2",[body.reportId,body.personId]);
+      if(!statement.length)return error("Décompte introuvable.",404);
+      const rows=await sql.query("SELECT work_delete_statement_permanently($1::uuid) AS deleted",[body.reportId]);
+      return rows[0]?.deleted===true?NextResponse.json({ok:true}):error("Suppression impossible.",409);
+    }
     if(body.action==="entry"){
       if(!validUuid(body.personId))return error("Choisissez une personne.");
       const active=await sql.query("SELECT id FROM work_people WHERE id=$1 AND archived_at IS NULL",[body.personId]);

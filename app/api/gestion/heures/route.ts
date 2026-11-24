@@ -134,8 +134,14 @@ export async function POST(request:Request){
       SELECT statement_id AS id FROM version`,[body.personId,body.cutoffDate]);
       if(!rows.length)return error("Aucune intervention non clôturée jusqu'à cette date.",409);
       const reportId=String(rows[0].id);
-      const delivery=await sendHoursReport(reportId);
-      return NextResponse.json({id:reportId,emailStatus:delivery.status,message:delivery.message});
+      // Une erreur d'envoi ne doit jamais annuler visuellement une clôture déjà enregistrée.
+      try{
+        const delivery=await sendHoursReport(reportId);
+        return NextResponse.json({id:reportId,emailStatus:delivery.status,message:delivery.message});
+      }catch(error){
+        console.error("Work report closed but notification could not start",error);
+        return NextResponse.json({id:reportId,emailStatus:"failed",message:"Décompte clôturé et archivé. L'envoi de l'e-mail n'a pas pu démarrer ; réessayez depuis l'historique."});
+      }
     }
     if(body.action==="revise"){
       if(!validUuid(body.reportId)||!Number.isInteger(Number(body.expectedVersion))||!Array.isArray(body.lines)||body.lines.length>1000)return error("Décompte incorrect.");

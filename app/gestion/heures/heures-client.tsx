@@ -244,7 +244,7 @@ export function HeuresClient(){
                 <button className="admin-primary" type="button" onClick={saveRevision} disabled={working}>Enregistrer la version corrigée</button>
                 <button className="hours-secondary" type="button" onClick={()=>setCorrections(null)}>Annuler</button></>:
                 <><button className="admin-primary" type="button" onClick={()=>window.print()}>Imprimer / Enregistrer en PDF</button>
-                  {!report.deletedAt&&["failed","skipped"].includes(report.emailStatus)&&<button className="hours-secondary" disabled={working} type="button" onClick={resend}>Renvoyer le PDF par e-mail</button>}
+                  {!report.deletedAt&&["pending","failed","skipped"].includes(report.emailStatus)&&<button className="hours-secondary" disabled={working} type="button" onClick={resend}>Renvoyer le PDF par e-mail</button>}
                   {report.deletedAt?<button className="hours-secondary" type="button" disabled={working} onClick={()=>reportAction("restore_report")}>Restaurer le décompte</button>:
                   <><button className="hours-secondary" type="button" disabled={working} onClick={startRevision}>Corriger ce décompte</button>
                     <button className="hours-secondary hours-destructive" type="button" disabled={working} onClick={()=>reportAction("trash_report")}>Mettre dans la corbeille</button></>}

@@ -22,9 +22,9 @@ export async function GET(){
   if(!await getAdminSession())return error("Non autorisé",401);
   try{
     const sql=database();
-    const people=await sql.query("SELECT id,first_name AS \"firstName\",last_name AS \"lastName\" FROM work_people ORDER BY last_name,first_name",[]);
+    const people=await sql.query("SELECT id,first_name AS \"firstName\",last_name AS \"lastName\",archived_at AS \"archivedAt\" FROM work_people ORDER BY archived_at NULLS FIRST,last_name,first_name",[]);
     const entries=await sql.query("SELECT id,person_id AS \"personId\",to_char(work_date,'YYYY-MM-DD') AS date,description,hours::float8 AS hours,amount_cents AS \"amountCents\" FROM work_entries WHERE statement_id IS NULL ORDER BY work_date DESC,created_at DESC",[]);
-    const reports=await sql.query(`SELECT r.id,r.person_id AS "personId",to_char(r.cutoff_date,'YYYY-MM-DD') AS "cutoffDate",r.created_at AS "createdAt",v.version,v.lines FROM work_statements r JOIN work_statement_versions v ON v.statement_id=r.id ORDER BY r.created_at DESC,v.version DESC`,[]);
+    const reports=await sql.query(`SELECT r.id,r.person_id AS "personId",to_char(r.cutoff_date,'YYYY-MM-DD') AS "cutoffDate",r.created_at AS "createdAt",r.deleted_at AS "deletedAt",v.version,v.lines FROM work_statements r JOIN work_statement_versions v ON v.statement_id=r.id ORDER BY r.created_at DESC,v.version DESC`,[]);
     return NextResponse.json({people,entries,reports},{headers:{"Cache-Control":"no-store"}});
   }catch(err){console.error("Hour register read failed",err);return error("Impossible de charger les décomptes. Vérifiez la migration Neon.",500)}
 }
@@ -41,8 +41,34 @@ export async function POST(request:Request){
       const rows=await sql.query('INSERT INTO work_people(first_name,last_name) VALUES($1,$2) RETURNING id',[firstName,lastName]);
       return NextResponse.json({id:rows[0].id},{status:201});
     }
+    if(body.action==="archive_person"||body.action==="restore_person"){
+      if(!validUuid(body.personId))return error("Personne invalide.");
+      const rows=await sql.query(
+        "UPDATE work_people SET archived_at="+(body.action==="archive_person"?"now()":"NULL")+" WHERE id=$1 AND archived_at IS "+(body.action==="archive_person"?"NULL":"NOT NULL")+" RETURNING id",
+        [body.personId]
+      );
+      return rows.length?NextResponse.json({ok:true}):error("Personne introuvable ou déjà mise à jour.",409);
+    }
+    if(body.action==="delete_person"){
+      if(!validUuid(body.personId))return error("Personne invalide.");
+      // Ne jamais effacer un historique ou des interventions lors de la suppression d'une fiche.
+      const rows=await sql.query(`DELETE FROM work_people p WHERE p.id=$1
+        AND NOT EXISTS(SELECT 1 FROM work_entries e WHERE e.person_id=p.id)
+        AND NOT EXISTS(SELECT 1 FROM work_statements s WHERE s.person_id=p.id)
+        RETURNING id`,[body.personId]);
+      return rows.length?NextResponse.json({ok:true}):error("Cette personne a des heures ou des décomptes : archivez-la pour conserver son historique.",409);
+    }
+    if(body.action==="trash_report"||body.action==="restore_report"){
+      if(!validUuid(body.reportId))return error("Décompte invalide.");
+      const trash=body.action==="trash_report";
+      const rows=await sql.query(`UPDATE work_statements SET deleted_at=${trash?"now()":"NULL"}
+        WHERE id=$1 AND deleted_at IS ${trash?"NULL":"NOT NULL"} RETURNING id`,[body.reportId]);
+      return rows.length?NextResponse.json({ok:true}):error("Décompte introuvable ou déjà déplacé.",409);
+    }
     if(body.action==="entry"){
       if(!validUuid(body.personId))return error("Choisissez une personne.");
+      const active=await sql.query("SELECT id FROM work_people WHERE id=$1 AND archived_at IS NULL",[body.personId]);
+      if(!active.length)return error("Cette personne est archivée. Réactivez-la avant de saisir des heures.",409);
       const e=entryInput(body);
       if(body.id!==undefined){
         if(!validUuid(body.id))return error("Intervention invalide.");
@@ -60,6 +86,8 @@ export async function POST(request:Request){
     }
     if(body.action==="close"){
       if(!validUuid(body.personId)||!validDate(body.cutoffDate))return error("Choisissez une personne et une date valide.");
+      const active=await sql.query("SELECT id FROM work_people WHERE id=$1 AND archived_at IS NULL",[body.personId]);
+      if(!active.length)return error("Cette personne est archivée.",409);
       // Une seule requête SQL atomique : attribution, photographie des lignes et clôture.
       const rows=await sql.query(`WITH available AS (
         SELECT id FROM work_entries WHERE person_id=$1::uuid AND statement_id IS NULL AND work_date<=$2::date FOR UPDATE
@@ -79,23 +107,28 @@ export async function POST(request:Request){
       return rows.length?NextResponse.json({id:rows[0].id}):error("Aucune intervention non clôturée jusqu'à cette date.",409);
     }
     if(body.action==="revise"){
-      if(!validUuid(body.reportId)||!Array.isArray(body.lines)||body.lines.length<1||body.lines.length>1000)return error("Décompte incorrect.");
-      const previous=await sql.query("SELECT lines FROM work_statement_versions WHERE statement_id=$1 ORDER BY version DESC LIMIT 1",[body.reportId]);
-      if(!previous.length)return error("Décompte introuvable.",404);
-      const prev=previous[0].lines as Array<{id:string}>;
-      const oldIds=new Set(prev.map(l=>l.id));
-      if(body.lines.length!==oldIds.size)return error("Le nombre de lignes doit rester identique. Pour une modification de structure, contactez l'administrateur.");
+      if(!validUuid(body.reportId)||!Number.isInteger(Number(body.expectedVersion))||!Array.isArray(body.lines)||body.lines.length>1000)return error("Décompte incorrect.");
+      const latest=await sql.query(`SELECT v.version FROM work_statement_versions v
+        JOIN work_statements s ON s.id=v.statement_id
+        WHERE v.statement_id=$1 AND s.deleted_at IS NULL ORDER BY v.version DESC LIMIT 1`,[body.reportId]);
+      if(!latest.length)return error("Décompte introuvable ou dans la corbeille.",404);
+      if(Number(latest[0].version)!==Number(body.expectedVersion))return error("Ce décompte a été modifié depuis son ouverture. Rechargez la dernière version.",409);
+      const unique=new Set<string>();
       const lines=body.lines.map(raw=>{
+        if(!raw||typeof raw!=="object")throw Error("Ligne invalide.");
         const line=raw as Record<string,unknown>;
-        if(!validUuid(line.id)||!oldIds.has(line.id))throw Error("Une intervention ne correspond pas à ce décompte.");
+        if(!validUuid(line.id)||unique.has(line.id))throw Error("Identifiant de ligne invalide ou en double.");
+        unique.add(line.id);
         const validated=entryInput(line);
         return {id:line.id,...validated};
       });
-      if(new Set(lines.map(l=>l.id)).size!==lines.length)return error("Lignes en double.");
+      // Version précédente intouchée ; contrôle de version atomique pour éviter deux mises à jour simultanées.
       const rows=await sql.query(`INSERT INTO work_statement_versions(statement_id,version,lines)
-        SELECT $1::uuid,COALESCE(MAX(version),0)+1,$2::jsonb FROM work_statement_versions WHERE statement_id=$1::uuid
-        RETURNING version`,[body.reportId,JSON.stringify(lines)]);
-      return NextResponse.json({version:rows[0].version});
+        SELECT s.id,$2::int+1,$3::jsonb FROM work_statements s
+        WHERE s.id=$1::uuid AND s.deleted_at IS NULL
+        AND (SELECT MAX(version) FROM work_statement_versions WHERE statement_id=s.id)=$2::int
+        RETURNING version`,[body.reportId,Number(body.expectedVersion),JSON.stringify(lines)]);
+      return rows.length?NextResponse.json({version:rows[0].version}):error("Une autre modification a eu lieu. Rechargez le décompte.",409);
     }
     return error("Action inconnue.");
   }catch(err){console.error("Hour register write failed",err);return error(err instanceof Error&&err.message.startsWith("Vérifiez")?err.message:"Opération impossible. Réessayez.",400)}

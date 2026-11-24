@@ -49,15 +49,6 @@ export async function POST(request:Request){
       );
       return rows.length?NextResponse.json({ok:true}):error("Personne introuvable ou déjà mise à jour.",409);
     }
-    if(body.action==="delete_person"){
-      if(!validUuid(body.personId))return error("Personne invalide.");
-      // Ne jamais effacer un historique ou des interventions lors de la suppression d'une fiche.
-      const rows=await sql.query(`DELETE FROM work_people p WHERE p.id=$1
-        AND NOT EXISTS(SELECT 1 FROM work_entries e WHERE e.person_id=p.id)
-        AND NOT EXISTS(SELECT 1 FROM work_statements s WHERE s.person_id=p.id)
-        RETURNING id`,[body.personId]);
-      return rows.length?NextResponse.json({ok:true}):error("Cette personne a des heures ou des décomptes : archivez-la pour conserver son historique.",409);
-    }
     if(body.action==="trash_report"||body.action==="restore_report"){
       if(!validUuid(body.reportId))return error("Décompte invalide.");
       const trash=body.action==="trash_report";

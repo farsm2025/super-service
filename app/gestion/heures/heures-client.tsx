@@ -29,6 +29,7 @@ async function request(body?:Record<string,unknown>):Promise<Record<string,unkno
 export function HeuresClient(){
   const [data,setData]=useState<State>(empty);
   const [personId,setPersonId]=useState("");
+  const [peopleView,setPeopleView]=useState<"active"|"archived">("active");
   const [name,setName]=useState({firstName:"",lastName:"",email:""});
   const [emailEdit,setEmailEdit]=useState("");
   const [service,setService]=useState<string>("");
@@ -45,17 +46,25 @@ export function HeuresClient(){
   const [deliveryChoice,setDeliveryChoice]=useState<"download"|"email"|"print"|"none"|null>(null);
   async function reload(){
     const state=await request() as unknown as State;
-    setData(state);setPersonId(id=>state.people.some(p=>p.id===id)?id:(state.people[0]?.id||""));
+    setData(state);setPersonId(id=>state.people.some(p=>p.id===id&&(peopleView==="archived"?Boolean(p.archivedAt):!p.archivedAt))?id:(state.people.find(p=>peopleView==="archived"?Boolean(p.archivedAt):!p.archivedAt)?.id||""));
     return state;
   }
-  useEffect(()=>{let active=true;request().then(r=>{if(!active)return;const s=r as unknown as State;setData(s);setPersonId(s.people[0]?.id||"");}).catch(e=>{if(active)setError(String(e.message))}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[]);
+  useEffect(()=>{let active=true;request().then(r=>{if(!active)return;const s=r as unknown as State;setData(s);setPersonId(s.people.find(p=>!p.archivedAt)?.id||"");}).catch(e=>{if(active)setError(String(e.message))}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[]);
   async function run(action:Record<string,unknown>,success:string){
     setWorking(true);setError("");setNotice("");
     try{await request(action);await reload();setNotice(success);return true}
     catch(e){setError(e instanceof Error?e.message:"Erreur de traitement");return false}
     finally{setWorking(false)}
   }
-  const person=data.people.find(p=>p.id===personId);
+  const visiblePeople=data.people.filter(p=>peopleView==="archived"?Boolean(p.archivedAt):!p.archivedAt);
+  const activePeopleCount=data.people.filter(p=>!p.archivedAt).length;
+  const archivedPeopleCount=data.people.length-activePeopleCount;
+  const person=visiblePeople.find(p=>p.id===personId);
+  function switchPeopleView(view:"active"|"archived"){
+    setPeopleView(view);setPersonId(data.people.find(p=>view==="archived"?Boolean(p.archivedAt):!p.archivedAt)?.id||"");
+    setEditingId(null);setForm(blank());setService("");setDetails("");setSelectedReport("");setCorrections(null);
+    setError("");setNotice("");
+  }
   const personArchived=Boolean(person?.archivedAt);
   useEffect(()=>{setEmailEdit(person?.email||"")},[personId,person?.email]);
   const pending=data.entries.filter(e=>e.personId===personId).sort((a,b)=>a.date.localeCompare(b.date));
@@ -64,6 +73,8 @@ export function HeuresClient(){
   const activeReports=reports.filter(r=>!r.deletedAt);
   const trashReports=reports.filter(r=>Boolean(r.deletedAt));
   const hasHistory=reports.length>0||data.entries.some(e=>e.personId===personId);
+  const reportsCount=new Set(reports.map(r=>r.id)).size;
+  const reportsVersions=reports.length;
   const latestVersion=(id:string)=>Math.max(0,...reports.filter(r=>r.id===id).map(r=>Number(r.version)));
   const report=reports.find(r=>r.id+":"+r.version===selectedReport)||null;
   const reportLines=corrections??report?.lines??[];
@@ -101,38 +112,44 @@ export function HeuresClient(){
     catch(e){setError(e instanceof Error?e.message:"Téléchargement impossible.")}
     finally{setWorking(false)}
   }
-  async function personAction(action:"archive_person"|"restore_person"|"delete_person"){
-    if(!person)return;
+  async function personAction(action:"archive_person"|"restore_person"){
+    if(!person||working)return;
+    const target=person;
     const confirmation=action==="archive_person"
-      ?"Archiver "+person.firstName+" "+person.lastName+" ? Ses heures et anciens décomptes seront conservés."
-      :action==="restore_person"
-        ?"Réactiver cette personne et la rendre disponible pour les nouvelles interventions ?"
-        :"Supprimer définitivement cette fiche sans heures ni décomptes ?";
+      ?"Archiver "+target.firstName+" "+target.lastName+" ? Ses heures et ses "+reportsCount+" décompte(s) restent conservés dans Archives."
+      :"Réactiver "+target.firstName+" "+target.lastName+" avec son historique ?";
     if(!window.confirm(confirmation))return;
-    const ok=await run({action,personId:person.id},action==="archive_person"?"Personne archivée, historique conservé.":action==="restore_person"?"Personne réactivée.":"Fiche supprimée.");
-    if(ok){setEditingId(null);setForm(blank());setSelectedReport("");setCorrections(null)}
+    const ok=await run({action,personId:target.id},action==="archive_person"
+      ?"Personne archivée. Elle reste récupérable depuis Archives."
+      :"Personne réactivée avec son historique.");
+    if(ok){
+      setEditingId(null);setForm(blank());setService("");setDetails("");setSelectedReport("");setCorrections(null);
+      if(action==="restore_person"){setPeopleView("active");setPersonId(target.id)}
+    }
   }
   async function deletePersonPermanently(){
     if(!person||working)return;
     const fullName=[person.firstName,person.lastName].join(" ").trim();
     const countPending=data.entries.filter(e=>e.personId===person.id).length;
-    const countReports=new Set(data.reports.filter(r=>r.personId===person.id).map(r=>r.id)).size;
-    if(!window.confirm("SUPPRESSION DÉFINITIVE de "+fullName+" ?\n\n"+countPending+" intervention(s) en cours et "+countReports+" décompte(s), avec toutes leurs versions, seront effacés.\n\nCette action est irréversible. Continuer ?"))return;
+    const countReports=reportsCount;
+    const countVersions=reportsVersions;
+    if(!window.confirm("SUPPRESSION DÉFINITIVE de "+fullName+" ?\n\n"+countPending+" intervention(s) non clôturée(s), "+countReports+" décompte(s) et "+countVersions+" version(s) seront effacés.\n\nCette action est irréversible. Continuer ?"))return;
     const typed=window.prompt("Deuxième confirmation : saisissez exactement le prénom et le nom de la personne à supprimer :\n"+fullName);
     if(typed!==fullName){if(typed!==null)setError("Suppression annulée : le nom saisi ne correspond pas.");return}
     const ok=await run({action:"permanent_delete_person",personId:person.id,confirmName:typed,confirmation:"SUPPRIMER DÉFINITIVEMENT"},"La personne et toutes ses données de suivi des heures ont été définitivement supprimées.");
     if(ok){setEditingId(null);setForm(blank());setSelectedReport("");setCorrections(null)}
   }
   async function deleteReportPermanently(){
-    if(!report||working)return;
-    if(!window.confirm("SUPPRESSION DÉFINITIVE du décompte du "+dateDisplay(report.cutoffDate)+" ?\nToutes ses versions et les heures enregistrées dans ce décompte seront supprimées. La personne sera conservée. Cette action est irréversible."))return;
+    if(!report||working||!report.deletedAt)return;
+    const countVersions=reports.filter(r=>r.id===report.id).length;
+    if(!window.confirm("SUPPRESSION DÉFINITIVE du décompte du "+dateDisplay(report.cutoffDate)+" ?\nSes "+countVersions+" version(s) et les heures enregistrées seront supprimées. La personne sera conservée. Cette action est irréversible."))return;
     const typed=window.prompt("Deuxième confirmation : écrivez SUPPRIMER pour effacer définitivement ce décompte.");
     if(typed!=="SUPPRIMER"){if(typed!==null)setError("Suppression annulée : confirmation incorrecte.");return}
     const ok=await run({action:"permanent_delete_report",reportId:report.id,personId:report.personId,confirmation:"SUPPRIMER DÉFINITIVEMENT"},"Décompte et versions définitivement supprimés.");
     if(ok){setSelectedReport("");setCorrections(null)}
   }
   async function reportAction(action:"trash_report"|"restore_report"){
-    if(!report)return;
+    if(!report||working)return;
     const confirming=action==="trash_report"?"Mettre ce décompte et toutes ses versions dans la corbeille ? Les données pourront être restaurées.":"Restaurer ce décompte et toutes ses versions dans l'historique ?";
     if(!window.confirm(confirming))return;
     const ok=await run({action,reportId:report.id},action==="trash_report"?"Décompte déplacé dans la corbeille.":"Décompte restauré dans l'historique.");
@@ -212,10 +229,15 @@ export function HeuresClient(){
     {notice&&<p role="status" className="hours-notice no-print">{notice}</p>}
     {loading?<p>Chargement…</p>:<div className="hours-layout no-print">
       <aside className="hours-card"><h2>Personnes</h2>
+        <div className="hours-people-tabs" role="group" aria-label="Affichage des personnes">
+          <button type="button" className={"hours-people-tab"+(peopleView==="active"?" selected":"")} aria-pressed={peopleView==="active"} onClick={()=>switchPeopleView("active")}>Personnel actif ({activePeopleCount})</button>
+          <button type="button" className={"hours-people-tab"+(peopleView==="archived"?" selected":"")} aria-pressed={peopleView==="archived"} onClick={()=>switchPeopleView("archived")}>Archives ({archivedPeopleCount})</button>
+        </div>
+        <p className="hours-muted">{peopleView==="archived"?"Les personnes archivées sont conservées avec leur historique. Réactivez-les pour reprendre la saisie.":"Seules les personnes actives sont affichées ici."}</p>
         <label className="hours-label">Sélectionner une personne
-          <select value={personId} onChange={e=>{setPersonId(e.target.value);setEditingId(null);setForm(blank());setSelectedReport("");setCorrections(null)}}>
-            {data.people.length===0&&<option value="">Ajoutez une personne</option>}
-            {data.people.map(p=><option value={p.id} key={p.id}>{p.firstName} {p.lastName}{p.archivedAt?" (archivée)":""}</option>)}
+          <select value={personId} disabled={!visiblePeople.length} onChange={e=>{setPersonId(e.target.value);setEditingId(null);setForm(blank());setSelectedReport("");setCorrections(null)}}>
+            {visiblePeople.length===0&&<option value="">Aucune personne {peopleView==="active"?"active":"archivée"}</option>}
+            {visiblePeople.map(p=><option value={p.id} key={p.id}>{p.firstName} {p.lastName}</option>)}
           </select>
         </label>
         {person&&<form className="hours-email-form" onSubmit={saveEmail}>
@@ -225,10 +247,13 @@ export function HeuresClient(){
           <button type="submit" className="hours-secondary" disabled={working||emailEdit===(person.email||"")}>Enregistrer l'e-mail</button>
         </form>}
         {person&&<div className="hours-person-actions">
-          {personArchived?<button type="button" className="hours-secondary" disabled={working} onClick={()=>personAction("restore_person")}>Réactiver la personne</button>:<button type="button" className="hours-secondary" disabled={working} onClick={()=>personAction("archive_person")}>Archiver la personne</button>}
-          <button type="button" className="hours-secondary hours-destructive" disabled={working} onClick={deletePersonPermanently}>Supprimer définitivement la personne</button>
-          {hasHistory&&<small>Attention : cette suppression effacera aussi toutes ses interventions et tous ses décomptes, même ceux archivés.</small>}
-        </div>}
+          {personArchived?<button type="button" className="hours-secondary" disabled={working} onClick={()=>personAction("restore_person")}>Réactiver la personne</button>:<button type="button" className="hours-secondary" disabled={working} onClick={()=>personAction("archive_person")}>Archiver la personne (récupérable)</button>}
+          {personArchived&&<details className="hours-danger-zone"><summary>Zone dangereuse — suppression définitive</summary>
+            <p>{data.entries.filter(e=>e.personId===person.id).length} intervention(s) non clôturée(s), {reportsCount} décompte(s) et {reportsVersions} version(s) seraient effacés sans restauration possible.</p>
+            <button type="button" className="hours-secondary hours-destructive" disabled={working} onClick={deletePersonPermanently}>Supprimer définitivement cette personne</button>
+          </details>}
+          {!personArchived&&hasHistory&&<small>L'archivage conserve les données. Pour une suppression définitive, archivez d'abord la personne.</small>}
+        </div>
         <form onSubmit={addPerson} className="hours-person-form"><h3>Ajouter une personne</h3>
           <label className="hours-label">Prénom<input required maxLength={100} value={name.firstName} onChange={e=>setName(n=>({...n,firstName:e.target.value}))}/></label>
           <label className="hours-label">Nom<input required maxLength={100} value={name.lastName} onChange={e=>setName(n=>({...n,lastName:e.target.value}))}/></label>
@@ -282,15 +307,18 @@ export function HeuresClient(){
                 <><button className="admin-primary" type="button" disabled={working} onClick={()=>downloadExisting(report)}>Télécharger le PDF</button>
                   <button className="hours-secondary" type="button" disabled={working} onClick={()=>window.print()}>Imprimer</button>
                   {!report.deletedAt&&["pending","failed","skipped"].includes(report.emailStatus)&&<button className="hours-secondary" disabled={working} type="button" onClick={resend}>Renvoyer le PDF par e-mail</button>}
-                  {report.deletedAt?<button className="hours-secondary" type="button" disabled={working} onClick={()=>reportAction("restore_report")}>Restaurer le décompte</button>:
+                  {report.deletedAt?<><button className="hours-secondary" type="button" disabled={working} onClick={()=>reportAction("restore_report")}>Restaurer le décompte et ses versions</button>
+                    <details className="hours-danger-zone"><summary>Zone dangereuse — suppression définitive</summary>
+                      <p>Ce décompte, ses {reports.filter(r=>r.id===report.id).length} version(s) et les interventions liées seront effacés définitivement.</p>
+                      <button className="hours-secondary hours-destructive" type="button" disabled={working} onClick={deleteReportPermanently}>Supprimer définitivement ce décompte</button>
+                    </details></>:
                   <><button className="hours-secondary" type="button" disabled={working} onClick={startRevision}>Corriger ce décompte</button>
-                    <button className="hours-secondary hours-destructive" type="button" disabled={working} onClick={()=>reportAction("trash_report")}>Mettre dans la corbeille</button></>}
-                  <button className="hours-secondary hours-destructive" type="button" disabled={working} onClick={deleteReportPermanently}>Supprimer définitivement</button>
+                    <button className="hours-secondary" type="button" disabled={working} onClick={()=>reportAction("trash_report")}>Mettre dans la corbeille (récupérable)</button></>}
                 </>}
             </div>
             {corrections&&<p className="hours-muted">L'original restera dans l'historique. Les totaux seront recalculés automatiquement.</p>}
           </div>}
-        </section></>:<div className="hours-card"><p>Ajoutez une personne pour commencer.</p></div>}
+        </section></>:<div className="hours-card"><p>{peopleView==="archived"?"Aucune personne archivée. Revenez au personnel actif pour travailler.":"Aucune personne active. Ajoutez-en une ou consultez les Archives."}</p></div>}
       </div>
     </div>}
     {deliveryChoice&&<div className="hours-delivery-overlay no-print" role="presentation">

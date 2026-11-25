@@ -57,6 +57,8 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
   const [syncMessage, setSyncMessage] = useState("");
   const [lastSyncAt, setLastSyncAt] = useState<Date|null>(null);
   const refreshInFlight = useRef(false);
+  const appointmentsRef = useRef(appointments);
+  appointmentsRef.current = appointments;
   const lastRefreshAt = useRef(Date.now());
 
   async function refresh() {
@@ -75,9 +77,9 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
       const result = await response.json();
       if (!Array.isArray(result.appointments)) throw new Error("Réponse du calendrier invalide.");
       // Never silently replace known appointments with an unexpectedly empty response.
-      if (result.appointments.length === 0 && appointments.length > 0) {
+      if (result.appointments.length === 0 && appointmentsRef.current.length > 0) {
         setSyncStatus("unexpected_empty");
-        setSyncMessage("Anomalie : le serveur renvoie 0 rendez-vous alors que l'application en affichait "+appointments.length+". L'ancienne liste est conservée temporairement. Vérifiez la connexion et contactez l'administrateur.");
+        setSyncMessage("Anomalie : le serveur renvoie 0 rendez-vous alors que l'application en affichait "+appointmentsRef.current.length+". L'ancienne liste est conservée temporairement. Vérifiez la connexion et contactez l'administrateur.");
       } else {
         setAppointments(result.appointments);
         setLastSyncAt(new Date());

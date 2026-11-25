@@ -1,6 +1,6 @@
 # Procédure de maintenance — Super-Service
 
-**Version :** 1.1 — 25 novembre 2026  
+**Version :** 1.2 — 25 novembre 2026  
 **Responsable du suivi :** Novelyo  
 **Périmètre :** site Super-Service uniquement, sans application automatique aux autres clients.
 
@@ -141,3 +141,33 @@ Une seule procédure de référence **par client et par dépôt** ; améliorer c
 7. Documenter ce qui a été **compilé**, **déployé** et **vraiment testé** ; si un test est impossible, le marquer « à faire » plutôt que « réussi ».
 
 **Dernière vérification read-only Neon avant cette mise à jour documentaire :** 7 fiches, aucune archivée, aucune intervention ni décompte enregistré dans la base consultée, et aucune référence orpheline détectée ; ceci ne constitue pas un test de suppression/restauration.
+
+## 9. Protection du calendrier lors des mises à jour (iPhone/PWA)
+
+**Incident signalé le 25 novembre 2026 :** l'utilisateur de l'application iPhone ne voyait plus ses rendez-vous. La vérification directe de Neon a retrouvé **44 rendez-vous, dont 39 confirmés**, mais aucun planifié pour ce jour. Un défaut d'affichage a été identifié dans `app/gestion/dashboard.tsx` : le filtre « Nouvelles demandes » appliqué par l'onglet « Demandes » persistait après un retour au « Calendrier » et pouvait masquer les rendez-vous confirmés. La perte de données n'est pas établie. Les suppressions historiques ne peuvent pas être datées avec certitude à partir des seuls compteurs PostgreSQL.
+
+### 9.1. Règles de protection
+
+1. **Ne jamais conclure que les rendez-vous ont disparu sur la seule base d'un calendrier vide à l'écran.** Vérifier les filtres, la vue Jour/Semaine/Mois, la session et la réponse API ; contrôler le nombre de lignes dans Neon.
+2. Le retour aux vues **Accueil** et **Calendrier** doit effacer les filtres temporaires issus notamment de « Demandes » ; l'interface doit indiquer quand des filtres restent actifs et proposer de tous les retirer.
+3. Le rafraîchissement de `GET /api/gestion/rendez-vous` doit signaler tout statut HTTP non réussi (notamment 401), erreur réseau ou réponse inattendue, au lieu de laisser croire à une liste vide.
+4. Si une réponse renvoie subitement zéro rendez-vous alors que la page en affichait précédemment, afficher une **alerte explicite** et conserver temporairement la liste connue : celle-ci **n'est alors pas garantie à jour**. Ne pas la présenter comme une preuve de synchronisation.
+5. Ne pas stocker de copies de fiches client non chiffrées dans `localStorage`, dans un cache PWA public ou dans un service tiers pour contourner un problème réseau.
+6. Vérifier `public/sw.js` : dans la version actuelle, les routes `/gestion` et `/api/` sont exclues des réponses mises en cache par le service worker. Ne pas supprimer cette exclusion sans analyse de sécurité et de confidentialité.
+7. Toute modification du calendrier, de son API, de l'authentification, des rendez-vous ou du service worker nécessite une vérification réelle sur téléphone, au-delà du simple build Vercel.
+
+### 9.2. Contrôles à effectuer avant et après chaque mise à jour
+
+- **Avant fusion sur `main` :** relever le nombre de rendez-vous Neon (total, confirmés, annulés, sans date planifiée) et la répartition par jour sur la période sensible. Consigner le SHA GitHub et la date. Aucune écriture SQL sur les rendez-vous.
+- **Prévisualisation Vercel :** attendre `READY` et vérifier que le tableau de bord et les vues Jour/Semaine/Mois s'affichent. Une compilation réussie ne constitue pas à elle seule un test de l'application authentifiée.
+- **Cas critique du filtre :** ouvrir « Demandes », revenir à « Calendrier » : tous les rendez-vous doivent être de nouveau visibles, y compris les confirmés ; vérifier « Afficher tous les rendez-vous ».
+- **Erreur de synchronisation :** simuler un échec de requête ou une session expirée sur un environnement de test ; le message doit être visible et l'application ne doit pas prétendre être à jour. Ne pas faire ce test en coupant volontairement la production.
+- **Après déploiement :** vérifier le SHA et l'état `READY` sur Vercel, comparer les comptes Neon relevés avant/après et vérifier les journaux d'erreur accessibles.
+- **iPhone du client :** ouvrir l'application installée depuis l'écran d'accueil, passer de « Demandes » à « Calendrier », retirer les filtres, cliquer « Actualiser » et vérifier les prochains rendez-vous connus. Noter explicitement si cette vérification a été faite ou demeure à faire.
+- **Si les rendez-vous paraissent absents :** arrêter toute modification destructrice, comparer Neon à l'historique et aux sauvegardes disponibles ; ne jamais restaurer une base entière ni réécrire des rendez-vous sans examen et autorisation.
+
+### 9.3. Historique technique
+
+- Code du calendrier : `app/gestion/dashboard.tsx`, `app/gestion/calendar-improvements.css`.
+- API calendrier : `app/api/gestion/rendez-vous/route.ts` et `app/api/gestion/rendez-vous/[id]/route.ts` ; données : `lib/appointments.ts`, tables `appointments` et `appointment_history`.
+- Correction de l'affichage iPhone et de la synchronisation : PR [#49](https://github.com/farsm2025/super-service/pull/49). **Statut du déploiement et des tests fonctionnels à relever séparément** ; ne pas les présumer du seul commit.

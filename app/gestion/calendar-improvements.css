@@ -85,3 +85,11 @@
     grid-template-columns: repeat(7, minmax(135px, 1fr));
   }
 }
+
+/* Super-Service iPhone: visible calendar refresh state and accidental filter protection. */
+.calendar-sync{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:12px 0;padding:12px 14px;background:#eaf6f0;color:#16563c;border:1px solid #b7dec8;border-radius:10px;font-size:.86rem}
+.calendar-sync p{margin:6px 0 0;line-height:1.45}
+.calendar-sync button,.calendar-filter-alert button{background:#fff;border:1px solid currentColor;border-radius:8px;padding:8px 11px;font-weight:750;cursor:pointer}
+.calendar-sync button:disabled{opacity:.55;cursor:wait}
+.calendar-sync-error{background:#fff1ee;color:#962d25;border-color:#efb9b3}
+.calendar-filter-alert{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:11px 13px;margin:12px 0;border:1px solid #e5c77e;border-radius:10px;background:#fff8e6;color:#705213;font-size:.86rem;font-weight:700}

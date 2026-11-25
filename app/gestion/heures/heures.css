@@ -32,3 +32,13 @@
 .hours-delivery-option.selected{border-color:var(--admin-blue);background:#edf5fc}
 .hours-delivery-option input{accent-color:var(--admin-blue);width:17px;height:17px}
 @media(max-width:480px){.hours-delivery-dialog{padding:16px}}
+
+/* Séparation des personnes actives, archives et suppressions irréversibles. */
+.hours-people-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0}
+.hours-people-tab{border:1px solid var(--admin-border);border-radius:9px;padding:11px 7px;background:#f7f9fa;color:#355267;cursor:pointer;font-weight:800;font-size:.84rem}
+.hours-people-tab.selected{background:#edf5fc;color:#155789;border-color:var(--admin-blue)}
+.hours-people-tab:focus-visible,.hours-danger-zone summary:focus-visible{outline:2px solid var(--admin-blue);outline-offset:2px}
+.hours-danger-zone{border:1px solid #e7b6bb;border-radius:9px;background:#fff8f8;padding:10px 12px;flex-basis:100%;width:100%}
+.hours-danger-zone summary{color:#9e2831;font-weight:800;cursor:pointer}
+.hours-danger-zone p{color:#8b303a;font-size:.85rem;line-height:1.45}
+.hours-danger-zone .hours-destructive{width:100%}

@@ -180,6 +180,7 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
   const today = dateKey(new Date());
   const todayItems = appointments.filter(item => item.startsAt && dateKey(item.startsAt) === today);
   const filtersActive=Boolean(query||status||type);
+  const automaticRequestsFilter=view==="list"&&status==="new_request"&&!query&&!type;
   function showFullCalendar(nextView:View="month") {setQuery("");setStatus("");setType("");setView(nextView);setSelectedDay(null);}
   const newCount = appointments.filter(item => item.status === "new_request").length;
   const types = [...new Set(appointments.map(item => item.requestType))].sort();
@@ -223,7 +224,7 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
         </div>
         <button type="button" onClick={()=>void refresh()} disabled={syncStatus==="loading"}>Actualiser</button>
       </section>
-      {filtersActive&&<div className="calendar-filter-alert"><span>Des filtres masquent certains rendez-vous ({filtered.length} affichés sur {appointments.length}).</span><button type="button" onClick={()=>{setQuery("");setStatus("");setType("");}}>Afficher tous les rendez-vous</button></div>}
+      {filtersActive&&!automaticRequestsFilter&&<div className="calendar-filter-alert"><span>Des filtres masquent certains rendez-vous ({filtered.length} affichés sur {appointments.length}).</span><button type="button" onClick={()=>{setQuery("");setStatus("");setType("");}}>Afficher tous les rendez-vous</button></div>}
       <section className="admin-tools"><input aria-label="Rechercher" placeholder="Rechercher un client, téléphone, adresse…" value={query} onChange={event => setQuery(event.target.value)}/><select aria-label="Filtrer par statut" value={status} onChange={event => setStatus(event.target.value)}><option value="">Tous les statuts</option>{Object.entries(statusLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select><select aria-label="Filtrer par type" value={type} onChange={event => setType(event.target.value)}><option value="">Tous les types</option>{types.map(value => <option value={value} key={value}>{value}</option>)}</select></section>
       <nav className="view-tabs" aria-label="Vue calendrier">{(["day", "week", "month", "year"] as View[]).map(value => <button key={value} className={view === value ? "active" : ""} onClick={() => showFullCalendar(value)}>{{day: "Jour", week: "Semaine", month: "Mois", year: "Année", list: "Liste"}[value]}</button>)}</nav>
       {(view === "month" || view === "year") && <section className="calendar-navigation" aria-label="Navigation du calendrier">
@@ -260,7 +261,7 @@ function CalendarContent({view, calendarDate, appointments, onOpen, onMove, onSe
     }
   };
   if (view === "day") return <AppointmentList title="Rendez-vous du jour" items={appointments.filter(item => item.startsAt && dateKey(item.startsAt) === dateKey(today))} onOpen={onOpen}/>;
-  if (view === "list") return <AppointmentList title="Prochains rendez-vous et demandes" items={appointments} onOpen={onOpen}/>;
+  if (view === "list") return <AppointmentList title="Nouvelles demandes à traiter" items={appointments} onOpen={onOpen}/>;
   if (view === "week") {
     const monday = new Date(today); monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
     const days = Array.from({length: 7}, (_, index) => {const day = new Date(monday); day.setDate(monday.getDate() + index); return day;});

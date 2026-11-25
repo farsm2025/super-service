@@ -53,6 +53,9 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
   const [notice, setNotice] = useState("");
   const [reminderState, setReminderState] = useState<ReminderState>("loading");
   const [reminderMessage, setReminderMessage] = useState("");
+  const [syncStatus, setSyncStatus] = useState<"ok"|"loading"|"error"|"unexpected_empty">("ok");
+  const [syncMessage, setSyncMessage] = useState("");
+  const [lastSyncAt, setLastSyncAt] = useState<Date|null>(null);
   const refreshInFlight = useRef(false);
   const lastRefreshAt = useRef(Date.now());
 
@@ -60,11 +63,30 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
     if (refreshInFlight.current) return;
     refreshInFlight.current = true;
     lastRefreshAt.current = Date.now();
+    setSyncStatus("loading");
+    setSyncMessage("");
     try {
       const response = await fetch("/api/gestion/rendez-vous", {cache: "no-store"});
-      if (response.ok) setAppointments((await response.json()).appointments);
+      if (!response.ok) {
+        throw new Error(response.status===401
+          ? "Session expirée : reconnectez-vous pour retrouver le calendrier."
+          : "Impossible de charger les rendez-vous (HTTP "+response.status+").");
+      }
+      const result = await response.json();
+      if (!Array.isArray(result.appointments)) throw new Error("Réponse du calendrier invalide.");
+      // Never silently replace known appointments with an unexpectedly empty response.
+      if (result.appointments.length === 0 && appointments.length > 0) {
+        setSyncStatus("unexpected_empty");
+        setSyncMessage("Anomalie : le serveur renvoie 0 rendez-vous alors que l'application en affichait "+appointments.length+". L'ancienne liste est conservée temporairement. Vérifiez la connexion et contactez l'administrateur.");
+      } else {
+        setAppointments(result.appointments);
+        setLastSyncAt(new Date());
+        setSyncStatus("ok");
+      }
     } catch (error) {
       console.error("Calendar refresh failed", error);
+      setSyncStatus("error");
+      setSyncMessage(error instanceof Error?error.message:"Échec de synchronisation du calendrier.");
     } finally {
       refreshInFlight.current = false;
     }
@@ -154,7 +176,9 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
     return (!query || text.includes(query.toLowerCase())) && (!status || item.status === status) && (!type || item.requestType === type);
   }), [appointments, query, status, type]);
   const today = dateKey(new Date());
-  const todayItems = filtered.filter(item => item.startsAt && dateKey(item.startsAt) === today);
+  const todayItems = appointments.filter(item => item.startsAt && dateKey(item.startsAt) === today);
+  const filtersActive=Boolean(query||status||type);
+  function showFullCalendar(nextView:View="month") {setQuery("");setStatus("");setType("");setView(nextView);setSelectedDay(null);}
   const newCount = appointments.filter(item => item.status === "new_request").length;
   const types = [...new Set(appointments.map(item => item.requestType))].sort();
 
@@ -189,11 +213,19 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
     <header className="admin-top"><div><span className="admin-brand">SUPER-SERVICE</span><p>Gestion des rendez-vous</p></div><div className="top-actions"><a className="carnet-nav-link" href="/gestion/carnet">📓 Carnet de devis</a><a className="carnet-nav-link" href="/gestion/heures">◷ Personnel / Heures</a><button className={`notification-button reminder-${reminderState}`} onClick={toggleReminders} aria-pressed={reminderState==="on"} disabled={reminderState==="working"||reminderState==="loading"} title={reminderState==="on"?"Désactiver les rappels":"Activer les rappels"}><span aria-hidden="true">{reminderState==="on"?"🔔":"🔕"}</span><small>{reminderState==="on"?"Rappels actifs":"Rappels inactifs"}</small></button><form action="/api/gestion/auth/logout" method="post"><button className="admin-ghost">Déconnexion</button></form></div></header>
     <main className="admin-main">
       {reminderMessage&&<p className={`reminder-message ${reminderState==="on"?"success":""}`} role="status">{reminderMessage}</p>}
-      <section className="today-hero"><div><p className="admin-kicker">Aujourd’hui</p><h1>{todayItems.length} rendez-vous</h1><p>{newCount ? `${newCount} nouvelle${newCount > 1 ? "s" : ""} demande${newCount > 1 ? "s" : ""} à traiter` : "Toutes les demandes sont traitées"}</p></div><button className="admin-primary" onClick={() => setManual(true)}>＋ Ajouter</button></section>
+      <section className="today-hero"><div><p className="admin-kicker">Aujourd’hui</p><h1>{todayItems.length} rendez-vous</h1><p>{appointments.length} rendez-vous enregistrés au total · {newCount} demande(s) nouvelle(s)</p></div><button className="admin-primary" onClick={() => setManual(true)}>＋ Ajouter</button></section>
+      <section className={"calendar-sync"+(syncStatus==="error"||syncStatus==="unexpected_empty"?" calendar-sync-error":"")} role="status" aria-live="polite">
+        <div><strong>{syncStatus==="loading"?"Actualisation en cours…":syncStatus==="ok"?"Calendrier chargé":syncStatus==="unexpected_empty"?"Attention : données à vérifier":"Calendrier non actualisé"}</strong>
+          <span> · {appointments.length} rendez-vous dans l'affichage{lastSyncAt?" · synchronisé à "+lastSyncAt.toLocaleTimeString("fr-CH",{hour:"2-digit",minute:"2-digit"}):""}</span>
+          {syncMessage&&<p>{syncMessage}</p>}
+        </div>
+        <button type="button" onClick={()=>void refresh()} disabled={syncStatus==="loading"}>Actualiser</button>
+      </section>
+      {filtersActive&&<div className="calendar-filter-alert"><span>Des filtres masquent certains rendez-vous ({filtered.length} affichés sur {appointments.length}).</span><button type="button" onClick={()=>{setQuery("");setStatus("");setType("");}}>Afficher tous les rendez-vous</button></div>}
       <section className="admin-tools"><input aria-label="Rechercher" placeholder="Rechercher un client, téléphone, adresse…" value={query} onChange={event => setQuery(event.target.value)}/><select aria-label="Filtrer par statut" value={status} onChange={event => setStatus(event.target.value)}><option value="">Tous les statuts</option>{Object.entries(statusLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select><select aria-label="Filtrer par type" value={type} onChange={event => setType(event.target.value)}><option value="">Tous les types</option>{types.map(value => <option value={value} key={value}>{value}</option>)}</select></section>
-      <nav className="view-tabs" aria-label="Vue calendrier">{(["day", "week", "month", "year"] as View[]).map(value => <button key={value} className={view === value ? "active" : ""} onClick={() => setView(value)}>{{day: "Jour", week: "Semaine", month: "Mois", year: "Année", list: "Liste"}[value]}</button>)}</nav>
+      <nav className="view-tabs" aria-label="Vue calendrier">{(["day", "week", "month", "year"] as View[]).map(value => <button key={value} className={view === value ? "active" : ""} onClick={() => showFullCalendar(value)}>{{day: "Jour", week: "Semaine", month: "Mois", year: "Année", list: "Liste"}[value]}</button>)}</nav>
       {(view === "month" || view === "year") && <section className="calendar-navigation" aria-label="Navigation du calendrier">
-        <button className="calendar-today" onClick={() => {setCalendarDate(new Date()); setView("month");}}>Aujourd’hui</button>
+        <button className="calendar-today" onClick={() => {setCalendarDate(new Date()); showFullCalendar("month");}}>Aujourd’hui</button>
         <div className="calendar-period-navigation">
           <button className="calendar-arrow" aria-label={view === "year" ? "Année précédente" : "Mois précédent"} onClick={() => shiftCalendar(-1)}>‹</button>
           <div className="calendar-period-picker">
@@ -206,7 +238,7 @@ export function Dashboard({initialAppointments, initialSelectedId}: {initialAppo
       </section>}
       <CalendarContent view={view} calendarDate={calendarDate} appointments={filtered} onOpen={open} onMove={move} onSelectDay={setSelectedDay} onSelectMonth={month => {setCalendarDate(month); setView("month");}} onSwipe={shiftCalendar}/>
     </main>
-    <footer className="admin-bottom"><button className={view === "day" ? "active" : ""} onClick={() => setView("day")}><span>⌂</span>Accueil</button><button className={view === "week" || view === "month" || view === "year" ? "active" : ""} onClick={() => setView("month")}><span>▦</span>Calendrier</button><button className={view === "list" ? "active" : ""} onClick={() => {setStatus("new_request"); setView("list");}}><span className="counter-icon">◎{newCount > 0 && <b>{newCount}</b>}</span>Demandes</button><button onClick={() => setManual(true)}><span>＋</span>Ajouter</button></footer>
+    <footer className="admin-bottom"><button className={view === "day" ? "active" : ""} onClick={() => showFullCalendar("day")}><span>⌂</span>Accueil</button><button className={view === "week" || view === "month" || view === "year" ? "active" : ""} onClick={() => showFullCalendar("month")}><span>▦</span>Calendrier</button><button className={view === "list" ? "active" : ""} onClick={() => {setStatus("new_request"); setView("list");}}><span className="counter-icon">◎{newCount > 0 && <b>{newCount}</b>}</span>Demandes</button><button onClick={() => setManual(true)}><span>＋</span>Ajouter</button></footer>
     {selectedDay && <DayAppointmentsPanel day={selectedDay} appointments={filtered} onClose={() => setSelectedDay(null)} onOpen={item => {setSelectedDay(null); open(item);}}/>}
     {selected && <AppointmentPanel key={selected.id} appointment={selected} onClose={() => setSelected(null)} onSaved={item => {setAppointments(current => current.map(existing => existing.id === item.id ? item : existing)); setSelected(null); setSelectedDay(null);}} onDeleted={() => {setAppointments(current => current.filter(item => item.id !== selected.id)); setSelected(null); setSelectedDay(null);}} notice={notice} setNotice={setNotice}/>}
     {manual && <ManualForm onClose={() => setManual(false)} onCreated={item => {setAppointments(current => [item, ...current]); setManual(false);}}/>}

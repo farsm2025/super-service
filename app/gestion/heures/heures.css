@@ -21,3 +21,14 @@
 .hours-email-status{font-size:.87rem;font-weight:700;color:#4f6878;margin:12px 0 14px}
 .hours-email-form input,.hours-entry-form select{border:1px solid var(--admin-border);border-radius:9px;padding:11px;color:#172330;background:#fff;font:inherit;width:100%;min-width:0}
 @media(max-width:480px){.hours-email-form button{width:100%}}
+
+/* Choix de remise lors de la clôture : conserver la charte actuelle. */
+.hours-delivery-overlay{position:fixed;inset:0;z-index:1000;background:rgba(16,30,44,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.hours-delivery-dialog{background:#fff;color:#172330;width:min(100%,510px);max-height:90vh;overflow-y:auto;border-radius:15px;padding:24px;box-shadow:0 14px 50px rgba(0,0,0,.24)}
+.hours-delivery-dialog h2{margin:0 0 12px;font-size:1.3rem}
+.hours-delivery-dialog p{line-height:1.5}
+.hours-delivery-options{display:grid;gap:8px;margin:16px 0}
+.hours-delivery-option{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--admin-border);border-radius:9px;cursor:pointer}
+.hours-delivery-option.selected{border-color:var(--admin-blue);background:#edf5fc}
+.hours-delivery-option input{accent-color:var(--admin-blue);width:17px;height:17px}
+@media(max-width:480px){.hours-delivery-dialog{padding:16px}}

@@ -83,7 +83,7 @@ export function HeuresClient(){
   function change<K extends keyof Editor>(key:K,value:Editor[K]){setForm(f=>({...f,[key]:value}))}
   async function addPerson(event:React.FormEvent){
     event.preventDefault();const ok=await run({action:"person",...name},"Personne enregistrée.");
-    if(ok){setName({firstName:"",lastName:"",email:""});}
+    if(ok){setName({firstName:"",lastName:"",email:""});if(peopleView==="archived")switchPeopleView("active");}
   }
   async function saveEmail(event:React.FormEvent){
     event.preventDefault();if(!person)return;
@@ -304,7 +304,7 @@ export function HeuresClient(){
               {corrections?<><button className="hours-secondary" type="button" disabled={working} onClick={addCorrection}>+ Ajouter une intervention</button>
                 <button className="admin-primary" type="button" onClick={saveRevision} disabled={working}>Enregistrer la version corrigée</button>
                 <button className="hours-secondary" type="button" onClick={()=>setCorrections(null)}>Annuler</button></>:
-                <><button className="admin-primary" type="button" disabled={working} onClick={()=>downloadExisting(report)}>Télécharger le PDF</button>
+                <><button className="admin-primary" type="button" disabled={working||Boolean(report.deletedAt)} onClick={()=>downloadExisting(report)}>Télécharger le PDF</button>
                   <button className="hours-secondary" type="button" disabled={working} onClick={()=>window.print()}>Imprimer</button>
                   {!report.deletedAt&&["pending","failed","skipped"].includes(report.emailStatus)&&<button className="hours-secondary" disabled={working} type="button" onClick={resend}>Renvoyer le PDF par e-mail</button>}
                   {report.deletedAt?<><button className="hours-secondary" type="button" disabled={working} onClick={()=>reportAction("restore_report")}>Restaurer le décompte et ses versions</button>

@@ -2,6 +2,7 @@ import {NextResponse} from "next/server";
 import {getAdminSession} from "@/lib/admin-auth";
 import {database} from "@/lib/db";
 import {sendHoursReport} from "@/lib/hours-email";
+import {generateHoursPdf,type HourPdfLine} from "@/lib/hours-pdf";
 
 export const dynamic="force-dynamic";
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -20,10 +21,28 @@ function entryInput(body:Record<string,unknown>){
   if(!validDate(date)||!description||description.length>1000||!Number.isFinite(hours)||hours<=0||hours>24||Math.abs(hours*100-Math.round(hours*100))>0.00001||!Number.isFinite(amount)||amount<0||amount>1000000||Math.abs(amount*100-Math.round(amount*100))>0.00001)throw Error("Vérifiez la date, la description, les heures (max. 24) et le montant en CHF.");
   return {date,description,hours,amountCents:Math.round(amount*100)};
 }
-export async function GET(){
+export async function GET(request:Request){
   if(!await getAdminSession())return error("Non autorisé",401);
   try{
     const sql=database();
+    const url=new URL(request.url);
+    const reportId=url.searchParams.get("reportId");
+    if(reportId!==null){
+      const version=Number(url.searchParams.get("version"));
+      if(!validUuid(reportId)||!Number.isSafeInteger(version)||version<1)return error("Décompte ou version invalide.");
+      const rows=await sql.query(`SELECT p.first_name,p.last_name,to_char(s.cutoff_date,'YYYY-MM-DD') AS cutoff_date,v.version,v.lines
+        FROM work_statements s JOIN work_people p ON p.id=s.person_id
+        JOIN work_statement_versions v ON v.statement_id=s.id
+        WHERE s.id=$1 AND v.version=$2 AND s.deleted_at IS NULL`,[reportId,version]);
+      if(!rows.length)return error("Décompte introuvable.",404);
+      const row=rows[0];
+      const pdf=generateHoursPdf({name:row.first_name+" "+row.last_name,cutoffDate:row.cutoff_date,
+        version:Number(row.version),lines:row.lines as HourPdfLine[],
+        generatedDate:new Date().toLocaleDateString("en-CA",{timeZone:"Europe/Zurich"})});
+      return new NextResponse(new Uint8Array(pdf),{headers:{"Content-Type":"application/pdf",
+        "Content-Disposition":'attachment; filename="decompte-heures-'+row.cutoff_date+'-v'+version+'.pdf"',
+        "Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff"}});
+    }
     const people=await sql.query("SELECT id,first_name AS \"firstName\",last_name AS \"lastName\",email,archived_at AS \"archivedAt\" FROM work_people ORDER BY archived_at NULLS FIRST,last_name,first_name",[]);
     const entries=await sql.query("SELECT id,person_id AS \"personId\",to_char(work_date,'YYYY-MM-DD') AS date,description,hours::float8 AS hours,amount_cents AS \"amountCents\" FROM work_entries WHERE statement_id IS NULL ORDER BY work_date DESC,created_at DESC",[]);
     const reports=await sql.query(`SELECT r.id,r.person_id AS "personId",to_char(r.cutoff_date,'YYYY-MM-DD') AS "cutoffDate",r.created_at AS "createdAt",r.deleted_at AS "deletedAt",r.email_status AS "emailStatus",r.email_to AS "emailTo",r.emailed_at AS "emailedAt",r.email_error AS "emailError",v.version,v.lines FROM work_statements r JOIN work_statement_versions v ON v.statement_id=r.id ORDER BY r.created_at DESC,v.version DESC`,[]);
@@ -134,14 +153,9 @@ export async function POST(request:Request){
       SELECT statement_id AS id FROM version`,[body.personId,body.cutoffDate]);
       if(!rows.length)return error("Aucune intervention non clôturée jusqu'à cette date.",409);
       const reportId=String(rows[0].id);
-      // Une erreur d'envoi ne doit jamais annuler visuellement une clôture déjà enregistrée.
-      try{
-        const delivery=await sendHoursReport(reportId);
-        return NextResponse.json({id:reportId,emailStatus:delivery.status,message:delivery.message});
-      }catch(error){
-        console.error("Work report closed but notification could not start",error);
-        return NextResponse.json({id:reportId,emailStatus:"failed",message:"Décompte clôturé et archivé. L'envoi de l'e-mail n'a pas pu démarrer ; réessayez depuis l'historique."});
-      }
+      // La clôture et la remise du décompte sont deux actions indépendantes.
+      // Aucun envoi automatique : l'utilisateur choisit la remise après clôture.
+      return NextResponse.json({id:reportId,emailStatus:"pending",message:"Décompte clôturé et archivé."});
     }
     if(body.action==="revise"){
       if(!validUuid(body.reportId)||!Number.isInteger(Number(body.expectedVersion))||!Array.isArray(body.lines)||body.lines.length>1000)return error("Décompte incorrect.");

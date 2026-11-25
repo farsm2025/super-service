@@ -253,7 +253,7 @@ export function HeuresClient(){
             <button type="button" className="hours-secondary hours-destructive" disabled={working} onClick={deletePersonPermanently}>Supprimer définitivement cette personne</button>
           </details>}
           {!personArchived&&hasHistory&&<small>L'archivage conserve les données. Pour une suppression définitive, archivez d'abord la personne.</small>}
-        </div>
+        </div>}
         <form onSubmit={addPerson} className="hours-person-form"><h3>Ajouter une personne</h3>
           <label className="hours-label">Prénom<input required maxLength={100} value={name.firstName} onChange={e=>setName(n=>({...n,firstName:e.target.value}))}/></label>
           <label className="hours-label">Nom<input required maxLength={100} value={name.lastName} onChange={e=>setName(n=>({...n,lastName:e.target.value}))}/></label>

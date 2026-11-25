@@ -1,6 +1,6 @@
 # Procédure de maintenance — Super-Service
 
-**Version :** 1.0 — 22 novembre 2026  
+**Version :** 1.1 — 25 novembre 2026  
 **Responsable du suivi :** Novelyo  
 **Périmètre :** site Super-Service uniquement, sans application automatique aux autres clients.
 
@@ -91,3 +91,53 @@ Respecter la structure existante du passeport numérique Super-Service (dossiers
 ## 7. Règle générale Novelyo
 
 Une seule procédure de référence **par client et par dépôt** ; améliorer cette documentation au fur et à mesure sans créer plusieurs méthodes concurrentes. Toujours privilégier la continuité, les changements minimaux, la sécurité et l'absence de coût supplémentaire.
+
+## 8. Personnel / Heures — clôture, archivage, corbeille et suppressions
+
+**État au 25 novembre 2026 :** changements publiés sur `main` via PR [#46](https://github.com/farsm2025/super-service/pull/46) (SHA `9281ab75`) et [#47](https://github.com/farsm2025/super-service/pull/47) (SHA `d975c366`), compilation de prévisualisation et déploiement Vercel de production `READY`. Les parcours complets d'archivage, de restauration, de suppression et de remise de PDF avec des données fictives **ne sont pas encore validés par test fonctionnel de bout en bout**.
+
+### 8.1. Composants existants — ne pas recréer
+
+- Interface : `app/gestion/heures/heures-client.tsx` ; styles : `app/gestion/heures/heures.css`.
+- API authentifiée : `app/api/gestion/heures/route.ts` (vérifie la session administrateur).
+- PDF : `lib/hours-pdf.ts` ; envoi : `lib/hours-email.ts` via Resend.
+- Tables Neon : `work_people`, `work_entries`, `work_statements` et `work_statement_versions`.
+- Migrations existantes du 24 novembre 2026 : `2026-11-24_releves_heures.sql`, `2026-11-24_archivage_personnes_corbeille_heures.sql`, `2026-11-24_suppression_definitive_heures.sql`, `2026-11-24_heures_email_decomptes.sql`.
+- Fonctions SQL déjà définies : `work_delete_person_permanently(uuid)` et `work_delete_statement_permanently(uuid)`. **Ne pas réécrire ni réexécuter de migration sans vérifier l'état réel de Neon.**
+
+### 8.2. Clôture et remise du décompte — PR #46
+
+1. La clôture enregistre le décompte et ses lignes ; l'envoi par e-mail **n'est plus automatique**.
+2. Choix de remise : **Télécharger le PDF** (sélection par défaut), envoyer par e-mail (si une adresse existe), imprimer, ou clôturer sans remise immédiate.
+3. Le PDF est généré par la fonction existante `generateHoursPdf` ; téléchargement authentifié via `GET /api/gestion/heures?reportId=...&version=...`. Le téléchargement est indisponible pour les décomptes dans la corbeille : les restaurer d'abord.
+4. Les décomptes clôturés et leurs versions restent dans l'historique. L'e-mail est déclenché explicitement via l'action API `resend_report` ; le suivi d'état d'envoi demeure distinct de la clôture.
+5. Un échec de téléchargement, d'impression ou d'envoi ne doit jamais être interprété comme une absence de clôture. Vérifier d'abord l'historique avant de retenter.
+
+### 8.3. Fiches de personnel — PR #47
+
+- Deux vues distinctes dans l'interface : **Personnel actif** et **Archives**, chacune avec compteur. Une personne archivée disparaît de la sélection active, mais sa fiche reste récupérable.
+- **Archiver** (`archive_person`) renseigne `work_people.archived_at` ; les interventions, décomptes et versions sont conservés.
+- **Réactiver** (`restore_person`) efface `archived_at` ; la personne revient dans la liste active avec son historique.
+- **Supprimer définitivement une personne** (`permanent_delete_person`) est présenté dans une « Zone dangereuse », uniquement depuis la fiche archivée. L'interface annonce le nombre d'interventions non clôturées, décomptes et versions ; elle exige une confirmation puis la saisie exacte du nom complet. La fonction SQL efface les versions, interventions, décomptes et la fiche. **Irréversible**.
+- Cette distinction entre archive et suppression définitive est une protection de l'interface : l'API garde ses validations propres. Ne jamais exécuter l'action destructrice sur une vraie fiche pour un simple test.
+
+### 8.4. Décomptes — corbeille et suppression
+
+- **Mettre dans la corbeille** (`trash_report`) renseigne `work_statements.deleted_at` : les versions et heures liées sont conservées.
+- **Restaurer** (`restore_report`) remet `deleted_at` à NULL ; le décompte et ses versions reviennent à l'historique actif.
+- **Supprimer définitivement un décompte** (`permanent_delete_report`) n'est proposé dans l'interface que pour un décompte déjà dans la corbeille. La « Zone dangereuse » indique le nombre de versions ; l'utilisateur confirme puis saisit `SUPPRIMER`. La fonction SQL supprime les versions, interventions liées et décompte, mais conserve la personne. **Irréversible**.
+- Les versions d'un même décompte sont rattachées à un identifiant commun : déplacer/restaurer un décompte porte sur toutes ses versions, et non sur une seule.
+
+### 8.5. Contrôles obligatoires après intervention
+
+**Avant tout test destructeur**, utiliser des enregistrements de démonstration isolés, jamais une fiche de collaborateur réel ; vérifier l'environnement et disposer d'une sauvegarde Neon datée/restaurable. Ne pas confondre compilation `READY` avec tests fonctionnels.
+
+1. Tester création de fiche fictive, ajout d'intervention et clôture ; vérifier la cohérence des heures, totaux, PDF et historique.
+2. Archiver la fiche ; vérifier sa disparition de Personnel actif, sa présence dans Archives et la conservation des heures/décomptes. La réactiver et vérifier son retour.
+3. Mettre un décompte fictif dans la corbeille ; vérifier son absence de l'historique actif, puis le restaurer avec ses versions intactes.
+4. Tester les confirmations de suppression : annuler, refuser une saisie incorrecte, constater qu'aucune donnée n'est modifiée.
+5. **Uniquement sur les données fictives et après contrôle préalable**, tester la suppression définitive d'un décompte depuis la corbeille, puis celle d'une fiche archivée ; contrôler l'absence des seules lignes associées en base et le rafraîchissement de l'interface.
+6. Vérifier séparément téléchargement PDF, impression et envoi par e-mail avec une adresse de test autorisée, sans envoyer de documents à de vrais collaborateurs.
+7. Documenter ce qui a été **compilé**, **déployé** et **vraiment testé** ; si un test est impossible, le marquer « à faire » plutôt que « réussi ».
+
+**Dernière vérification read-only Neon avant cette mise à jour documentaire :** 7 fiches, aucune archivée, aucune intervention ni décompte enregistré dans la base consultée, et aucune référence orpheline détectée ; ceci ne constitue pas un test de suppression/restauration.

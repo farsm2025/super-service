@@ -42,6 +42,7 @@ export function HeuresClient(){
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState("");
   const [notice,setNotice]=useState("");
+  const [deliveryChoice,setDeliveryChoice]=useState<"download"|"email"|"print"|"none"|null>(null);
   async function reload(){
     const state=await request() as unknown as State;
     setData(state);setPersonId(id=>state.people.some(p=>p.id===id)?id:(state.people[0]?.id||""));
@@ -82,6 +83,22 @@ export function HeuresClient(){
     setWorking(true);setError("");setNotice("");
     try{const result=await request({action:"resend_report",reportId:report.id});await reload();setNotice(String(result.message||"Demande de renvoi traitée."))}
     catch(e){setError(e instanceof Error?e.message:"Renvoi impossible")}
+    finally{setWorking(false)}
+  }
+  async function downloadPdf(reportId:string,version:number){
+    const response=await fetch("/api/gestion/heures?reportId="+encodeURIComponent(reportId)+"&version="+version,{cache:"no-store"});
+    if(!response.ok){const body=await response.json().catch(()=>({error:"Téléchargement impossible."}));throw Error(body.error||"Téléchargement impossible.");}
+    const url=URL.createObjectURL(await response.blob());
+    const link=document.createElement("a");
+    link.href=url;link.download="decompte-heures-"+reportId.slice(0,8)+"-v"+version+".pdf";
+    document.body.appendChild(link);link.click();link.remove();
+    window.setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }
+  async function downloadExisting(r:Report){
+    if(working)return;
+    setWorking(true);setError("");setNotice("");
+    try{await downloadPdf(r.id,r.version);setNotice("Téléchargement du PDF lancé.")}
+    catch(e){setError(e instanceof Error?e.message:"Téléchargement impossible.")}
     finally{setWorking(false)}
   }
   async function personAction(action:"archive_person"|"restore_person"|"delete_person"){
@@ -134,17 +151,36 @@ export function HeuresClient(){
     await run({action:"delete",id,personId},"Intervention supprimée.");
   }
   async function close(){
+    if(!deliveryChoice||working)return;
     const toClose=pending.filter(e=>e.date<=cutoff);
     if(!toClose.length){setError("Aucune intervention à clôturer pour cette date.");return}
-    if(!window.confirm("Clôturer "+decimal(total(toClose).hours)+" heures et "+francs(total(toClose).amount)+" jusqu'au "+dateDisplay(cutoff)+" ? Les lignes seront archivées."))return;
+    const method=deliveryChoice;
+    if(method==="email"&&!person?.email){setError("Renseignez d'abord l'adresse e-mail de la personne, ou choisissez une autre remise.");return}
     setWorking(true);setError("");setNotice("");
     try{
       const result=await request({action:"close",personId,cutoffDate:cutoff});
       const fresh=await reload();
       const chosen=fresh.reports.find(r=>r.id===result.id);
       if(chosen)setSelectedReport(chosen.id+":"+chosen.version);
-      setCorrections(null);
-      setNotice(String(result.message||"Décompte clôturé et conservé dans l’historique."));
+      setCorrections(null);setDeliveryChoice(null);
+      let message="Décompte clôturé et conservé dans l'historique.";
+      try{
+        if(method==="email"){
+          const sent=await request({action:"resend_report",reportId:result.id});
+          await reload();
+          message=String(sent.message||message);
+        }else if(method==="download"){
+          if(!chosen)throw Error("PDF indisponible : retrouvez le décompte dans l'historique.");
+          await downloadPdf(chosen.id,chosen.version);
+          message+=" Téléchargement du PDF lancé.";
+        }else if(method==="print"){
+          window.setTimeout(()=>window.print(),200);
+          message+=" Impression ouverte.";
+        }
+      }catch(e){
+        setError("Décompte bien clôturé, mais remise impossible : "+(e instanceof Error?e.message:"réessayez depuis l'historique."));
+      }
+      setNotice(message);
     }catch(e){setError(e instanceof Error?e.message:"Clôture impossible")}
     finally{setWorking(false)}
   }
@@ -216,7 +252,7 @@ export function HeuresClient(){
             <div className="hours-form-actions"><button className="admin-primary" disabled={working}>{editingId?"Enregistrer la modification":"Ajouter l’intervention"}</button>{editingId&&<button type="button" className="hours-secondary" onClick={()=>{setEditingId(null);setForm(blank());setService("");setDetails("")}}>Annuler</button>}</div>
           </form>}
           <div className="hours-scroll"><table className="hours-table"><thead><tr><th>Date</th><th>Travail</th><th>Heures</th><th>Montant</th><th>Actions</th></tr></thead><tbody>{pending.map(l=><tr key={l.id}><td>{dateDisplay(l.date)}</td><td>{l.description}</td><td>{decimal(l.hours)} h</td><td>{francs(l.amountCents)}</td><td><button type="button" className="hours-link" disabled={personArchived} onClick={()=>startEdit(l)}>Modifier</button><button type="button" disabled={personArchived} className="hours-link hours-danger" onClick={()=>remove(l.id)}>Supprimer</button></td></tr>)}</tbody><tfoot><tr><th colSpan={2}>Grand total</th><th>{decimal(sums.hours)} h</th><th>{francs(sums.amount)}</th><th/></tr></tfoot></table>{!pending.length&&<p className="hours-empty">Aucune intervention en attente. Les anciennes restent dans l'historique.</p>}</div>
-          {!personArchived&&<div className="hours-close"><label className="hours-label">Clôturer jusqu'au<input type="date" value={cutoff} onChange={e=>setCutoff(e.target.value)}/></label><button type="button" className="admin-primary" disabled={working||!pending.some(e=>e.date<=cutoff)} onClick={close}>Clôturer le décompte</button></div>}
+          {!personArchived&&<div className="hours-close"><label className="hours-label">Clôturer jusqu'au<input type="date" value={cutoff} onChange={e=>setCutoff(e.target.value)}/></label><button type="button" className="admin-primary" disabled={working||!pending.some(e=>e.date<=cutoff)} onClick={()=>{setDeliveryChoice("download");setError("");}}>Clôturer le décompte</button></div>}
         </section>
         <section className="hours-card">
           <h2>Historique des décomptes</h2>
@@ -243,7 +279,8 @@ export function HeuresClient(){
               {corrections?<><button className="hours-secondary" type="button" disabled={working} onClick={addCorrection}>+ Ajouter une intervention</button>
                 <button className="admin-primary" type="button" onClick={saveRevision} disabled={working}>Enregistrer la version corrigée</button>
                 <button className="hours-secondary" type="button" onClick={()=>setCorrections(null)}>Annuler</button></>:
-                <><button className="admin-primary" type="button" onClick={()=>window.print()}>Imprimer / Enregistrer en PDF</button>
+                <><button className="admin-primary" type="button" disabled={working} onClick={()=>downloadExisting(report)}>Télécharger le PDF</button>
+                  <button className="hours-secondary" type="button" disabled={working} onClick={()=>window.print()}>Imprimer</button>
                   {!report.deletedAt&&["pending","failed","skipped"].includes(report.emailStatus)&&<button className="hours-secondary" disabled={working} type="button" onClick={resend}>Renvoyer le PDF par e-mail</button>}
                   {report.deletedAt?<button className="hours-secondary" type="button" disabled={working} onClick={()=>reportAction("restore_report")}>Restaurer le décompte</button>:
                   <><button className="hours-secondary" type="button" disabled={working} onClick={startRevision}>Corriger ce décompte</button>
@@ -254,6 +291,24 @@ export function HeuresClient(){
             {corrections&&<p className="hours-muted">L'original restera dans l'historique. Les totaux seront recalculés automatiquement.</p>}
           </div>}
         </section></>:<div className="hours-card"><p>Ajoutez une personne pour commencer.</p></div>}
+      </div>
+    </div>}
+    {deliveryChoice&&<div className="hours-delivery-overlay no-print" role="presentation">
+      <div className="hours-delivery-dialog" role="dialog" aria-modal="true" aria-labelledby="hours-delivery-title">
+        <h2 id="hours-delivery-title">Clôturer le décompte</h2>
+        <p>Vous allez clôturer <strong>{decimal(total(pending.filter(e=>e.date<=cutoff)).hours)} h</strong> pour <strong>{francs(total(pending.filter(e=>e.date<=cutoff)).amount)}</strong>, jusqu'au {dateDisplay(cutoff)}. Les interventions seront archivées dans l'historique.</p>
+        <p><strong>Comment souhaitez-vous remettre le décompte ?</strong></p>
+        <div className="hours-delivery-options">
+          {([["download","Télécharger le PDF"],["email","Envoyer par e-mail"],["print","Imprimer"],["none","Clôturer sans remise immédiate"]] as const).map(([value,label])=>
+            <label key={value} className={"hours-delivery-option"+(deliveryChoice===value?" selected":"")}>
+              <input type="radio" name="hours-delivery" value={value} checked={deliveryChoice===value} onChange={()=>setDeliveryChoice(value)}/>{label}
+            </label>)}
+        </div>
+        {deliveryChoice==="email"&&<p className="hours-muted">{person?.email?"Envoi à "+person.email:"Aucune adresse e-mail enregistrée. Ajoutez-la sur la fiche de la personne, ou choisissez une autre option."}</p>}
+        <div className="hours-buttons">
+          <button type="button" className="hours-secondary" disabled={working} onClick={()=>setDeliveryChoice(null)}>Annuler</button>
+          <button type="button" className="admin-primary" disabled={working||(deliveryChoice==="email"&&!person?.email)} onClick={close}>{working?"Clôture en cours…":"Confirmer la clôture"}</button>
+        </div>
       </div>
     </div>}
     {report&&!corrections&&<section className="hours-print">

@@ -22,7 +22,7 @@ export const originalBlogPost:BlogPost={
  title:"Checklist ultime pour un déménagement sans stress à Lausanne",
  excerpt:"Du choix du camion à l’état des lieux : une checklist étape par étape pour organiser votre déménagement à Lausanne et maîtriser votre budget.",
  publishedAt:"2026-10-20",
- updatedAt:"2026-10-20",
+ updatedAt:"2026-11-27",
  category:"Conseils déménagement",
  image:"/images/demenagement/equipe-demenagement-lausanne.webp",
  imageAlt:"Équipe de déménagement Super-Service transportant des cartons à Lausanne",

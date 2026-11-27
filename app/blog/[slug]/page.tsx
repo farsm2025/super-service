@@ -32,6 +32,7 @@ export default async function BlogArticle({params}:RouteProps){
  const isCleaning=post.slug==="checklist-nettoyage-fin-de-bail-lausanne";
  const isMoving=post.slug==="checklist-demenagement-lausanne";
  const isTruckRental=post.slug==="location-camion-lausanne-prix-comparatif";
+ const hasInteractiveChecklist=isCleaning||isMoving;
  const headings=blocks.flatMap(b=>b.type==="h2"&&b.text!==post.title?[b.text]:[]);
  const publicationDate=new Intl.DateTimeFormat("fr-CH",{day:"numeric",month:"long",year:"numeric",timeZone:"Europe/Zurich"}).format(new Date(post.publishedAt+"T12:00:00Z"));
  const url=`${SITE_URL}/blog/${post.slug}`;
@@ -56,7 +57,7 @@ export default async function BlogArticle({params}:RouteProps){
    <div className="blog-article-layout">
      <aside className="blog-toc" aria-label="Sommaire"><h2>Dans cet article</h2><ol>{headings.map(h=><li key={h}><a href={`#${sectionId(h)}`}>{h}</a></li>)}</ol><Link href="/devis" className="blog-toc-cta">Demander un devis →</Link></aside>
      <article className="blog-prose" aria-label={post.title}>
-       {isMoving&&<div className="blog-checklist-toolbar"><p>Cochez les tâches au fur et à mesure. Votre progression reste enregistrée sur cet appareil.</p><PrintChecklistButton/></div>}
+       {hasInteractiveChecklist&&<div className="blog-checklist-toolbar"><p>Cochez les tâches au fur et à mesure. Votre progression reste enregistrée sur cet appareil.</p><PrintChecklistButton/></div>}
        {blocks.map((block,i)=>{
          if(block.type==="h2")return block.text===post.title?null:<h2 id={sectionId(block.text)} key={i}>{block.text}</h2>;
          if(block.type==="h3")return <h3 key={i}>{block.text}</h3>;
@@ -67,7 +68,7 @@ export default async function BlogArticle({params}:RouteProps){
          </div>;
          if(block.type!=="list")return null;
          const checkList=block.items.every(item=>item.checklist);
-         if(isMoving&&checkList&&!block.ordered)return <InteractiveChecklist key={i} items={block.items.map(item=>item.text)} storageKey={`super-service:checklist:${post.slug}:${i}`}/>;
+         if(hasInteractiveChecklist&&checkList&&!block.ordered)return <InteractiveChecklist key={i} items={block.items.map(item=>item.text)} storageKey={`super-service:checklist:${post.slug}:${i}`}/>;
          const items=block.items.map((item,j)=><li key={j}>{item.checklist?<span className="blog-check-mark" aria-hidden="true">☐</span>:null}{item.text}</li>);
          return block.ordered?<ol key={i} className="blog-list blog-numbered">{items}</ol>:
            <ul key={i} className={checkList?"blog-checklist":"blog-list"}>{items}</ul>;

@@ -74,7 +74,7 @@
 @media print{.blog-compare-table{min-width:0}.blog-prose .blog-table-wrap{overflow:visible}.blog-compare-table th{color:#000;background:#eee}}
 
 
-/* Checklist de déménagement : progression locale, sans modification des autres articles. */
+/* Checklists des guides déménagement et nettoyage : progression locale, sans impact sur les autres articles. */
 .blog-checklist-toolbar{border:1px solid #dce6f1;background:#f5f8fc;border-radius:12px;padding:17px 20px;margin-bottom:25px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .blog-checklist-toolbar p{margin:0;font-size:14px;line-height:1.55;color:#45617a;flex:1 1 290px}
 .blog-checklist-print{border:1px solid #0a4c93;color:#0a4c93;background:#fff;border-radius:8px;padding:9px 13px;cursor:pointer;font-size:13px;font-weight:800;line-height:1.4}

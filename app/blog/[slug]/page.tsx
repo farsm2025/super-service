@@ -7,6 +7,7 @@ import {Footer} from "../../ui/footer";
 import {MobileActions} from "../../ui/mobile-actions";
 import {getBlogPost} from "../../../lib/blog";
 import {parseBlogMarkdown,sectionId} from "../../../lib/blog-markdown";
+import {InteractiveChecklist,PrintChecklistButton} from "../interactive-checklist";
 import {SITE_URL,absoluteUrl} from "../../../lib/site";
 
 type RouteProps={params:Promise<{slug:string}>};
@@ -19,7 +20,7 @@ export async function generateMetadata({params}:RouteProps):Promise<Metadata>{
    title:post.seoTitle,
    description:post.seoDescription,
    alternates:{canonical:`/blog/${post.slug}`},
-   openGraph:{type:"article",title:post.title,description:post.seoDescription,url:`/blog/${post.slug}`,images:[{url:post.image,alt:post.imageAlt}],publishedTime:post.publishedAt},
+   openGraph:{type:"article",title:post.title,description:post.seoDescription,url:`/blog/${post.slug}`,images:[{url:post.image,alt:post.imageAlt}],publishedTime:post.publishedAt,modifiedTime:post.updatedAt||post.publishedAt},
    twitter:{card:"summary_large_image",title:post.title,description:post.seoDescription,images:[post.image]},
  };
 }
@@ -29,11 +30,12 @@ export default async function BlogArticle({params}:RouteProps){
  if(!post)notFound();
  const blocks=parseBlogMarkdown(post.body);
  const isCleaning=post.slug==="checklist-nettoyage-fin-de-bail-lausanne";
+ const isMoving=post.slug==="checklist-demenagement-lausanne";
  const isTruckRental=post.slug==="location-camion-lausanne-prix-comparatif";
  const headings=blocks.flatMap(b=>b.type==="h2"&&b.text!==post.title?[b.text]:[]);
  const publicationDate=new Intl.DateTimeFormat("fr-CH",{day:"numeric",month:"long",year:"numeric",timeZone:"Europe/Zurich"}).format(new Date(post.publishedAt+"T12:00:00Z"));
  const url=`${SITE_URL}/blog/${post.slug}`;
- const schema={"@context":"https://schema.org","@type":"BlogPosting","@id":url+"#article",headline:post.title,description:post.seoDescription,image:absoluteUrl(post.image),datePublished:post.publishedAt,author:{"@type":"Organization",name:"Super-Service",url:SITE_URL},publisher:{"@id":SITE_URL+"/#organization"},mainEntityOfPage:url,inLanguage:"fr-CH"};
+ const schema={"@context":"https://schema.org","@type":"BlogPosting","@id":url+"#article",headline:post.title,description:post.seoDescription,image:absoluteUrl(post.image),datePublished:post.publishedAt,dateModified:post.updatedAt||post.publishedAt,author:{"@type":"Organization","@id":SITE_URL+"/#organization",name:"Super-Service",url:SITE_URL},publisher:{"@id":SITE_URL+"/#organization"},mainEntityOfPage:url,inLanguage:"fr-CH"};
  const breadcrumb={"@context":"https://schema.org","@type":"BreadcrumbList",itemListElement:[
    {"@type":"ListItem",position:1,name:"Accueil",item:SITE_URL},
    {"@type":"ListItem",position:2,name:"Blog",item:SITE_URL+"/blog"},
@@ -46,7 +48,7 @@ export default async function BlogArticle({params}:RouteProps){
      <p className="eyebrow light">{post.category}</p>
      <h1>{post.title}</h1>
      <p className="blog-hero-intro">{post.excerpt}</p>
-     <div className="blog-byline"><span>Par Super-Service</span><span aria-hidden="true">•</span><time dateTime={post.publishedAt}>{publicationDate}</time></div>
+     <div className="blog-byline"><span>Par Super-Service</span><span aria-hidden="true">•</span><time dateTime={post.publishedAt}>{publicationDate}</time>{post.updatedAt&&post.updatedAt.slice(0,10)!==post.publishedAt.slice(0,10)&&<><span aria-hidden="true">•</span><span>Mis à jour le <time dateTime={post.updatedAt}>{new Intl.DateTimeFormat("fr-CH",{day:"numeric",month:"long",year:"numeric",timeZone:"Europe/Zurich"}).format(new Date(post.updatedAt.slice(0,10)+"T12:00:00Z"))}</time></span></>}</div>
    </section>
    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema)}}/>
    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(breadcrumb)}}/>
@@ -54,6 +56,7 @@ export default async function BlogArticle({params}:RouteProps){
    <div className="blog-article-layout">
      <aside className="blog-toc" aria-label="Sommaire"><h2>Dans cet article</h2><ol>{headings.map(h=><li key={h}><a href={`#${sectionId(h)}`}>{h}</a></li>)}</ol><Link href="/devis" className="blog-toc-cta">Demander un devis →</Link></aside>
      <article className="blog-prose" aria-label={post.title}>
+       {isMoving&&<div className="blog-checklist-toolbar"><p>Cochez les tâches au fur et à mesure. Votre progression reste enregistrée sur cet appareil.</p><PrintChecklistButton/></div>}
        {blocks.map((block,i)=>{
          if(block.type==="h2")return block.text===post.title?null:<h2 id={sectionId(block.text)} key={i}>{block.text}</h2>;
          if(block.type==="h3")return <h3 key={i}>{block.text}</h3>;
@@ -64,6 +67,7 @@ export default async function BlogArticle({params}:RouteProps){
          </div>;
          if(block.type!=="list")return null;
          const checkList=block.items.every(item=>item.checklist);
+         if(isMoving&&checkList&&!block.ordered)return <InteractiveChecklist key={i} items={block.items.map(item=>item.text)} storageKey={`super-service:checklist:${post.slug}:${i}`}/>;
          const items=block.items.map((item,j)=><li key={j}>{item.checklist?<span className="blog-check-mark" aria-hidden="true">☐</span>:null}{item.text}</li>);
          return block.ordered?<ol key={i} className="blog-list blog-numbered">{items}</ol>:
            <ul key={i} className={checkList?"blog-checklist":"blog-list"}>{items}</ul>;

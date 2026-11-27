@@ -203,6 +203,14 @@ Les économies les plus simples commencent souvent avant le jour J : réduire le
 
 ## Questions fréquentes sur le déménagement à Lausanne
 
+### Quel camion choisir pour déménager à Lausanne ?
+
+Pour quelques cartons ou un meuble isolé, un petit utilitaire peut suffire. Pour un déménagement plus important, évaluez le volume de vos meubles et vérifiez les dimensions intérieures, la charge utile et l'accès aux deux immeubles. Les grands fourgons et camions de 17 à 20 m³ peuvent limiter les trajets, mais ils ne conviennent pas à toutes les rues ou tous les parkings. Vous trouverez les véhicules proposés par Super-Service sur notre page de location de camion.
+
+### Combien coûte un déménagement à Lausanne ?
+
+Le prix varie selon le volume transporté, les étages, l'accessibilité, la distance et les services choisis : transport seul, manutention, démontage ou nettoyage. Pour comparer des offres, fournissez à chaque entreprise la même liste de meubles, les mêmes adresses et les mêmes contraintes d'accès. Un devis personnalisé sera plus fiable qu'un tarif moyen annoncé sans contexte.
+
 ### Quand commencer à préparer son déménagement ?
 
 Pour un appartement complet, commencer six à huit semaines avant offre une marge confortable. Ce planning est un conseil d’organisation : adaptez-le au volume à transporter, à vos disponibilités et aux démarches nécessaires.

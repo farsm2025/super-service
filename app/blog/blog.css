@@ -72,3 +72,19 @@
 .blog-prose .blog-numbered li{padding-left:7px;margin-bottom:11px}
 @media(max-width:680px){.blog-compare-table{min-width:480px;font-size:14px}.blog-compare-table th,.blog-compare-table td{padding:12px 13px}}
 @media print{.blog-compare-table{min-width:0}.blog-prose .blog-table-wrap{overflow:visible}.blog-compare-table th{color:#000;background:#eee}}
+
+
+/* Checklist de déménagement : progression locale, sans modification des autres articles. */
+.blog-checklist-toolbar{border:1px solid #dce6f1;background:#f5f8fc;border-radius:12px;padding:17px 20px;margin-bottom:25px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.blog-checklist-toolbar p{margin:0;font-size:14px;line-height:1.55;color:#45617a;flex:1 1 290px}
+.blog-checklist-print{border:1px solid #0a4c93;color:#0a4c93;background:#fff;border-radius:8px;padding:9px 13px;cursor:pointer;font-size:13px;font-weight:800;line-height:1.4}
+.blog-checklist-print:hover,.blog-checklist-print:focus-visible{background:#eaf2fd;outline-offset:3px}
+.blog-checklist-progress{font-size:13px;font-weight:750;color:#4e657b;margin:0 0 8px!important}
+.blog-checklist-interactive li{align-items:center}
+.blog-checklist-interactive label{display:flex;align-items:flex-start;gap:12px;width:100%;cursor:pointer;line-height:1.55}
+.blog-checklist-interactive input[type="checkbox"]{width:19px;height:19px;margin:3px 0 0;flex-shrink:0;accent-color:#0758c9;cursor:pointer}
+.blog-checklist-interactive input:focus-visible{outline:2px solid #0758c9;outline-offset:3px}
+.blog-checklist-interactive li.is-complete{background:#eef7f2}
+.blog-checklist-interactive li.is-complete span{text-decoration:line-through;color:#60756a}
+@media(max-width:680px){.blog-checklist-toolbar{padding:15px}.blog-checklist-print{width:100%}}
+@media print{.blog-checklist-toolbar,.blog-checklist-progress{display:none!important}.blog-checklist-interactive li.is-complete span{text-decoration:none;color:#000}}

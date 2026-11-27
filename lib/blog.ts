@@ -36,12 +36,12 @@ export const nettoyageBlogPost:BlogPost={
  title:"Checklist nettoyage fin de bail : les points vérifiés par les régies",
  excerpt:"Cuisine, salle de bains, vitres, stores et état des lieux : la checklist pièce par pièce pour rendre un logement propre à Lausanne et dans le canton de Vaud.",
  publishedAt:"2026-10-20",
- updatedAt:"2026-10-20",
+ updatedAt:"2026-11-27",
  category:"Conseils nettoyage",
  image:"/images/nettoyage/agent-nettoyage-super-service-vaud.webp",
  imageAlt:"Agent de nettoyage Super-Service intervenant dans le canton de Vaud",
- seoTitle:"Checklist nettoyage fin de bail à Lausanne",
- seoDescription:"Nettoyage de fin de bail à Lausanne : checklist pièce par pièce, points contrôlés à l’état des lieux, usure normale, régies et conseils pratiques.",
+ seoTitle:"Nettoyage fin de bail Lausanne : checklist état des lieux",
+ seoDescription:"Comment nettoyer un appartement avant l’état des lieux à Lausanne ? Guide en 6 étapes, checklist pièce par pièce, contrôles des régies et conseils pratiques.",
  body:nettoyageArticleMarkdown,
 };
 
